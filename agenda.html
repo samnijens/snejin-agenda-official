@@ -7,13 +7,22 @@
 
 <meta charset="UTF-8">
 
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
 <title>Snejin Agenda</title>
 
 
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="style.css">
+
+
+<!-- FullCalendar -->
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 
 
 </head>
@@ -27,30 +36,26 @@
 <header>
 
 
-    <div class="brand">
+<div class="brand">
 
 
-        <img
-        src="images/logo.png"
-        class="logo-small"
-        alt="Snejin Agenda logo">
+<img
+src="logo.png"
+class="logo-small"
+alt="Logo">
 
 
-        <h1>
-            Snejin Agenda 🌴
-        </h1>
+<h1>
+Snejin Agenda 🌴
+</h1>
 
 
-    </div>
+</div>
 
 
-
-    <button id="logoutButton">
-
-        Uitloggen
-
-    </button>
-
+<button id="logoutButton">
+Uitloggen
+</button>
 
 
 </header>
@@ -61,37 +66,7 @@
 <main class="agenda-box">
 
 
-<h2>
-    Welkom bij Snejin Agenda ☀️
-</h2>
-
-
-<p>
-    Je bent succesvol ingelogd.
-</p>
-
-
-<p>
-    Hier komt straks jouw volledige kalender:
-</p>
-
-
-<ul>
-
-<li>📅 Maandweergave</li>
-
-<li>📆 Weekweergave</li>
-
-<li>🗓️ Dagweergave</li>
-
-<li>🌴 Vakanties</li>
-
-<li>🎂 Verjaardagen</li>
-
-<li>🇳🇱 Nederlandse feestdagen</li>
-
-</ul>
-
+<div id="calendar"></div>
 
 
 </main>
@@ -99,11 +74,7 @@
 
 
 
-<script 
-type="module"
-src="js/agenda.js">
-</script>
-
+<script type="module" src="agenda.js"></script>
 
 
 </body>
