@@ -2,35 +2,45 @@ import { auth, db } from "./firebase.js";
 
 
 import {
-
 onAuthStateChanged,
-
 signOut
-
 }
-
 from
-
 "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 
 import {
 
 collection,
-
 getDocs,
-
-addDoc,
-
-deleteDoc,
-
-doc
+addDoc
 
 }
-
 from
-
 "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+
+let calendar;
+
+let selectedDate="";
+
+
+
+const colors={
+
+werk:"#ff0000",
+
+vakantie:"#00aa00",
+
+activiteit:"#006400",
+
+verjaardag:"#ff9900",
+
+feestdag:"#ffff00"
+
+};
+
 
 
 
@@ -47,7 +57,7 @@ return;
 }
 
 
-startCalendar();
+loadCalendar();
 
 
 });
@@ -56,12 +66,7 @@ startCalendar();
 
 
 
-async function startCalendar(){
-
-
-const calendarEl =
-document.getElementById("calendar");
-
+async function loadCalendar(){
 
 
 let events=[];
@@ -75,16 +80,28 @@ collection(db,"events")
 
 
 
-snapshot.forEach((item)=>{
+snapshot.forEach((doc)=>{
+
+
+let data=doc.data();
+
 
 
 events.push({
 
-id:item.id,
+id:doc.id,
 
-title:item.data().title,
+title:data.title,
 
-start:item.data().start
+start:data.start,
+
+description:data.description,
+
+backgroundColor:
+colors[data.type],
+
+allDay:data.allDay
+
 
 });
 
@@ -95,21 +112,22 @@ start:item.data().start
 
 
 
-const calendar =
-new FullCalendar.Calendar(calendarEl,{
+calendar =
+new FullCalendar.Calendar(
+
+document.getElementById("calendar"),
+
+{
 
 
 initialView:"dayGridMonth",
 
-
 locale:"nl",
-
 
 firstDay:1,
 
 
 headerToolbar:{
-
 
 left:"prev,next today",
 
@@ -118,7 +136,6 @@ center:"title",
 right:
 "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
 
-
 },
 
 
@@ -126,62 +143,17 @@ events:events,
 
 
 
-dateClick:async(info)=>{
+dateClick(info){
 
 
-const title =
-prompt("Nieuwe afspraak:");
+selectedDate=info.dateStr;
 
 
-
-if(title){
-
-
-await addDoc(
-collection(db,"events"),
-{
-
-title:title,
-
-start:info.dateStr
-
-}
-
-);
+document.getElementById("eventDate").value=
+selectedDate;
 
 
-location.reload();
-
-
-}
-
-
-},
-
-
-
-eventClick:async(info)=>{
-
-
-if(confirm("Afspraak verwijderen?")){
-
-
-await deleteDoc(
-
-doc(
-db,
-"events",
-info.event.id
-
-)
-
-);
-
-
-location.reload();
-
-
-}
+openModal();
 
 
 }
@@ -200,13 +172,104 @@ calendar.render();
 
 
 
+function openModal(){
+
+document.getElementById("eventModal").style.display="flex";
+
+}
+
+
+
+document
+.getElementById("closeModal")
+.onclick=()=>{
+
+
+document.getElementById("eventModal").style.display="none";
+
+
+};
+
+
+
+
+
+document
+.getElementById("saveEvent")
+.onclick=async()=>{
+
+
+const title=
+document.getElementById("eventTitle").value;
+
+
+const description=
+document.getElementById("eventDescription").value;
+
+
+const date=
+document.getElementById("eventDate").value;
+
+
+const time=
+document.getElementById("eventTime").value;
+
+
+const allDay=
+document.getElementById("allDay").checked;
+
+
+const type=
+document.getElementById("eventType").value;
+
+
+
+let start=date;
+
+
+
+if(!allDay && time){
+
+start=date+"T"+time;
+
+}
+
+
+
+await addDoc(
+collection(db,"events"),
+{
+
+
+title,
+
+description,
+
+start,
+
+type,
+
+allDay
+
+
+});
+
+
+location.reload();
+
+
+};
+
+
+
+
+
 document
 .getElementById("logoutButton")
 .onclick=()=>{
 
 
 signOut(auth);
-
 
 window.location.href="index.html";
 
