@@ -280,3 +280,262 @@ body.login-page{
     }
 
 }
+/* =====================================================
+   AGENDA PAGINA
+===================================================== */
+
+body.agenda-page{
+
+    margin:0;
+
+    min-height:100vh;
+
+    background:
+        linear-gradient(
+            rgba(0,170,190,.20),
+            rgba(255,220,120,.20)
+        ),
+        url("main_background.jpg");
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+
+}
+
+/* ===========================
+   HEADER
+=========================== */
+
+.topbar{
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:20px;
+
+    padding:18px 30px;
+
+    background:rgba(255,255,255,.88);
+
+    backdrop-filter:blur(15px);
+
+    box-shadow:0 5px 25px rgba(0,0,0,.12);
+
+}
+
+.logo-area{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+}
+
+.logo-small{
+
+    width:70px;
+
+    height:auto;
+
+}
+
+.logo-area h1{
+
+    color:#008b8b;
+
+    font-size:30px;
+
+    margin:0;
+
+}
+
+.logo-area span{
+
+    color:#666;
+
+    font-size:14px;
+
+}
+
+/* ===========================
+   KNOPPEN
+=========================== */
+
+.top-buttons{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.top-buttons input{
+
+    width:260px;
+
+    height:46px;
+
+    border:none;
+
+    border-radius:14px;
+
+    padding:0 15px;
+
+    font-size:15px;
+
+    background:#f2f6f7;
+
+}
+
+.top-buttons button{
+
+    border:none;
+
+    border-radius:14px;
+
+    padding:12px 18px;
+
+    background:linear-gradient(135deg,#00A896,#02C39A);
+
+    color:white;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.top-buttons button:hover{
+
+    transform:translateY(-2px);
+
+}
+
+/* ===========================
+   KALENDER
+=========================== */
+
+main{
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+
+    padding:35px;
+
+}
+
+.calendar-card{
+
+    width:100%;
+
+    max-width:1600px;
+
+    background:rgba(255,255,255,.90);
+
+    backdrop-filter:blur(18px);
+
+    border-radius:28px;
+
+    padding:25px;
+
+    box-shadow:0 20px 50px rgba(0,0,0,.18);
+
+}
+
+#calendar{
+
+    width:100%;
+
+}
+
+/* FullCalendar */
+
+.fc{
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:15px;
+
+}
+
+.fc-toolbar-title{
+
+    font-size:30px !important;
+
+    color:#008b8b;
+
+}
+
+.fc-button{
+
+    border:none !important;
+
+    border-radius:12px !important;
+
+}
+
+/* ===========================
+   MOBIEL
+=========================== */
+
+@media(max-width:900px){
+
+.topbar{
+
+    flex-direction:column;
+
+    align-items:stretch;
+
+}
+
+.logo-area{
+
+    justify-content:center;
+
+}
+
+.top-buttons{
+
+    flex-wrap:wrap;
+
+    justify-content:center;
+
+}
+
+.top-buttons input{
+
+    width:100%;
+
+}
+
+main{
+
+    padding:15px;
+
+}
+
+.calendar-card{
+
+    padding:12px;
+
+}
+
+}
