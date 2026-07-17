@@ -1,74 +1,346 @@
-/* =======================================================
-   SNEJIN AGENDA
-   COMPLETE STYLE.CSS
-======================================================= */
+/* ======================================================
+   SNEJIN AGENDA - MODERN DESIGN
+====================================================== */
 
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-
 
 html,
-body{
+body {
+    min-height: 100%;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
 
-    width:100%;
-    min-height:100%;
 
-    font-family:
-    "Segoe UI",
-    Arial,
-    sans-serif;
+/* ======================================================
+   LOGIN
+====================================================== */
+
+body.login-page {
+
+    min-height: 100vh;
+
+    background:
+        linear-gradient(
+            rgba(0,0,0,.25),
+            rgba(0,120,140,.25)
+        ),
+        url("default_background.jpg");
+
+    background-size: cover;
+    background-position: center;
 
 }
 
 
-/* =======================================================
-   LOGIN PAGINA
-======================================================= */
-
-
-body.login-page{
+.login-overlay {
 
     min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:20px;
+
+}
+
+
+.login-card {
+
+    width:100%;
+    max-width:420px;
+
+    background:rgba(255,255,255,.95);
+
+    border-radius:35px;
+
+    padding:45px 35px;
+
+    text-align:center;
+
+    box-shadow:
+        0 30px 80px rgba(0,0,0,.35);
+
+}
+
+
+.logo {
+
+    width:130px;
+
+    margin-bottom:20px;
+
+}
+
+
+.login-card h1 {
+
+    color:#008f83;
+
+    font-size:34px;
+
+}
+
+
+.subtitle {
+
+    margin:10px 0 30px;
+
+    color:#666;
+
+}
+
+
+
+.form-group {
+
+    text-align:left;
+
+    margin-bottom:18px;
+
+}
+
+
+.form-group label {
+
+    font-weight:600;
+
+    color:#333;
+
+}
+
+
+
+.form-group input {
+
+    margin-top:8px;
+
+    width:100%;
+
+    height:52px;
+
+    border-radius:18px;
+
+    border:1px solid #ddd;
+
+    padding:0 18px;
+
+    font-size:16px;
+
+}
+
+
+
+#loginButton {
+
+    width:100%;
+
+    height:52px;
+
+    border-radius:18px;
+
+    border:none;
+
+    background:#00a896;
+
+    color:white;
+
+    font-size:17px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+}
+
+
+
+/* ======================================================
+   AGENDA
+====================================================== */
+
+
+body.agenda-page {
+
+
+    min-height:100vh;
+
 
     background:
 
     linear-gradient(
-        rgba(0,180,200,.25),
-        rgba(255,210,120,.25)
+        rgba(0,0,0,.20),
+        rgba(0,150,160,.25)
     ),
 
-    url("default_background.jpg");
+    url("main_background.jpg");
 
 
     background-size:cover;
 
     background-position:center;
 
-    background-repeat:no-repeat;
+}
 
-    background-attachment:fixed;
+
+/* HEADER */
+
+
+.topbar {
+
+
+    margin:20px;
+
+    padding:18px 25px;
+
+
+    border-radius:25px;
+
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+
+    background:
+
+    rgba(255,255,255,.85);
+
+
+    backdrop-filter:blur(20px);
+
+
+    box-shadow:
+
+    0 15px 40px rgba(0,0,0,.18);
+
 
 }
 
 
 
-.login-overlay{
-
-
-    min-height:100vh;
+.logo-area {
 
 
     display:flex;
 
+    align-items:center;
 
-    justify-content:center;
+    gap:15px;
 
+
+}
+
+
+
+.logo-small {
+
+
+    width:65px;
+
+
+}
+
+
+
+.logo-area h1 {
+
+
+    color:#008f83;
+
+    font-size:28px;
+
+
+}
+
+
+
+.logo-area span {
+
+
+    color:#666;
+
+
+}
+
+
+
+/* TOP KNOPPEN */
+
+
+.top-buttons {
+
+
+    display:flex;
+
+    gap:10px;
 
     align-items:center;
+
+
+}
+
+
+
+.top-buttons input {
+
+
+    height:45px;
+
+    width:230px;
+
+
+    border-radius:15px;
+
+    border:none;
+
+
+    padding:0 15px;
+
+
+}
+
+
+
+.top-buttons button {
+
+
+    height:45px;
+
+    padding:0 18px;
+
+
+    border:none;
+
+    border-radius:15px;
+
+
+    background:#00a896;
+
+    color:white;
+
+
+    cursor:pointer;
+
+    font-weight:600;
+
+
+}
+
+
+
+/* ======================================================
+   KALENDER
+====================================================== */
+
+
+main {
 
 
     padding:20px;
@@ -78,473 +350,17 @@ body.login-page{
 
 
 
-.login-card{
+.calendar-card {
 
 
-    width:100%;
+    max-width:1500px;
 
-
-    max-width:430px;
+    margin:auto;
 
 
     background:
 
-    rgba(255,255,255,.92);
-
-
-    backdrop-filter:
-
-    blur(18px);
-
-
-    border-radius:30px;
-
-
-    padding:40px;
-
-
-    text-align:center;
-
-
-    box-shadow:
-
-    0 25px 60px rgba(0,0,0,.30);
-
-
-    animation:
-
-    fadeIn .6s ease;
-
-
-}
-
-
-
-.logo{
-
-
-    width:140px;
-
-
-    margin-bottom:15px;
-
-
-}
-
-
-
-.login-card h1{
-
-
-    color:#008b8b;
-
-
-    font-size:34px;
-
-
-    margin-bottom:10px;
-
-
-}
-
-
-
-.subtitle{
-
-
-    color:#666;
-
-
-    margin-bottom:30px;
-
-
-}
-
-
-
-.form-group{
-
-
-    text-align:left;
-
-
-    margin-bottom:18px;
-
-
-}
-
-
-
-.form-group label{
-
-
-    display:block;
-
-
-    margin-bottom:8px;
-
-
-    font-weight:600;
-
-
-}
-
-
-
-.form-group input{
-
-
-    width:100%;
-
-
-    height:52px;
-
-
-    border:none;
-
-
-    border-radius:16px;
-
-
-    padding:0 16px;
-
-
-    font-size:16px;
-
-
-    background:#f2f7f8;
-
-
-}
-
-
-
-.form-group input:focus{
-
-
-    outline:none;
-
-
-    background:white;
-
-
-    box-shadow:
-
-    0 0 0 3px rgba(0,168,150,.25);
-
-
-}
-
-
-
-#loginButton{
-
-
-    width:100%;
-
-
-    height:52px;
-
-
-    border:none;
-
-
-    border-radius:16px;
-
-
-    background:
-
-    linear-gradient(
-        135deg,
-        #00A896,
-        #02C39A
-    );
-
-
-    color:white;
-
-
-    font-size:17px;
-
-
-    font-weight:bold;
-
-
-    cursor:pointer;
-
-
-}
-
-
-
-.message{
-
-
-    margin-top:20px;
-
-
-    min-height:25px;
-
-
-    font-weight:bold;
-
-
-}
-
-
-
-
-/* =======================================================
-   AGENDA PAGINA
-======================================================= */
-
-
-body.agenda-page{
-
-
-    min-height:100vh;
-
-
-    background:
-
-
-    linear-gradient(
-        rgba(0,170,190,.20),
-        rgba(255,220,120,.20)
-    ),
-
-
-    url("main_background.jpg");
-
-
-    background-size:cover;
-
-
-    background-position:center;
-
-
-    background-attachment:fixed;
-
-
-}
-
-
-
-/* HEADER */
-
-
-.topbar{
-
-
-    width:100%;
-
-
-    display:flex;
-
-
-    justify-content:space-between;
-
-
-    align-items:center;
-
-
-    padding:18px 30px;
-
-
-    background:
-
-    rgba(255,255,255,.88);
-
-
-    backdrop-filter:blur(15px);
-
-
-    box-shadow:
-
-    0 5px 25px rgba(0,0,0,.12);
-
-
-}
-
-
-
-.logo-area{
-
-
-    display:flex;
-
-
-    align-items:center;
-
-
-    gap:15px;
-
-
-}
-
-
-
-.logo-small{
-
-
-    width:70px;
-
-
-}
-
-
-
-.logo-area h1{
-
-
-    color:#008b8b;
-
-
-    font-size:30px;
-
-
-}
-
-
-
-.logo-area span{
-
-
-    color:#666;
-
-
-}
-/* =======================================================
-   TOP BUTTONS
-======================================================= */
-
-
-.top-buttons{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:12px;
-
-}
-
-
-
-.top-buttons input{
-
-
-    width:260px;
-
-
-    height:46px;
-
-
-    border:none;
-
-
-    border-radius:15px;
-
-
-    padding:0 15px;
-
-
-    font-size:15px;
-
-
-    background:#f2f7f8;
-
-
-}
-
-
-
-.top-buttons button{
-
-
-    border:none;
-
-
-    border-radius:15px;
-
-
-    padding:12px 18px;
-
-
-    background:
-
-    linear-gradient(
-        135deg,
-        #00A896,
-        #02C39A
-    );
-
-
-    color:white;
-
-
-    font-weight:bold;
-
-
-    cursor:pointer;
-
-
-    transition:.25s;
-
-
-}
-
-
-
-.top-buttons button:hover{
-
-
-    transform:translateY(-2px);
-
-
-}
-
-
-
-/* =======================================================
-   KALENDER
-======================================================= */
-
-
-main{
-
-
-    width:100%;
-
-
-    display:flex;
-
-
-    justify-content:center;
-
-
-    padding:35px;
-
-
-}
-
-
-
-.calendar-card{
-
-
-    width:100%;
-
-
-    max-width:1600px;
-
-
-    background:
-
-    rgba(255,255,255,.92);
-
-
-    backdrop-filter:blur(18px);
+    rgba(255,255,255,.93);
 
 
     border-radius:30px;
@@ -555,47 +371,32 @@ main{
 
     box-shadow:
 
-    0 20px 50px rgba(0,0,0,.20);
+    0 25px 70px rgba(0,0,0,.25);
 
 
 }
 
 
 
-#calendar{
+.fc {
 
 
-    width:100%;
+    border-radius:20px;
 
-
-}
-
-
-
-/* FullCalendar uiterlijk */
-
-
-.fc{
-
-
-    background:white;
-
-
-    border-radius:22px;
-
-
-    padding:15px;
+    overflow:hidden;
 
 
 }
 
 
 
-.fc-toolbar-title{
+/* Kalender titel */
 
 
-    color:#008b8b;
+.fc-toolbar-title {
 
+
+    color:#008f83 !important;
 
     font-size:28px !important;
 
@@ -604,173 +405,120 @@ main{
 
 
 
-.fc-button{
+/* Kalender knoppen */
 
 
-    background:#00A896 !important;
+.fc-button {
 
+
+    background:#00a896 !important;
 
     border:none !important;
-
 
     border-radius:12px !important;
 
 
-    padding:8px 14px !important;
-
-
 }
 
 
 
-.fc-button:hover{
+/* afspraken */
 
 
-    background:#007f72 !important;
+.fc-event {
 
 
-}
+    border-radius:10px !important;
 
-
-
-.fc-daygrid-day-number{
-
-
-    color:#444;
-
-
-}
-
-
-
-.fc-event{
-
+    padding:5px !important;
 
     border:none !important;
 
 
-    border-radius:8px !important;
-
-
-    padding:4px !important;
-
-
 }
 
 
 
-/* =======================================================
+/* ======================================================
    NIEUWE AFSPRAAK KNOP
-======================================================= */
+====================================================== */
 
 
-.floatingButton{
+.floatingButton {
 
 
     position:fixed;
 
 
-    right:30px;
+    right:35px;
+
+    bottom:35px;
 
 
-    bottom:30px;
+    width:70px;
 
-
-    width:65px;
-
-
-    height:65px;
-
-
-    border:none;
+    height:70px;
 
 
     border-radius:50%;
 
 
-    background:
+    border:none;
 
-    linear-gradient(
-        135deg,
-        #00A896,
-        #02C39A
-    );
+
+    background:#00a896;
 
 
     color:white;
 
 
-    font-size:30px;
+    font-size:35px;
+
+
+    box-shadow:
+
+    0 15px 40px rgba(0,0,0,.35);
 
 
     cursor:pointer;
 
 
-    box-shadow:
-
-    0 10px 30px rgba(0,0,0,.25);
-
-
-    z-index:100;
-
-
 }
 
 
 
-.floatingButton:hover{
+/* ======================================================
+   POPUP
+====================================================== */
 
 
-    transform:scale(1.08);
+.modal {
 
 
-}
+    position:fixed;
 
-
-
-/* =======================================================
-   AFSPRAAK POPUP
-======================================================= */
-
-
-.modal{
+    inset:0;
 
 
     display:none;
 
 
-    position:fixed;
-
-
-    inset:0;
-
-
-    background:
-
-    rgba(0,0,0,.45);
-
-
     justify-content:center;
-
 
     align-items:center;
 
 
-    padding:20px;
-
-
-    z-index:1000;
+    background:rgba(0,0,0,.45);
 
 
 }
 
 
 
-.modal-content{
+.modal-content {
 
 
-    width:100%;
-
+    width:90%;
 
     max-width:450px;
 
@@ -786,42 +534,7 @@ main{
 
     box-shadow:
 
-    0 25px 60px rgba(0,0,0,.35);
-
-
-}
-
-
-
-.modal-content h2{
-
-
-    text-align:center;
-
-
-    color:#008b8b;
-
-
-    margin-bottom:20px;
-
-
-}
-
-
-
-.modal-content label{
-
-
-    display:block;
-
-
-    margin-top:12px;
-
-
-    margin-bottom:5px;
-
-
-    font-weight:600;
+    0 30px 80px rgba(0,0,0,.4);
 
 
 }
@@ -830,337 +543,98 @@ main{
 
 .modal-content input,
 .modal-content textarea,
-.modal-content select{
+.modal-content select {
 
 
     width:100%;
 
 
-    border:none;
+    padding:14px;
 
 
-    background:#f2f7f8;
+    margin:8px 0;
 
 
     border-radius:15px;
 
 
-    padding:12px;
-
-
-    font-size:15px;
+    border:1px solid #ddd;
 
 
 }
 
 
 
-.modal-content textarea{
-
-
-    height:100px;
-
-
-    resize:none;
-
-
-}
-
-
-
-.modalButtons{
+.modalButtons {
 
 
     display:flex;
 
-
     gap:10px;
 
-
-    margin-top:20px;
+    margin-top:15px;
 
 
 }
 
 
 
-.modalButtons button{
+.modalButtons button {
 
 
     flex:1;
 
+    padding:14px;
 
     border:none;
 
-
     border-radius:15px;
 
-
-    padding:13px;
-
-
     color:white;
 
-
-    cursor:pointer;
-
-
-    font-weight:bold;
+    background:#00a896;
 
 
 }
 
 
 
-#saveEvent{
+/* ======================================================
+   MOBIEL
+====================================================== */
 
 
-    background:#00A896;
+@media(max-width:800px){
 
 
-}
-
-
-
-#cancelEvent{
-
-
-    background:#e63946;
-
-
-}
-
-
-
-/* =======================================================
-   DONKERE MODUS VOORBEREIDING
-======================================================= */
-
-
-body.dark{
-
-
-    background:#121212;
-
-
-}
-
-
-
-body.dark .calendar-card,
-body.dark .login-card,
-body.dark .modal-content{
-
-
-    background:
-
-    rgba(30,30,30,.92);
-
-
-    color:white;
-
-
-}
-
-
-
-body.dark .fc{
-
-
-    background:#222;
-
-
-}
-
-
-
-/* =======================================================
-   RESPONSIVE
-======================================================= */
-
-
-@media(max-width:900px){
-
-
-    .topbar{
-
+    .topbar {
 
         flex-direction:column;
-
 
         gap:15px;
 
-
     }
 
 
-
-    .top-buttons{
-
+    .top-buttons {
 
         width:100%;
-
 
         flex-wrap:wrap;
 
-
-        justify-content:center;
-
-
     }
 
 
-
-    .top-buttons input{
-
+    .top-buttons input {
 
         width:100%;
 
-
     }
 
 
+    .calendar-card {
 
-    main{
-
-
-        padding:15px;
-
-
-    }
-
-
-
-    .calendar-card{
-
-
-        padding:12px;
-
-
-    }
-
-
-
-}
-
-
-
-@media(max-width:600px){
-
-
-    .login-card{
-
-
-        padding:25px;
-
-
-        border-radius:24px;
-
-
-    }
-
-
-
-    .logo{
-
-
-        width:110px;
-
-
-    }
-
-
-
-    .login-card h1{
-
-
-        font-size:26px;
-
-
-    }
-
-
-
-    .logo-area h1{
-
-
-        font-size:24px;
-
-
-    }
-
-
-
-    .floatingButton{
-
-
-        width:55px;
-
-
-        height:55px;
-
-
-        right:20px;
-
-
-        bottom:20px;
-
-
-    }
-
-
-
-    .modal-content{
-
-
-        padding:25px;
-
-
-    }
-
-
-
-    .modalButtons{
-
-
-        flex-direction:column;
-
-
-    }
-
-
-
-}
-
-
-/* =======================================================
-   ANIMATIE
-======================================================= */
-
-
-@keyframes fadeIn{
-
-
-    from{
-
-
-        opacity:0;
-
-
-        transform:translateY(20px);
-
-
-    }
-
-
-    to{
-
-
-        opacity:1;
-
-
-        transform:translateY(0);
-
+        padding:10px;
 
     }
 
