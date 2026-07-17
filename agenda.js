@@ -1,277 +1,364 @@
+// =====================================================
+// SNEJIN AGENDA
+// agenda.js
+// =====================================================
+
+
 import { auth, db } from "./firebase.js";
 
 
 import {
-onAuthStateChanged,
-signOut
-}
-from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
 
 
 import {
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-collection,
-getDocs,
-addDoc
+
+
+// =====================================================
+// LOGIN CONTROLE
+// =====================================================
+
+
+onAuthStateChanged(auth, (user) => {
+
+
+    if (!user) {
+
+        window.location.href = "index.html";
+
+    }
+
+
+});
+
+
+
+
+// =====================================================
+// ELEMENTEN
+// =====================================================
+
+
+const calendarElement = document.getElementById("calendar");
+
+const themeButton = document.getElementById("themeButton");
+
+const logoutButton = document.getElementById("logoutButton");
+
+const searchInput = document.getElementById("search");
+
+const addEventButton = document.getElementById("addEventButton");
+
+
+
+
+
+// =====================================================
+// DONKER / LICHT MODUS
+// =====================================================
+
+
+
+function updateThemeButton(){
+
+
+    if(document.body.classList.contains("dark")){
+
+
+        // donkere modus actief
+        // knop wordt zon
+
+
+        themeButton.textContent = "☀️";
+
+
+        themeButton.title =
+        "Schakel naar lichte modus";
+
+
+    } else {
+
+
+        // lichte modus actief
+        // knop wordt maan
+
+
+        themeButton.textContent = "🌙";
+
+
+        themeButton.title =
+        "Schakel naar donkere modus";
+
+
+    }
+
 
 }
-from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+
+
+const savedTheme =
+localStorage.getItem("theme");
+
+
+
+if(savedTheme === "dark"){
+
+    document.body.classList.add("dark");
+
+}
+
+
+updateThemeButton();
+
+
+
+
+
+themeButton.addEventListener(
+"click",
+()=>{
+
+
+    document.body.classList.toggle("dark");
+
+
+
+    if(
+        document.body.classList.contains("dark")
+    ){
+
+
+        localStorage.setItem(
+            "theme",
+            "dark"
+        );
+
+
+    }else{
+
+
+        localStorage.setItem(
+            "theme",
+            "light"
+        );
+
+
+    }
+
+
+    updateThemeButton();
+
+
+});
+
+
+
+
+
+// =====================================================
+// UITLOGGEN
+// =====================================================
+
+
+logoutButton.addEventListener(
+"click",
+async ()=>{
+
+
+    await signOut(auth);
+
+
+    window.location.href =
+    "index.html";
+
+
+});
+
+
+
+
+// =====================================================
+// FULLCALENDAR
+// =====================================================
 
 
 
 let calendar;
 
-let selectedDate="";
 
 
-
-const colors={
-
-werk:"#ff0000",
-
-vakantie:"#00aa00",
-
-activiteit:"#006400",
-
-verjaardag:"#ff9900",
-
-feestdag:"#ffff00"
-
-};
-
-
-
-
-
-onAuthStateChanged(auth,(user)=>{
-
-
-if(!user){
-
-window.location.href="index.html";
-
-return;
-
-}
-
-
-loadCalendar();
-
-
-});
-
-
-
-
-
-async function loadCalendar(){
-
-
-let events=[];
-
-
-
-const snapshot =
-await getDocs(
-collection(db,"events")
-);
-
-
-
-snapshot.forEach((doc)=>{
-
-
-let data=doc.data();
-
-
-
-events.push({
-
-id:doc.id,
-
-title:data.title,
-
-start:data.start,
-
-description:data.description,
-
-backgroundColor:
-colors[data.type],
-
-allDay:data.allDay
-
-
-});
-
-
-});
-
-
-
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
 
 
 calendar =
 new FullCalendar.Calendar(
-
-document.getElementById("calendar"),
-
+calendarElement,
 {
 
 
-initialView:"dayGridMonth",
-
-locale:"nl",
-
-firstDay:1,
+    initialView:
+    "dayGridMonth",
 
 
-headerToolbar:{
-
-left:"prev,next today",
-
-center:"title",
-
-right:
-"dayGridMonth,timeGridWeek,timeGridDay,listWeek"
-
-},
+    locale:
+    "nl",
 
 
-events:events,
+    firstDay:
+    1,
+
+
+    selectable:true,
+
+
+    editable:true,
+
+
+    height:"auto",
 
 
 
-dateClick(info){
+    headerToolbar:{
 
 
-selectedDate=info.dateStr;
+        left:
+        "prev,next today",
 
 
-document.getElementById("eventDate").value=
-selectedDate;
+        center:
+        "title",
 
 
-openModal();
+        right:
+        "dayGridMonth,timeGridWeek,timeGridDay,listYear"
 
 
-}
+    },
+
+
+    buttonText:{
+
+
+        today:
+        "Vandaag",
+
+
+        month:
+        "Maand",
+
+
+        week:
+        "Week",
+
+
+        day:
+        "Dag",
+
+
+        list:
+        "Agenda"
+
+
+    },
+
+
+
+    events:[]
 
 
 
 });
+
 
 
 calendar.render();
 
 
-}
+
+});
 
 
 
 
-
-function openModal(){
-
-document.getElementById("eventModal").style.display="flex";
-
-}
+// =====================================================
+// ZOEKEN
+// =====================================================
 
 
-
-document
-.getElementById("closeModal")
-.onclick=()=>{
-
-
-document.getElementById("eventModal").style.display="none";
+searchInput.addEventListener(
+"input",
+()=>{
 
 
-};
+    const value =
+    searchInput.value.toLowerCase();
 
 
 
+    document
+    .querySelectorAll(".fc-event")
+    .forEach(event=>{
 
 
-document
-.getElementById("saveEvent")
-.onclick=async()=>{
+        if(
+            event.textContent
+            .toLowerCase()
+            .includes(value)
+        ){
 
 
-const title=
-document.getElementById("eventTitle").value;
+            event.style.display =
+            "";
 
 
-const description=
-document.getElementById("eventDescription").value;
+        }else{
 
 
-const date=
-document.getElementById("eventDate").value;
+            event.style.display =
+            "none";
 
 
-const time=
-document.getElementById("eventTime").value;
+        }
 
 
-const allDay=
-document.getElementById("allDay").checked;
+    });
 
-
-const type=
-document.getElementById("eventType").value;
-
-
-
-let start=date;
-
-
-
-if(!allDay && time){
-
-start=date+"T"+time;
-
-}
-
-
-
-await addDoc(
-collection(db,"events"),
-{
-
-
-title,
-
-description,
-
-start,
-
-type,
-
-allDay
 
 
 });
 
 
-location.reload();
-
-
-};
 
 
 
+// =====================================================
+// NIEUWE AFSPRAAK KNOP
+// =====================================================
 
 
-document
-.getElementById("logoutButton")
-.onclick=()=>{
+
+addEventButton.addEventListener(
+"click",
+()=>{
 
 
-signOut(auth);
+    alert(
+    "Afspraak toevoegen komt in de volgende stap."
+    );
 
-window.location.href="index.html";
 
-
-};
+});
