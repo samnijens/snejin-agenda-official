@@ -1012,3 +1012,251 @@ body.dark .logo-area span{
 
 
 }
+/* ======================================================
+   SNEJIN AGENDA ANIMATIES
+====================================================== */
+
+
+/* Hele pagina verschijnt rustig */
+
+body.agenda-page {
+
+    animation:
+    pageAppear .8s ease;
+
+}
+
+
+
+
+/* Header animatie */
+
+.topbar {
+
+    animation:
+    slideDown .8s ease;
+
+}
+
+
+
+
+
+/* Kalender kaart animatie */
+
+.calendar-card {
+
+    animation:
+    calendarAppear 1s ease;
+
+}
+
+
+
+
+/* Knoppen animatie */
+
+.top-buttons button,
+.floatingButton {
+
+
+    transition:
+    transform .25s ease,
+    box-shadow .25s ease;
+
+}
+
+
+
+.top-buttons button:hover,
+.floatingButton:hover {
+
+
+    transform:
+    translateY(-4px)
+    scale(1.05);
+
+
+
+    box-shadow:
+
+    0 15px 30px rgba(0,0,0,.25);
+
+
+}
+
+
+
+
+
+/* Logo kleine zweefanimatie */
+
+.logo-small {
+
+
+    animation:
+
+    floatingLogo 3s ease-in-out infinite;
+
+
+}
+
+
+
+
+
+/* Kalender dagen zachte overgang */
+
+.fc-daygrid-day {
+
+
+    transition:
+
+    background .25s ease;
+
+
+}
+
+
+
+.fc-daygrid-day:hover {
+
+
+    background:
+
+    rgba(0,168,150,.08);
+
+
+}
+
+
+
+
+
+/* Animaties */
+
+
+@keyframes pageAppear {
+
+
+    from {
+
+
+        opacity:0;
+
+
+    }
+
+
+    to {
+
+
+        opacity:1;
+
+
+    }
+
+
+}
+
+
+
+
+@keyframes slideDown {
+
+
+    from {
+
+
+        opacity:0;
+
+
+        transform:
+        translateY(-40px);
+
+
+    }
+
+
+    to {
+
+
+        opacity:1;
+
+
+        transform:
+        translateY(0);
+
+
+    }
+
+
+}
+
+
+
+
+
+@keyframes calendarAppear {
+
+
+    from {
+
+
+        opacity:0;
+
+
+        transform:
+
+        translateY(50px)
+        scale(.95);
+
+
+    }
+
+
+    to {
+
+
+        opacity:1;
+
+
+        transform:
+
+        translateY(0)
+        scale(1);
+
+
+    }
+
+
+}
+
+
+
+
+
+@keyframes floatingLogo {
+
+
+    0%,100% {
+
+
+        transform:
+        translateY(0);
+
+
+    }
+
+
+    50% {
+
+
+        transform:
+        translateY(-8px);
+
+
+    }
+
+
+}
