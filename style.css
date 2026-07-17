@@ -27,21 +27,23 @@ body{
 
 
 /* ======================================================
-   LOGIN PAGINA
+   SNEJIN AGENDA - NIEUWE LOGIN DESIGN
 ====================================================== */
 
 
-body.login-page{
-
+body.login-page {
 
     min-height:100vh;
 
+    overflow:hidden;
 
-    background:
+
+    background-image:
 
     linear-gradient(
-        rgba(0,180,200,.25),
-        rgba(255,190,90,.30)
+        135deg,
+        rgba(0,120,160,.45),
+        rgba(255,180,80,.35)
     ),
 
     url("default_background.jpg");
@@ -51,24 +53,22 @@ body.login-page{
 
     background-position:center;
 
-    background-repeat:no-repeat;
-
 
 }
 
 
 
-.login-overlay{
 
+.login-overlay {
 
     min-height:100vh;
+
+    width:100%;
 
 
     display:flex;
 
-
     justify-content:center;
-
 
     align-items:center;
 
@@ -80,17 +80,50 @@ body.login-page{
 
 
 
-.login-card{
+
+.login-card {
 
 
     width:100%;
 
 
-    max-width:430px;
+    max-width:450px;
+
+
+    padding:45px;
+
+
+    border-radius:40px;
 
 
 
-    padding:45px 40px;
+    background:
+
+    rgba(255,255,255,.82);
+
+
+
+    backdrop-filter:
+
+    blur(30px);
+
+
+
+    -webkit-backdrop-filter:
+
+    blur(30px);
+
+
+
+    box-shadow:
+
+    0 35px 90px rgba(0,0,0,.45);
+
+
+
+    border:
+
+    1px solid rgba(255,255,255,.6);
 
 
 
@@ -98,44 +131,10 @@ body.login-page{
 
 
 
-    border-radius:35px;
-
-
-
-    background:
-
-    rgba(255,255,255,.80);
-
-
-
-    backdrop-filter:
-
-    blur(25px);
-
-
-
-    -webkit-backdrop-filter:
-
-    blur(25px);
-
-
-
-    border:
-
-    1px solid rgba(255,255,255,.5);
-
-
-
-    box-shadow:
-
-
-    0 30px 80px rgba(0,0,0,.35);
-
-
-
     animation:
 
-    fadeIn .7s ease;
+    loginShow .8s ease;
+
 
 
 }
@@ -143,30 +142,24 @@ body.login-page{
 
 
 
-.logo{
+
+.login-card .logo {
 
 
-    width:150px;
+    width:170px;
+
+
+    height:auto;
 
 
     margin-bottom:20px;
 
 
-}
+    filter:
 
-
-
-
-.login-card h1{
-
-
-    color:#008b8b;
-
-
-    font-size:36px;
-
-
-    margin-bottom:10px;
+    drop-shadow(
+        0 15px 20px rgba(0,0,0,.25)
+    );
 
 
 }
@@ -174,7 +167,34 @@ body.login-page{
 
 
 
-.subtitle{
+.login-card h1 {
+
+
+    font-size:40px;
+
+
+    font-weight:800;
+
+
+    letter-spacing:-1px;
+
+
+    color:#007f7f;
+
+
+    margin-bottom:8px;
+
+
+}
+
+
+
+
+
+.subtitle {
+
+
+    font-size:16px;
 
 
     color:#555;
@@ -188,59 +208,63 @@ body.login-page{
 
 
 
-.form-group{
+.form-group {
+
+
+    margin-bottom:22px;
 
 
     text-align:left;
 
 
-    margin-bottom:20px;
-
-
 }
 
 
 
 
-.form-group label{
+.form-group label {
 
 
-    display:block;
+    font-size:14px;
 
 
-    margin-bottom:8px;
-
-
-    font-weight:600;
+    font-weight:700;
 
 
     color:#333;
 
 
+    margin-bottom:8px;
+
+
+    display:block;
+
+
 }
 
 
 
 
-.form-group input{
+.form-group input {
 
 
     width:100%;
 
 
-    height:55px;
+    height:58px;
+
+
+    border-radius:20px;
 
 
     border:none;
 
 
-    border-radius:18px;
-
-
-    padding:0 18px;
+    padding:0 20px;
 
 
     font-size:16px;
+
 
 
     background:
@@ -248,14 +272,25 @@ body.login-page{
     rgba(255,255,255,.95);
 
 
+
+    box-shadow:
+
+    0 8px 20px rgba(0,0,0,.08);
+
+
 }
 
 
 
-.form-group input:focus{
+
+
+.form-group input:focus {
 
 
     outline:none;
+
+
+    transform:scale(1.02);
 
 
     box-shadow:
@@ -268,25 +303,34 @@ body.login-page{
 
 
 
-#loginButton{
+
+#loginButton {
 
 
     width:100%;
 
 
-    height:55px;
+    height:58px;
+
+
+    margin-top:15px;
 
 
     border:none;
 
 
-    border-radius:18px;
+    border-radius:20px;
 
 
-    margin-top:10px;
 
+    background:
 
-    cursor:pointer;
+    linear-gradient(
+        135deg,
+        #00c9a7,
+        #008f87
+    );
+
 
 
     color:white;
@@ -295,16 +339,17 @@ body.login-page{
     font-size:18px;
 
 
-    font-weight:bold;
+    font-weight:800;
 
 
-    background:
+    cursor:pointer;
 
-    linear-gradient(
-        135deg,
-        #00A896,
-        #02C39A
-    );
+
+    box-shadow:
+
+
+    0 15px 30px rgba(0,140,130,.35);
+
 
 
     transition:.3s;
@@ -314,23 +359,30 @@ body.login-page{
 
 
 
-#loginButton:hover{
+
+#loginButton:hover {
 
 
-    transform:translateY(-3px);
+    transform:
+
+    translateY(-4px);
 
 
 }
 
 
 
-.message{
+
+.message {
 
 
     margin-top:20px;
 
 
     min-height:25px;
+
+
+    color:#d62828;
 
 
     font-weight:bold;
@@ -341,6 +393,81 @@ body.login-page{
 
 
 
+
+@keyframes loginShow {
+
+
+    from {
+
+
+        opacity:0;
+
+
+        transform:
+
+        translateY(40px)
+        scale(.9);
+
+
+    }
+
+
+    to {
+
+
+        opacity:1;
+
+
+        transform:
+
+        translateY(0)
+        scale(1);
+
+
+    }
+
+
+}
+
+
+
+
+@media(max-width:500px){
+
+
+    .login-card {
+
+
+        padding:35px 25px;
+
+
+        border-radius:30px;
+
+
+    }
+
+
+
+    .login-card h1 {
+
+
+        font-size:30px;
+
+
+    }
+
+
+
+    .login-card .logo {
+
+
+        width:130px;
+
+
+    }
+
+
+}
 /* ======================================================
    AGENDA PAGINA
 ====================================================== */
