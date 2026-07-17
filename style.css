@@ -40,8 +40,8 @@ body.login-page{
     background:
 
     linear-gradient(
-        rgba(0,170,190,.25),
-        rgba(255,210,120,.25)
+        rgba(0,180,200,.25),
+        rgba(255,190,90,.30)
     ),
 
     url("default_background.jpg");
@@ -52,8 +52,6 @@ body.login-page{
     background-position:center;
 
     background-repeat:no-repeat;
-
-    background-attachment:fixed;
 
 
 }
@@ -75,7 +73,7 @@ body.login-page{
     align-items:center;
 
 
-    padding:25px;
+    padding:20px;
 
 
 }
@@ -91,21 +89,8 @@ body.login-page{
     max-width:430px;
 
 
-    background:
 
-    rgba(255,255,255,.92);
-
-
-
-    backdrop-filter:blur(20px);
-
-
-
-    border-radius:32px;
-
-
-
-    padding:40px;
+    padding:45px 40px;
 
 
 
@@ -113,20 +98,55 @@ body.login-page{
 
 
 
+    border-radius:35px;
+
+
+
+    background:
+
+    rgba(255,255,255,.80);
+
+
+
+    backdrop-filter:
+
+    blur(25px);
+
+
+
+    -webkit-backdrop-filter:
+
+    blur(25px);
+
+
+
+    border:
+
+    1px solid rgba(255,255,255,.5);
+
+
+
     box-shadow:
 
-    0 30px 70px rgba(0,0,0,.35);
 
+    0 30px 80px rgba(0,0,0,.35);
+
+
+
+    animation:
+
+    fadeIn .7s ease;
 
 
 }
 
 
 
-.login-card .logo{
+
+.logo{
 
 
-    width:140px;
+    width:150px;
 
 
     margin-bottom:20px;
@@ -136,13 +156,14 @@ body.login-page{
 
 
 
+
 .login-card h1{
 
 
     color:#008b8b;
 
 
-    font-size:34px;
+    font-size:36px;
 
 
     margin-bottom:10px;
@@ -152,16 +173,18 @@ body.login-page{
 
 
 
+
 .subtitle{
 
 
-    color:#666;
+    color:#555;
 
 
-    margin-bottom:30px;
+    margin-bottom:35px;
 
 
 }
+
 
 
 
@@ -171,10 +194,11 @@ body.login-page{
     text-align:left;
 
 
-    margin-bottom:18px;
+    margin-bottom:20px;
 
 
 }
+
 
 
 
@@ -197,28 +221,31 @@ body.login-page{
 
 
 
+
 .form-group input{
 
 
     width:100%;
 
 
-    height:52px;
+    height:55px;
 
 
     border:none;
 
 
-    border-radius:16px;
+    border-radius:18px;
 
 
-    padding:0 16px;
+    padding:0 18px;
 
 
     font-size:16px;
 
 
-    background:#f2f7f8;
+    background:
+
+    rgba(255,255,255,.95);
 
 
 }
@@ -231,12 +258,9 @@ body.login-page{
     outline:none;
 
 
-    background:white;
-
-
     box-shadow:
 
-    0 0 0 3px rgba(0,168,150,.25);
+    0 0 0 4px rgba(0,168,150,.25);
 
 
 }
@@ -250,16 +274,28 @@ body.login-page{
     width:100%;
 
 
-    height:52px;
+    height:55px;
 
 
     border:none;
 
 
-    border-radius:16px;
+    border-radius:18px;
 
 
     margin-top:10px;
+
+
+    cursor:pointer;
+
+
+    color:white;
+
+
+    font-size:18px;
+
+
+    font-weight:bold;
 
 
     background:
@@ -271,38 +307,36 @@ body.login-page{
     );
 
 
-    color:white;
-
-
-    font-size:17px;
-
-
-    font-weight:bold;
-
-
-    cursor:pointer;
+    transition:.3s;
 
 
 }
 
+
+
+#loginButton:hover{
+
+
+    transform:translateY(-3px);
+
+
+}
 
 
 
 .message{
 
 
-    min-height:25px;
-
-
     margin-top:20px;
+
+
+    min-height:25px;
 
 
     font-weight:bold;
 
 
 }
-
-
 
 
 
@@ -320,12 +354,10 @@ body.agenda-page{
 
     background:
 
-
     linear-gradient(
-        rgba(0,0,0,.20),
-        rgba(0,150,170,.25)
+        rgba(0,150,170,.20),
+        rgba(255,220,120,.20)
     ),
-
 
     url("main_background.jpg");
 
@@ -341,7 +373,6 @@ body.agenda-page{
 
 
 }
-
 
 
 
@@ -367,17 +398,10 @@ body.agenda-page{
     align-items:center;
 
 
-    gap:20px;
-
-
-
-    border-radius:25px;
-
-
 
     background:
 
-    rgba(255,255,255,.90);
+    rgba(255,255,255,.85);
 
 
 
@@ -385,12 +409,17 @@ body.agenda-page{
 
 
 
+    border-radius:25px;
+
+
+
     box-shadow:
 
-    0 15px 40px rgba(0,0,0,.18);
+    0 20px 50px rgba(0,0,0,.18);
 
 
 }
+
 
 
 
@@ -413,7 +442,7 @@ body.agenda-page{
 .logo-small{
 
 
-    width:65px;
+    width:70px;
 
 
 }
@@ -437,7 +466,6 @@ body.agenda-page{
 
 
 }
-
 
 
 
@@ -468,7 +496,7 @@ body.agenda-page{
     height:45px;
 
 
-    width:230px;
+    width:240px;
 
 
     border:none;
@@ -491,22 +519,22 @@ body.agenda-page{
     height:45px;
 
 
-    padding:0 18px;
-
-
     border:none;
 
 
     border-radius:15px;
 
 
-    cursor:pointer;
+    padding:0 18px;
+
+
+    background:#00A896;
 
 
     color:white;
 
 
-    background:#00A896;
+    cursor:pointer;
 
 
     font-weight:bold;
@@ -519,9 +547,7 @@ body.agenda-page{
 
 
 
-/* ======================================================
-   KALENDER
-====================================================== */
+/* KALENDER */
 
 
 main{
@@ -543,18 +569,21 @@ main{
     margin:auto;
 
 
+
     background:
 
-    rgba(255,255,255,.94);
+    rgba(255,255,255,.92);
+
+
+
+    backdrop-filter:blur(20px);
 
 
 
     border-radius:30px;
 
 
-
     padding:25px;
-
 
 
     box-shadow:
@@ -573,6 +602,7 @@ main{
 
 
 }
+
 
 
 
@@ -618,24 +648,9 @@ main{
 
 
 
-.fc-event{
 
 
-    border-radius:8px !important;
-
-
-    border:none !important;
-
-
-}
-
-
-
-
-
-/* ======================================================
-   NIEUWE AFSPRAAK KNOP
-====================================================== */
+/* NIEUWE AFSPRAAK KNOP */
 
 
 .floatingButton{
@@ -650,16 +665,17 @@ main{
     bottom:30px;
 
 
+
     width:65px;
 
 
     height:65px;
 
 
-    border:none;
-
-
     border-radius:50%;
+
+
+    border:none;
 
 
     background:#00A896;
@@ -672,11 +688,6 @@ main{
 
 
     cursor:pointer;
-
-
-    box-shadow:
-
-    0 15px 35px rgba(0,0,0,.30);
 
 
 }
@@ -697,7 +708,7 @@ body.dark .calendar-card{
 
     background:
 
-    rgba(25,25,25,.92);
+    rgba(25,25,25,.90);
 
 
     color:white;
@@ -710,7 +721,7 @@ body.dark .calendar-card{
 body.dark .fc{
 
 
-    background:#1e1e1e;
+    background:#222;
 
 
 }
@@ -750,11 +761,45 @@ body.dark .logo-area span{
 
 
 
+/* ANIMATIE */
 
 
-/* ======================================================
-   RESPONSIVE
-====================================================== */
+@keyframes fadeIn{
+
+
+    from{
+
+
+        opacity:0;
+
+
+        transform:
+        translateY(20px);
+
+
+    }
+
+
+    to{
+
+
+        opacity:1;
+
+
+        transform:
+        translateY(0);
+
+
+    }
+
+
+}
+
+
+
+
+
+/* MOBIEL */
 
 
 @media(max-width:800px){
@@ -813,7 +858,7 @@ body.dark .logo-area span{
     .login-card{
 
 
-        padding:25px;
+        padding:35px 25px;
 
 
     }
@@ -833,7 +878,7 @@ body.dark .logo-area span{
     .logo{
 
 
-        width:110px;
+        width:120px;
 
 
     }
