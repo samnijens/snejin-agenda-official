@@ -1,67 +1,86 @@
 <!DOCTYPE html>
 <html lang="nl">
-
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snejin Agenda - Inloggen</title>
 
-<title>Snejin Agenda - Login</title>
+    <meta name="theme-color" content="#009688">
 
-<link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <link rel="stylesheet" href="style.css">
 
 </head>
 
-
 <body class="login-background">
 
+<div class="login-container">
 
-<div class="login-box">
+    <div class="login-card">
 
+        <img
+            src="logo.png"
+            alt="Snejin Agenda"
+            class="logo">
 
-<img 
-src="logo.png"
-class="logo"
-alt="Snejin Agenda logo">
+        <h1>Snejin Agenda</h1>
 
+        <p class="subtitle">
+            Familieagenda voor iedereen 🌴
+        </p>
 
-<h1>
-Snejin Agenda
-</h1>
+        <form id="loginForm">
 
+            <div class="input-group">
 
-<p>
-Welkom terug 🌴☀️
-</p>
+                <label for="email">
+                    E-mailadres
+                </label>
 
+                <input
+                    id="email"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="naam@email.nl"
+                    required>
 
-<input
-id="email"
-type="email"
-placeholder="Email">
+            </div>
 
+            <div class="input-group">
 
-<input
-id="password"
-type="password"
-placeholder="Wachtwoord">
+                <label for="password">
+                    Wachtwoord
+                </label>
 
+                <input
+                    id="password"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="••••••••"
+                    required>
 
-<button id="loginButton">
-Inloggen
-</button>
+            </div>
 
+            <button
+                type="submit"
+                id="loginButton">
 
-<p id="error"></p>
+                Inloggen
 
+            </button>
+
+        </form>
+
+        <div id="message"></div>
+
+    </div>
 
 </div>
 
-
 <script type="module" src="login.js"></script>
 
-
 </body>
-
 </html>
