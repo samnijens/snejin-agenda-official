@@ -9,21 +9,24 @@
 
     <title>Snejin Agenda</title>
 
-    <link rel="icon" type="image/png" href="logo.png">
+
+    <link rel="icon" href="logo.png">
+
 
     <link rel="stylesheet" href="style.css">
 
 
-    <!-- FullCalendar CSS -->
+    <!-- FullCalendar stijl -->
     <link 
-        href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css"
-        rel="stylesheet">
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css"
+    rel="stylesheet">
 
 
 </head>
 
 
 <body class="agenda-page">
+
 
 
 <header class="topbar">
@@ -33,12 +36,14 @@
 
 
         <img 
-            src="logo.png"
-            alt="Snejin Agenda"
-            class="logo-small">
+        src="logo.png"
+        class="logo-small"
+        alt="Snejin Agenda logo">
+
 
 
         <div>
+
 
             <h1>
                 Snejin Agenda
@@ -57,18 +62,21 @@
 
 
 
+
+
     <div class="top-buttons">
 
 
-        <input 
-            id="search"
-            type="search"
-            placeholder="🔍 Zoek afspraak">
+        <input
+        id="search"
+        type="search"
+        placeholder="🔍 Zoek afspraak">
 
 
-        <button 
-            id="themeButton"
-            title="Donkere modus">
+
+        <button
+        id="themeButton"
+        type="button">
 
             🌙
 
@@ -76,15 +84,19 @@
 
 
 
-        <button 
-            id="logoutButton">
+
+        <button
+        id="logoutButton"
+        type="button">
 
             🚪 Uitloggen
 
         </button>
 
 
+
     </div>
+
 
 
 </header>
@@ -105,19 +117,17 @@
     </section>
 
 
+
 </main>
 
 
 
 
 
-<!-- Nieuwe afspraak knop -->
-
-
-<button 
-    id="addEventButton"
-    class="floatingButton">
-
+<button
+id="addEventButton"
+class="floatingButton"
+type="button">
 
     +
 
@@ -128,178 +138,18 @@
 
 
 
-<!-- Afspraak popup -->
+<!-- FullCalendar script -->
 
-
-<div 
-    id="eventModal"
-    class="modal">
-
-
-    <div class="modal-content">
-
-
-        <h2>
-            Nieuwe afspraak
-        </h2>
-
-
-
-        <label>
-            Naam
-        </label>
-
-
-        <input 
-            id="eventTitle"
-            type="text"
-            placeholder="Naam afspraak">
-
-
-
-
-
-        <label>
-            Omschrijving
-        </label>
-
-
-        <textarea
-            id="eventDescription"
-            placeholder="Omschrijving">
-        </textarea>
-
-
-
-
-
-        <label>
-            Datum
-        </label>
-
-
-        <input
-            id="eventDate"
-            type="date">
-
-
-
-
-
-        <label>
-            Tijd
-        </label>
-
-
-        <input
-            id="eventTime"
-            type="time">
-
-
-
-
-
-        <label class="checkbox">
-
-
-            <input
-                id="allDay"
-                type="checkbox">
-
-
-            Hele dag
-
-
-        </label>
-
-
-
-
-
-        <label>
-            Type afspraak
-        </label>
-
-
-
-        <select 
-            id="eventType">
-
-
-            <option value="werk">
-                🔴 Werken
-            </option>
-
-
-            <option value="vakantie">
-                🟢 Vakantie
-            </option>
-
-
-            <option value="activiteit">
-                🟩 Activiteit
-            </option>
-
-
-            <option value="verjaardag">
-                🟠 Verjaardag
-            </option>
-
-
-            <option value="feestdag">
-                🟡 Feestdag
-            </option>
-
-
-        </select>
-
-
-
-
-
-
-        <div class="modalButtons">
-
-
-            <button 
-                id="saveEvent">
-
-                Opslaan
-
-            </button>
-
-
-
-            <button
-                id="cancelEvent">
-
-                Annuleren
-
-            </button>
-
-
-        </div>
-
-
-    </div>
-
-
-</div>
-
-
-
-
-
-
-<!-- FullCalendar JavaScript -->
-<script 
+<script
 src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js">
 </script>
 
 
 
-<!-- Eigen script -->
-<script 
+
+<!-- Eigen JavaScript -->
+
+<script
 type="module"
 src="agenda.js">
 </script>
