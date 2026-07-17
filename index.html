@@ -2,9 +2,7 @@
 <html lang="nl">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Snejin Agenda - Inloggen</title>
@@ -14,63 +12,59 @@
     <link rel="icon" type="image/png" href="logo.png">
 
     <link rel="stylesheet" href="style.css">
-
 </head>
 
-<body class="login-background">
+<body class="login-page">
 
-    <div class="login-container">
+    <div class="login-overlay">
 
         <div class="login-card">
 
-            <img
-                src="logo.png"
-                alt="Snejin Agenda Logo"
-                class="logo">
+            <img src="logo.png"
+                 alt="Snejin Agenda"
+                 class="logo">
 
             <h1>Snejin Agenda</h1>
 
             <p class="subtitle">
-                Welkom! Log in om je familieagenda te openen.
+                Familieagenda • Altijd en overal beschikbaar
             </p>
 
-            <form id="loginForm">
+            <form id="loginForm" autocomplete="on">
 
-                <div class="input-group">
+                <div class="form-group">
 
                     <label for="email">
                         E-mailadres
                     </label>
 
                     <input
-                        type="email"
                         id="email"
-                        name="email"
-                        placeholder="naam@email.nl"
+                        type="email"
                         autocomplete="email"
+                        placeholder="naam@email.nl"
                         required>
 
                 </div>
 
-                <div class="input-group">
+                <div class="form-group">
 
                     <label for="password">
                         Wachtwoord
                     </label>
 
                     <input
-                        type="password"
                         id="password"
-                        name="password"
-                        placeholder="Voer je wachtwoord in"
+                        type="password"
                         autocomplete="current-password"
+                        placeholder="Voer je wachtwoord in"
                         required>
 
                 </div>
 
                 <button
-                    type="submit"
-                    id="loginButton">
+                    id="loginButton"
+                    type="submit">
 
                     🔐 Inloggen
 
@@ -78,7 +72,7 @@
 
             </form>
 
-            <div id="message"></div>
+            <div id="message" class="message"></div>
 
         </div>
 
