@@ -1,11 +1,25 @@
-// Firebase SDK
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+// =====================================================
+// SNEJIN AGENDA
+// firebase.js
+// =====================================================
 
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { initializeApp } 
+from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 
-// Firebase Config
+
+import { getAuth } 
+from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+
+import { getFirestore } 
+from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+
+
+
+// Firebase configuratie
+
 const firebaseConfig = {
 
     apiKey: "AIzaSyARKx42cvUgW9Qpf33DmBirfMdSERi8Jl8",
@@ -22,11 +36,18 @@ const firebaseConfig = {
 
 };
 
+
+
+
 // Firebase starten
+
 const app = initializeApp(firebaseConfig);
 
-// Exporteren
-export const auth = getAuth(app);
-export const db = getFirestore(app);
 
-console.log("✅ Firebase succesvol gestart");
+
+
+// Exporteren voor andere bestanden
+
+export const auth = getAuth(app);
+
+export const db = getFirestore(app);
