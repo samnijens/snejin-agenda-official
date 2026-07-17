@@ -1,7 +1,8 @@
 /* =======================================================
    SNEJIN AGENDA
-   style.css
+   COMPLETE STYLE.CSS
 ======================================================= */
+
 
 *{
     margin:0;
@@ -9,366 +10,414 @@
     box-sizing:border-box;
 }
 
-html,body{
+
+html,
+body{
+
     width:100%;
-    height:100%;
-    font-family:"Segoe UI",sans-serif;
+    min-height:100%;
+
+    font-family:
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
 }
 
-/* ===========================================
+
+/* =======================================================
    LOGIN PAGINA
-=========================================== */
+======================================================= */
+
 
 body.login-page{
 
-    background-image:
-        linear-gradient(
-            rgba(0,180,200,.25),
-            rgba(255,210,120,.25)
-        ),
-        url("default_background.jpg");
+    min-height:100vh;
+
+    background:
+
+    linear-gradient(
+        rgba(0,180,200,.25),
+        rgba(255,210,120,.25)
+    ),
+
+    url("default_background.jpg");
+
 
     background-size:cover;
+
     background-position:center;
+
     background-repeat:no-repeat;
+
     background-attachment:fixed;
 
 }
 
-/* donkere laag */
+
 
 .login-overlay{
 
-    width:100%;
+
     min-height:100vh;
 
+
     display:flex;
+
+
     justify-content:center;
+
+
     align-items:center;
 
-    padding:30px;
+
+    padding:20px;
+
 
 }
 
-/* login kaart */
+
 
 .login-card{
 
+
     width:100%;
+
+
     max-width:430px;
 
-    background:rgba(255,255,255,.90);
 
-    backdrop-filter:blur(18px);
+    background:
+
+    rgba(255,255,255,.92);
+
+
+    backdrop-filter:
+
+    blur(18px);
+
 
     border-radius:30px;
 
+
     padding:40px;
+
 
     text-align:center;
 
-    box-shadow:
-        0 25px 60px rgba(0,0,0,.30);
 
-    animation:fadeIn .6s ease;
+    box-shadow:
+
+    0 25px 60px rgba(0,0,0,.30);
+
+
+    animation:
+
+    fadeIn .6s ease;
+
 
 }
+
+
 
 .logo{
 
+
     width:140px;
+
 
     margin-bottom:15px;
 
+
 }
+
+
 
 .login-card h1{
 
+
     color:#008b8b;
+
 
     font-size:34px;
 
-    margin-bottom:8px;
+
+    margin-bottom:10px;
+
 
 }
+
+
 
 .subtitle{
 
+
     color:#666;
+
 
     margin-bottom:30px;
 
+
 }
 
-/* formulier */
+
 
 .form-group{
 
+
     text-align:left;
+
 
     margin-bottom:18px;
 
+
 }
+
+
 
 .form-group label{
 
+
     display:block;
+
 
     margin-bottom:8px;
 
+
     font-weight:600;
 
-    color:#444;
 
 }
+
+
 
 .form-group input{
 
+
     width:100%;
+
 
     height:52px;
 
+
     border:none;
 
+
     border-radius:16px;
+
 
     padding:0 16px;
 
+
     font-size:16px;
+
 
     background:#f2f7f8;
 
-    transition:.25s;
 
 }
+
+
 
 .form-group input:focus{
 
+
     outline:none;
+
 
     background:white;
 
+
     box-shadow:
-        0 0 0 3px rgba(0,168,150,.25);
+
+    0 0 0 3px rgba(0,168,150,.25);
+
 
 }
 
-/* knop */
+
 
 #loginButton{
 
+
     width:100%;
+
 
     height:52px;
 
+
     border:none;
+
 
     border-radius:16px;
 
-    margin-top:10px;
 
-    font-size:17px;
+    background:
 
-    font-weight:bold;
+    linear-gradient(
+        135deg,
+        #00A896,
+        #02C39A
+    );
+
 
     color:white;
 
-    cursor:pointer;
 
-    background:
-        linear-gradient(
-            135deg,
-            #00A896,
-            #02C39A
-        );
+    font-size:17px;
 
-    transition:.25s;
-
-}
-
-#loginButton:hover{
-
-    transform:translateY(-2px);
-
-    box-shadow:
-        0 12px 25px rgba(0,0,0,.20);
-
-}
-
-/* melding */
-
-.message{
-
-    min-height:24px;
-
-    margin-top:20px;
 
     font-weight:bold;
 
-    color:#d62828;
+
+    cursor:pointer;
+
 
 }
 
-/* animatie */
 
-@keyframes fadeIn{
 
-    from{
+.message{
 
-        opacity:0;
-        transform:translateY(20px);
 
-    }
+    margin-top:20px;
 
-    to{
 
-        opacity:1;
-        transform:translateY(0);
+    min-height:25px;
 
-    }
+
+    font-weight:bold;
+
 
 }
 
-/* tablet */
 
-@media(max-width:768px){
 
-    .login-card{
 
-        max-width:420px;
-
-        padding:35px;
-
-    }
-
-}
-
-/* mobiel */
-
-@media(max-width:480px){
-
-    .login-overlay{
-
-        padding:20px;
-
-    }
-
-    .login-card{
-
-        padding:25px;
-
-        border-radius:24px;
-
-    }
-
-    .logo{
-
-        width:100px;
-
-    }
-
-    .login-card h1{
-
-        font-size:28px;
-
-    }
-
-    .subtitle{
-
-        font-size:14px;
-
-    }
-
-}
-/* =====================================================
+/* =======================================================
    AGENDA PAGINA
-===================================================== */
+======================================================= */
+
 
 body.agenda-page{
 
-    margin:0;
 
     min-height:100vh;
 
+
     background:
-        linear-gradient(
-            rgba(0,170,190,.20),
-            rgba(255,220,120,.20)
-        ),
-        url("main_background.jpg");
+
+
+    linear-gradient(
+        rgba(0,170,190,.20),
+        rgba(255,220,120,.20)
+    ),
+
+
+    url("main_background.jpg");
+
 
     background-size:cover;
+
+
     background-position:center;
-    background-repeat:no-repeat;
+
+
     background-attachment:fixed;
+
 
 }
 
-/* ===========================
-   HEADER
-=========================== */
+
+
+/* HEADER */
+
 
 .topbar{
 
+
     width:100%;
 
+
     display:flex;
+
 
     justify-content:space-between;
 
+
     align-items:center;
 
-    gap:20px;
 
     padding:18px 30px;
 
-    background:rgba(255,255,255,.88);
+
+    background:
+
+    rgba(255,255,255,.88);
+
 
     backdrop-filter:blur(15px);
 
-    box-shadow:0 5px 25px rgba(0,0,0,.12);
+
+    box-shadow:
+
+    0 5px 25px rgba(0,0,0,.12);
+
 
 }
+
+
 
 .logo-area{
 
+
     display:flex;
+
 
     align-items:center;
 
+
     gap:15px;
 
+
 }
+
+
 
 .logo-small{
 
+
     width:70px;
 
-    height:auto;
 
 }
+
+
 
 .logo-area h1{
 
+
     color:#008b8b;
+
 
     font-size:30px;
 
-    margin:0;
 
 }
+
+
 
 .logo-area span{
 
+
     color:#666;
 
-    font-size:14px;
 
 }
+/* =======================================================
+   TOP BUTTONS
+======================================================= */
 
-/* ===========================
-   KNOPPEN
-=========================== */
 
 .top-buttons{
 
@@ -380,162 +429,740 @@ body.agenda-page{
 
 }
 
+
+
 .top-buttons input{
+
 
     width:260px;
 
+
     height:46px;
+
 
     border:none;
 
-    border-radius:14px;
+
+    border-radius:15px;
+
 
     padding:0 15px;
 
+
     font-size:15px;
 
-    background:#f2f6f7;
+
+    background:#f2f7f8;
+
 
 }
+
+
 
 .top-buttons button{
 
+
     border:none;
 
-    border-radius:14px;
+
+    border-radius:15px;
+
 
     padding:12px 18px;
 
-    background:linear-gradient(135deg,#00A896,#02C39A);
+
+    background:
+
+    linear-gradient(
+        135deg,
+        #00A896,
+        #02C39A
+    );
+
 
     color:white;
 
+
     font-weight:bold;
+
 
     cursor:pointer;
 
+
     transition:.25s;
 
+
 }
+
+
 
 .top-buttons button:hover{
 
+
     transform:translateY(-2px);
+
 
 }
 
-/* ===========================
+
+
+/* =======================================================
    KALENDER
-=========================== */
+======================================================= */
+
 
 main{
 
+
     width:100%;
+
 
     display:flex;
 
+
     justify-content:center;
+
 
     padding:35px;
 
+
 }
+
+
 
 .calendar-card{
 
+
     width:100%;
+
 
     max-width:1600px;
 
-    background:rgba(255,255,255,.90);
+
+    background:
+
+    rgba(255,255,255,.92);
+
 
     backdrop-filter:blur(18px);
 
-    border-radius:28px;
+
+    border-radius:30px;
+
 
     padding:25px;
 
-    box-shadow:0 20px 50px rgba(0,0,0,.18);
+
+    box-shadow:
+
+    0 20px 50px rgba(0,0,0,.20);
+
 
 }
+
+
 
 #calendar{
 
+
     width:100%;
+
 
 }
 
-/* FullCalendar */
+
+
+/* FullCalendar uiterlijk */
+
 
 .fc{
 
+
     background:white;
 
-    border-radius:20px;
+
+    border-radius:22px;
+
 
     padding:15px;
 
+
 }
+
+
 
 .fc-toolbar-title{
 
-    font-size:30px !important;
 
     color:#008b8b;
 
+
+    font-size:28px !important;
+
+
 }
+
+
 
 .fc-button{
 
+
+    background:#00A896 !important;
+
+
     border:none !important;
+
 
     border-radius:12px !important;
 
-}
 
-/* ===========================
-   MOBIEL
-=========================== */
+    padding:8px 14px !important;
 
-@media(max-width:900px){
-
-.topbar{
-
-    flex-direction:column;
-
-    align-items:stretch;
 
 }
 
-.logo-area{
+
+
+.fc-button:hover{
+
+
+    background:#007f72 !important;
+
+
+}
+
+
+
+.fc-daygrid-day-number{
+
+
+    color:#444;
+
+
+}
+
+
+
+.fc-event{
+
+
+    border:none !important;
+
+
+    border-radius:8px !important;
+
+
+    padding:4px !important;
+
+
+}
+
+
+
+/* =======================================================
+   NIEUWE AFSPRAAK KNOP
+======================================================= */
+
+
+.floatingButton{
+
+
+    position:fixed;
+
+
+    right:30px;
+
+
+    bottom:30px;
+
+
+    width:65px;
+
+
+    height:65px;
+
+
+    border:none;
+
+
+    border-radius:50%;
+
+
+    background:
+
+    linear-gradient(
+        135deg,
+        #00A896,
+        #02C39A
+    );
+
+
+    color:white;
+
+
+    font-size:30px;
+
+
+    cursor:pointer;
+
+
+    box-shadow:
+
+    0 10px 30px rgba(0,0,0,.25);
+
+
+    z-index:100;
+
+
+}
+
+
+
+.floatingButton:hover{
+
+
+    transform:scale(1.08);
+
+
+}
+
+
+
+/* =======================================================
+   AFSPRAAK POPUP
+======================================================= */
+
+
+.modal{
+
+
+    display:none;
+
+
+    position:fixed;
+
+
+    inset:0;
+
+
+    background:
+
+    rgba(0,0,0,.45);
+
 
     justify-content:center;
 
+
+    align-items:center;
+
+
+    padding:20px;
+
+
+    z-index:1000;
+
+
 }
 
-.top-buttons{
 
-    flex-wrap:wrap;
 
-    justify-content:center;
+.modal-content{
 
-}
-
-.top-buttons input{
 
     width:100%;
 
+
+    max-width:450px;
+
+
+    background:white;
+
+
+    border-radius:30px;
+
+
+    padding:35px;
+
+
+    box-shadow:
+
+    0 25px 60px rgba(0,0,0,.35);
+
+
 }
 
-main{
 
-    padding:15px;
+
+.modal-content h2{
+
+
+    text-align:center;
+
+
+    color:#008b8b;
+
+
+    margin-bottom:20px;
+
 
 }
 
-.calendar-card{
+
+
+.modal-content label{
+
+
+    display:block;
+
+
+    margin-top:12px;
+
+
+    margin-bottom:5px;
+
+
+    font-weight:600;
+
+
+}
+
+
+
+.modal-content input,
+.modal-content textarea,
+.modal-content select{
+
+
+    width:100%;
+
+
+    border:none;
+
+
+    background:#f2f7f8;
+
+
+    border-radius:15px;
+
 
     padding:12px;
 
+
+    font-size:15px;
+
+
 }
+
+
+
+.modal-content textarea{
+
+
+    height:100px;
+
+
+    resize:none;
+
+
+}
+
+
+
+.modalButtons{
+
+
+    display:flex;
+
+
+    gap:10px;
+
+
+    margin-top:20px;
+
+
+}
+
+
+
+.modalButtons button{
+
+
+    flex:1;
+
+
+    border:none;
+
+
+    border-radius:15px;
+
+
+    padding:13px;
+
+
+    color:white;
+
+
+    cursor:pointer;
+
+
+    font-weight:bold;
+
+
+}
+
+
+
+#saveEvent{
+
+
+    background:#00A896;
+
+
+}
+
+
+
+#cancelEvent{
+
+
+    background:#e63946;
+
+
+}
+
+
+
+/* =======================================================
+   DONKERE MODUS VOORBEREIDING
+======================================================= */
+
+
+body.dark{
+
+
+    background:#121212;
+
+
+}
+
+
+
+body.dark .calendar-card,
+body.dark .login-card,
+body.dark .modal-content{
+
+
+    background:
+
+    rgba(30,30,30,.92);
+
+
+    color:white;
+
+
+}
+
+
+
+body.dark .fc{
+
+
+    background:#222;
+
+
+}
+
+
+
+/* =======================================================
+   RESPONSIVE
+======================================================= */
+
+
+@media(max-width:900px){
+
+
+    .topbar{
+
+
+        flex-direction:column;
+
+
+        gap:15px;
+
+
+    }
+
+
+
+    .top-buttons{
+
+
+        width:100%;
+
+
+        flex-wrap:wrap;
+
+
+        justify-content:center;
+
+
+    }
+
+
+
+    .top-buttons input{
+
+
+        width:100%;
+
+
+    }
+
+
+
+    main{
+
+
+        padding:15px;
+
+
+    }
+
+
+
+    .calendar-card{
+
+
+        padding:12px;
+
+
+    }
+
+
+
+}
+
+
+
+@media(max-width:600px){
+
+
+    .login-card{
+
+
+        padding:25px;
+
+
+        border-radius:24px;
+
+
+    }
+
+
+
+    .logo{
+
+
+        width:110px;
+
+
+    }
+
+
+
+    .login-card h1{
+
+
+        font-size:26px;
+
+
+    }
+
+
+
+    .logo-area h1{
+
+
+        font-size:24px;
+
+
+    }
+
+
+
+    .floatingButton{
+
+
+        width:55px;
+
+
+        height:55px;
+
+
+        right:20px;
+
+
+        bottom:20px;
+
+
+    }
+
+
+
+    .modal-content{
+
+
+        padding:25px;
+
+
+    }
+
+
+
+    .modalButtons{
+
+
+        flex-direction:column;
+
+
+    }
+
+
+
+}
+
+
+/* =======================================================
+   ANIMATIE
+======================================================= */
+
+
+@keyframes fadeIn{
+
+
+    from{
+
+
+        opacity:0;
+
+
+        transform:translateY(20px);
+
+
+    }
+
+
+    to{
+
+
+        opacity:1;
+
+
+        transform:translateY(0);
+
+
+    }
+
 
 }
