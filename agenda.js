@@ -1,11 +1,10 @@
 // =====================================================
 // SNEJIN AGENDA
-// agenda.js
+// agenda.js - basis versie
 // =====================================================
 
 
-import { auth, db } from "./firebase.js";
-
+import { auth } from "./firebase.js";
 
 import {
     onAuthStateChanged,
@@ -13,54 +12,55 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
 
+// ELEMENTEN
 
-import {
-    collection,
-    addDoc,
-    getDocs,
-    deleteDoc,
-    doc
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-
+const calendarElement = document.getElementById("calendar");
+const themeButton = document.getElementById("themeButton");
+const logoutButton = document.getElementById("logoutButton");
 
 
 // =====================================================
 // LOGIN CONTROLE
 // =====================================================
 
+onAuthStateChanged(auth, (user)=>{
 
-onAuthStateChanged(auth, (user) => {
-
-
-    if (!user) {
+    if(!user){
 
         window.location.href = "index.html";
 
     }
 
-
 });
 
 
-
-
 // =====================================================
-// ELEMENTEN
+// UITLOGGEN
 // =====================================================
 
+if(logoutButton){
 
-const calendarElement = document.getElementById("calendar");
+    logoutButton.addEventListener("click", async ()=>{
 
-const themeButton = document.getElementById("themeButton");
+        try{
 
-const logoutButton = document.getElementById("logoutButton");
+            await signOut(auth);
 
-const searchInput = document.getElementById("search");
+            window.location.href="index.html";
 
-const addEventButton = document.getElementById("addEventButton");
+        }
+        catch(error){
 
+            console.error(
+                "Uitloggen mislukt:",
+                error
+            );
 
+        }
 
+    });
+
+}
 
 
 // =====================================================
@@ -68,43 +68,31 @@ const addEventButton = document.getElementById("addEventButton");
 // =====================================================
 
 
-
-function updateThemeButton(){
-
-
-    if(document.body.classList.contains("dark")){
+function updateThemeIcon(){
 
 
-        // donkere modus actief
+    if(
+        document.body.classList.contains("dark")
+    ){
+
+        // Donkere modus actief
         // knop wordt zon
 
-
-        themeButton.textContent = "☀️";
-
-
-        themeButton.title =
-        "Schakel naar lichte modus";
+        themeButton.textContent="☀️";
 
 
-    } else {
+    }
+    else{
 
-
-        // lichte modus actief
+        // Lichte modus actief
         // knop wordt maan
 
-
-        themeButton.textContent = "🌙";
-
-
-        themeButton.title =
-        "Schakel naar donkere modus";
-
+        themeButton.textContent="🌙";
 
     }
 
 
 }
-
 
 
 
@@ -112,253 +100,136 @@ const savedTheme =
 localStorage.getItem("theme");
 
 
-
-if(savedTheme === "dark"){
+if(savedTheme==="dark"){
 
     document.body.classList.add("dark");
 
 }
 
 
-updateThemeButton();
+if(themeButton){
 
+    updateThemeIcon();
 
 
+    themeButton.addEventListener(
+        "click",
+        ()=>{
 
 
-themeButton.addEventListener(
-"click",
-()=>{
+            document.body.classList.toggle("dark");
 
 
-    document.body.classList.toggle("dark");
+            if(
+                document.body.classList.contains("dark")
+            ){
 
+                localStorage.setItem(
+                    "theme",
+                    "dark"
+                );
 
+            }
+            else{
 
-    if(
-        document.body.classList.contains("dark")
-    ){
+                localStorage.setItem(
+                    "theme",
+                    "light"
+                );
 
+            }
 
-        localStorage.setItem(
-            "theme",
-            "dark"
-        );
 
-
-    }else{
-
-
-        localStorage.setItem(
-            "theme",
-            "light"
-        );
-
-
-    }
-
-
-    updateThemeButton();
-
-
-});
-
-
-
-
-
-// =====================================================
-// UITLOGGEN
-// =====================================================
-
-
-logoutButton.addEventListener(
-"click",
-async ()=>{
-
-
-    await signOut(auth);
-
-
-    window.location.href =
-    "index.html";
-
-
-});
-
-
-
-
-// =====================================================
-// FULLCALENDAR
-// =====================================================
-
-
-
-let calendar;
-
-
-
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-
-calendar =
-new FullCalendar.Calendar(
-calendarElement,
-{
-
-
-    initialView:
-    "dayGridMonth",
-
-
-    locale:
-    "nl",
-
-
-    firstDay:
-    1,
-
-
-    selectable:true,
-
-
-    editable:true,
-
-
-    height:"auto",
-
-
-
-    headerToolbar:{
-
-
-        left:
-        "prev,next today",
-
-
-        center:
-        "title",
-
-
-        right:
-        "dayGridMonth,timeGridWeek,timeGridDay,listYear"
-
-
-    },
-
-
-    buttonText:{
-
-
-        today:
-        "Vandaag",
-
-
-        month:
-        "Maand",
-
-
-        week:
-        "Week",
-
-
-        day:
-        "Dag",
-
-
-        list:
-        "Agenda"
-
-
-    },
-
-
-
-    events:[]
-
-
-
-});
-
-
-
-calendar.render();
-
-
-
-});
-
-
-
-
-// =====================================================
-// ZOEKEN
-// =====================================================
-
-
-searchInput.addEventListener(
-"input",
-()=>{
-
-
-    const value =
-    searchInput.value.toLowerCase();
-
-
-
-    document
-    .querySelectorAll(".fc-event")
-    .forEach(event=>{
-
-
-        if(
-            event.textContent
-            .toLowerCase()
-            .includes(value)
-        ){
-
-
-            event.style.display =
-            "";
-
-
-        }else{
-
-
-            event.style.display =
-            "none";
+            updateThemeIcon();
 
 
         }
+    );
 
-
-    });
-
-
-
-});
-
-
+}
 
 
 
 // =====================================================
-// NIEUWE AFSPRAAK KNOP
+// FULLCALENDAR STARTEN
 // =====================================================
 
 
-
-addEventButton.addEventListener(
-"click",
-()=>{
+if(calendarElement){
 
 
-    alert(
-    "Afspraak toevoegen komt in de volgende stap."
+    const calendar =
+    new FullCalendar.Calendar(
+        calendarElement,
+        {
+
+            initialView:
+            "dayGridMonth",
+
+
+            locale:
+            "nl",
+
+
+            firstDay:
+            1,
+
+
+            height:
+            "auto",
+
+
+            headerToolbar:{
+
+                left:
+                "prev,next today",
+
+                center:
+                "title",
+
+                right:
+                "dayGridMonth,timeGridWeek,timeGridDay,listYear"
+
+            },
+
+
+            buttonText:{
+
+                today:
+                "Vandaag",
+
+                month:
+                "Maand",
+
+                week:
+                "Week",
+
+                day:
+                "Dag",
+
+                list:
+                "Agenda"
+
+            },
+
+
+            events:[]
+
+
+        }
     );
 
 
-});
+    calendar.render();
+
+
+}
+else{
+
+
+    console.error(
+        "Kalender element #calendar bestaat niet."
+    );
+
+
+}
