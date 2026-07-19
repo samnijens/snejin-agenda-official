@@ -18,7 +18,6 @@
       <span>Familieagenda</span>
     </div>
   </div>
-
   <div class="top-buttons">
     <input id="search" type="search" placeholder="🔍 Zoek afspraak">
     <button id="themeButton" type="button">🌙</button>
@@ -34,37 +33,69 @@
 
 <button id="addEventButton" class="floatingButton" type="button">+</button>
 
-<div id="eventModal" class="modal" style="display:none;">
+<!-- VIEW MODAL - Info bekijken -->
+<div id="viewModal" class="modal">
+  <div class="modal-content view-content">
+    <button class="modal-close" id="viewCloseX">✕</button>
+    <div id="viewCategoryBadge" class="category-badge">🔴 Werken</div>
+    <h2 id="viewTitle">Afspraak titel</h2>
+    <div class="view-meta">
+      <span id="viewDate">📅 12 juli 2026</span>
+      <span id="viewTime">⏰ 14:00</span>
+    </div>
+    <p id="viewDescription" class="view-desc">Geen omschrijving.</p>
+    <div class="modal-buttons">
+      <button id="viewEditButton" class="btn-primary">✏️ Bewerken</button>
+      <button id="viewDeleteButton" class="btn-danger">🗑️ Verwijderen</button>
+      <button id="viewCloseButton" class="btn-secondary">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL - Maken / Bewerken -->
+<div id="eventModal" class="modal">
   <div class="modal-content">
-    <h2>Nieuwe afspraak</h2>
+    <button class="modal-close" id="formCloseX">✕</button>
+    <h2 id="formTitle">Nieuwe afspraak</h2>
+    <p class="form-subtitle">Voeg een nieuwe afspraak toe voor de hele familie.</p>
 
-    <label>Naam</label>
-    <input id="eventTitle" type="text">
+    <div class="form-group-modal">
+      <label>Naam afspraak</label>
+      <input id="eventTitle" type="text" placeholder="Bijv. Verjaardag mama">
+    </div>
 
-    <label>Omschrijving</label>
-    <textarea id="eventDescription"></textarea>
+    <div class="form-group-modal">
+      <label>Omschrijving</label>
+      <textarea id="eventDescription" placeholder="Waar, wat meenemen..."></textarea>
+    </div>
 
-    <label>Datum</label>
-    <input id="eventDate" type="date">
+    <div class="form-row">
+      <div class="form-group-modal">
+        <label>Datum</label>
+        <input id="eventDate" type="date">
+      </div>
+      <div class="form-group-modal">
+        <label>Tijd</label>
+        <input id="eventTime" type="time">
+      </div>
+    </div>
 
-    <label>Tijd</label>
-    <input id="eventTime" type="time">
+    <label class="checkbox-label"><input id="allDay" type="checkbox"> Hele dag</label>
 
-    <label><input id="allDay" type="checkbox"> Hele dag</label>
-
-    <label>Categorie</label>
-    <select id="eventType">
-      <option value="work">🔴 Werken</option>
-      <option value="holiday">🟢 Vakantie</option>
-      <option value="activity">🟩 Activiteit</option>
-      <option value="birthday">🟠 Verjaardag</option>
-      <option value="holidayofficial">🟡 Officiële feestdag</option>
-    </select>
+    <div class="form-group-modal">
+      <label>Categorie</label>
+      <select id="eventType">
+        <option value="work">🔴 Werken</option>
+        <option value="holiday">🟢 Vakantie</option>
+        <option value="activity">🟩 Activiteit</option>
+        <option value="birthday">🟠 Verjaardag</option>
+        <option value="holidayofficial">🟡 Officiële feestdag</option>
+      </select>
+    </div>
 
     <div class="modal-buttons">
-      <button id="saveEventButton">Opslaan</button>
-      <button id="deleteEventButton">Verwijderen</button>
-      <button id="cancelEventButton">Annuleren</button>
+      <button id="saveEventButton" class="btn-primary">💾 Opslaan</button>
+      <button id="cancelEventButton" class="btn-secondary">Annuleren</button>
     </div>
   </div>
 </div>
