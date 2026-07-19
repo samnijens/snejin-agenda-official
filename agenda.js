@@ -87,7 +87,7 @@ const categoryLabels = {
     activity:        "🟩 Activiteit",
     birthday:        "🟠 Verjaardag",
     holidayofficial: "🟡 Officiële feestdag"
-    other: "🟡 Overig"
+    other: "⚫ Overig"
 };
 
 function getEventColor(category) {
