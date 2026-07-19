@@ -6,7 +6,6 @@
 <title>Snejin Agenda</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
 </head>
 <body class="agenda-page">
 
@@ -18,6 +17,7 @@
       <span>Familieagenda</span>
     </div>
   </div>
+
   <div class="top-buttons">
     <input id="search" type="search" placeholder="🔍 Zoek afspraak">
     <button id="themeButton" type="button">🌙</button>
@@ -31,71 +31,83 @@
   </section>
 </main>
 
-<button id="addEventButton" class="floatingButton" type="button">+</button>
+<button id="addEventButton" class="floatingButton" type="button" title="Nieuwe afspraak">+</button>
 
-<!-- VIEW MODAL - Info bekijken -->
-<div id="viewModal" class="modal">
+<!-- ============ INFO / BEKIJKEN MODAL ============ -->
+<div id="eventViewModal" class="modal">
   <div class="modal-content view-content">
-    <button class="modal-close" id="viewCloseX">✕</button>
-    <div id="viewCategoryBadge" class="category-badge">🔴 Werken</div>
-    <h2 id="viewTitle">Afspraak titel</h2>
+    <button class="modal-close" id="closeViewX" type="button" aria-label="Sluiten">&times;</button>
+
+    <span class="view-badge" id="viewBadge">Categorie</span>
+    <h2 id="viewTitle">Afspraak</h2>
+
     <div class="view-meta">
-      <span id="viewDate">📅 12 juli 2026</span>
-      <span id="viewTime">⏰ 14:00</span>
+      <div class="view-row"><span class="view-icon">📅</span><span id="viewDate">-</span></div>
+      <div class="view-row"><span class="view-icon">⏰</span><span id="viewTime">-</span></div>
+      <div class="view-row"><span class="view-icon">🏷️</span><span id="viewCategoryName">-</span></div>
     </div>
-    <p id="viewDescription" class="view-desc">Geen omschrijving.</p>
+
+    <div class="view-desc">
+      <h3>Omschrijving</h3>
+      <p id="viewDescription">Geen omschrijving.</p>
+    </div>
+
     <div class="modal-buttons">
-      <button id="viewEditButton" class="btn-primary">✏️ Bewerken</button>
-      <button id="viewDeleteButton" class="btn-danger">🗑️ Verwijderen</button>
-      <button id="viewCloseButton" class="btn-secondary">Sluiten</button>
+      <button id="editFromViewButton" class="btn btn-edit" type="button">✏️ Bewerken</button>
+      <button id="deleteFromViewButton" class="btn btn-delete" type="button">🗑️ Verwijderen</button>
+      <button id="closeViewButton" class="btn btn-cancel" type="button">Sluiten</button>
     </div>
   </div>
 </div>
 
-<!-- EDIT MODAL - Maken / Bewerken -->
+<!-- ============ NIEUW / BEWERKEN MODAL ============ -->
 <div id="eventModal" class="modal">
-  <div class="modal-content">
-    <button class="modal-close" id="formCloseX">✕</button>
+  <div class="modal-content form-content">
+    <button class="modal-close" id="closeFormX" type="button" aria-label="Sluiten">&times;</button>
+
     <h2 id="formTitle">Nieuwe afspraak</h2>
-    <p class="form-subtitle">Voeg een nieuwe afspraak toe voor de hele familie.</p>
 
-    <div class="form-group-modal">
-      <label>Naam afspraak</label>
-      <input id="eventTitle" type="text" placeholder="Bijv. Verjaardag mama">
-    </div>
-
-    <div class="form-group-modal">
-      <label>Omschrijving</label>
-      <textarea id="eventDescription" placeholder="Waar, wat meenemen..."></textarea>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group-modal">
-        <label>Datum</label>
-        <input id="eventDate" type="date">
+    <div class="form-body">
+      <div class="form-group">
+        <label for="eventTitle">Naam</label>
+        <input id="eventTitle" type="text" placeholder="Bijv. Tandarts">
       </div>
-      <div class="form-group-modal">
-        <label>Tijd</label>
-        <input id="eventTime" type="time">
+
+      <div class="form-group">
+        <label for="eventDescription">Omschrijving</label>
+        <textarea id="eventDescription" rows="3" placeholder="Extra informatie..."></textarea>
       </div>
-    </div>
 
-    <label class="checkbox-label"><input id="allDay" type="checkbox"> Hele dag</label>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="eventDate">Datum</label>
+          <input id="eventDate" type="date">
+        </div>
+        <div class="form-group">
+          <label for="eventTime">Tijd</label>
+          <input id="eventTime" type="time">
+        </div>
+      </div>
 
-    <div class="form-group-modal">
-      <label>Categorie</label>
-      <select id="eventType">
-        <option value="work">🔴 Werken</option>
-        <option value="holiday">🟢 Vakantie</option>
-        <option value="activity">🟩 Activiteit</option>
-        <option value="birthday">🟠 Verjaardag</option>
-        <option value="holidayofficial">🟡 Officiële feestdag</option>
-      </select>
+      <div class="form-group">
+        <label for="eventType">Categorie</label>
+        <select id="eventType">
+          <option value="work">🔴 Werken</option>
+          <option value="holiday">🟢 Vakantie</option>
+          <option value="activity">🟩 Activiteit</option>
+          <option value="birthday">🟠 Verjaardag</option>
+          <option value="holidayofficial">🟡 Officiële feestdag</option>
+        </select>
+      </div>
+
+      <label class="checkbox-line">
+        <input id="allDay" type="checkbox"> Hele dag
+      </label>
     </div>
 
     <div class="modal-buttons">
-      <button id="saveEventButton" class="btn-primary">💾 Opslaan</button>
-      <button id="cancelEventButton" class="btn-secondary">Annuleren</button>
+      <button id="saveEventButton" class="btn btn-save" type="button">💾 Opslaan</button>
+      <button id="cancelEventButton" class="btn btn-cancel" type="button">Annuleren</button>
     </div>
   </div>
 </div>
