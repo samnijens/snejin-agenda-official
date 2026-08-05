@@ -126,7 +126,9 @@ function formatTimeNL(d) {
 // =====================================================
 // MODAL: FORM (nieuw + bewerken)
 // =====================================================
-
+if (doneFromViewButton) {
+    doneFromViewButton.addEventListener("click", markEventAsDone);
+}
 function resetForm() {
     selectedEventId       = null;
     titleInput.value      = "";
