@@ -67,6 +67,7 @@ let currentViewEvent  = null;   // FullCalendar event dat bekeken wordt
 let searchTerm        = "";
 
 const appointmentsRef = collection(db, "appointments");
+const completedAppointmentsRef = collection(db, "completedAppointments");
 
 
 // =====================================================
@@ -354,6 +355,32 @@ if (editFromViewButton) {
 // =====================================================
 
 async function deleteCurrentEvent() {
+async function markEventAsDone() {
+    if (!currentViewEvent) return;
+
+    try {
+        const event = currentViewEvent;
+
+        await addDoc(completedAppointmentsRef, {
+            title: event.title,
+            description: event.extendedProps.description || "",
+            start: event.startStr,
+            allDay: event.allDay,
+            category: event.extendedProps.category || "activity",
+            completedAt: new Date().toISOString()
+        });
+
+        await deleteDoc(doc(db, "appointments", event.id));
+
+        closeViewModal();
+        await loadAppointments();
+
+        alert("✅ Afspraak is verplaatst naar 'Gedaan & Geweest'.");
+    } catch (error) {
+        console.error(error);
+        alert("Kon afspraak niet afronden.");
+    }
+}
     const id = currentViewEvent ? currentViewEvent.id : selectedEventId;
 
     if (!id) {
