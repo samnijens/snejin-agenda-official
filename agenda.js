@@ -44,6 +44,7 @@ const allDayInput      = document.getElementById("allDay");
 const categoryInput    = document.getElementById("eventType");
 
 // View modal
+const doneFromViewButton = document.getElementById("doneFromViewButton");
 const viewModal          = document.getElementById("eventViewModal");
 const viewBadge          = document.getElementById("viewBadge");
 const viewTitle          = document.getElementById("viewTitle");
