@@ -1743,6 +1743,13 @@ body.agenda-page {
 .btn-delete { background: linear-gradient(135deg, #ff6b6b, #d62828); }
 .btn-cancel { background: #e2e6ea; color: #444; }
 .btn-cancel:hover { filter: none; background: #d3d8dd; }
+.btn-done{
+    background:linear-gradient(135deg,#2ecc71,#27ae60);
+}
+
+.btn-done:hover{
+    filter:brightness(1.05);
+}
 
 /* ---- DONKER MODUS ---- */
 body.dark .modal-content {
