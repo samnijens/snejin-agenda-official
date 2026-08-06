@@ -1,5 +1,5 @@
 // ===============================
-// IMPORTS (pas aan indien nodig)
+// IMPORTS
 // ===============================
 import { db } from "./firebase.js";
 import {
@@ -19,6 +19,37 @@ let currentViewEvent = null;
 
 const appointmentsRef = collection(db, "appointments");
 const completedAppointmentsRef = collection(db, "completedAppointments");
+
+// ===============================
+// 🎨 CATEGORIE DATA
+// ===============================
+const categoryConfig = {
+work: {
+label: "🔴 Werken",
+color: "#ff3b3b",
+emoji: "🔴"
+},
+holiday: {
+label: "🟢 Vakantie",
+color: "#28a745",
+emoji: "🟢"
+},
+activity: {
+label: "🟩 Activiteit",
+color: "#198754",
+emoji: "🟩"
+},
+birthday: {
+label: "🟠 Verjaardag",
+color: "#fd7e14",
+emoji: "🎂"
+},
+holidayofficial: {
+label: "🟡 Feestdag",
+color: "#ffc107",
+emoji: "🟡"
+}
+};
 
 // ===============================
 // INIT CALENDAR
@@ -57,14 +88,26 @@ const snapshot = await getDocs(appointmentsRef);
 snapshot.forEach(docSnap => {
     const data = docSnap.data();
 
+    const category = data.category || "activity";
+    const config = categoryConfig[category] || {};
+
+    const color = config.color || "#6c757d";
+    const emoji = config.emoji || "";
+
     calendar.addEvent({
         id: docSnap.id,
-        title: data.title,
+
+        // 🎉 EMOJI IN TITEL
+        title: `${emoji} ${data.title}`,
+
         start: data.start,
         allDay: data.allDay,
+
+        color: color,
+
         extendedProps: {
-            description: data.description,
-            category: data.category
+            description: data.description || "",
+            category: category
         }
     });
 });
@@ -72,12 +115,13 @@ snapshot.forEach(docSnap => {
 }
 
 // ===============================
-// ADD EVENT
+// SAVE EVENT
 // ===============================
 async function saveEvent() {
 const title = document.getElementById("title").value;
 const date = document.getElementById("date").value;
 const description = document.getElementById("description").value;
+const category = document.getElementById("category").value;
 
 if (!title || !date) {
     alert("Vul titel en datum in.");
@@ -89,7 +133,7 @@ await addDoc(appointmentsRef, {
     start: date,
     description,
     allDay: true,
-    category: "activity"
+    category
 });
 
 closeFormModal();
@@ -98,7 +142,7 @@ await loadAppointments();
 }
 
 // ===============================
-// ✅ FIX: NIET MEER GENEST!
+// AFSPRAAK AFRONDEN
 // ===============================
 async function markEventAsDone() {
 if (!currentViewEvent) return;
@@ -120,7 +164,7 @@ try {
     closeViewModal();
     await loadAppointments();
 
-    alert("✅ Afspraak afgerond!");
+    alert("Afspraak afgerond!");
 } catch (error) {
     console.error(error);
     alert("Fout bij afronden.");
@@ -152,7 +196,7 @@ try {
 }
 
 // ===============================
-// MODALS (basic)
+// MODALS
 // ===============================
 function openFormModal(date) {
 document.getElementById("formModal").style.display = "block";
@@ -178,7 +222,7 @@ document.getElementById("viewModal").style.display = "none";
 }
 
 // ===============================
-// BUTTONS KOPPELEN
+// BUTTONS
 // ===============================
 document.getElementById("saveBtn")?.addEventListener("click", saveEvent);
 document.getElementById("deleteBtn")?.addEventListener("click", deleteCurrentEvent);
