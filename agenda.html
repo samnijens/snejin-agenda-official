@@ -5,8 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Snejin Agenda</title>
 <link rel="icon" href="logo.png">
+
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="agenda-page">
 
 <header class="topbar">
@@ -20,31 +25,57 @@
 
   <div class="top-buttons">
     <input id="search" type="search" placeholder="🔍 Zoek afspraak">
+
+    <!-- 🌙 Dark mode -->
     <button id="themeButton" type="button">🌙</button>
+
+    <!-- 🔔 Notificaties -->
+    <button id="notifToggle" type="button">🔔</button>
+
+    <!-- ⏱️ Tijd keuze -->
+    <select id="notifyTime">
+      <option value="5">5 min</option>
+      <option value="10">10 min</option>
+      <option value="30">30 min</option>
+    </select>
+
+    <!-- 🚪 Logout -->
     <button id="logoutButton" type="button">🚪 Uitloggen</button>
   </div>
 </header>
 
 <main>
+
+  <!-- 📅 Kalender -->
   <section class="calendar-card">
     <div id="calendar"></div>
   </section>
+
+  <!-- 📂 Archief -->
+  <section class="calendar-card">
+    <h2>📂 Afgeronde / Oude afspraken</h2>
+    <ul id="completedList" class="completed-list"></ul>
+  </section>
+
 </main>
 
+<!-- ➕ Floating knop -->
 <button id="addEventButton" class="floatingButton" type="button" title="Nieuwe afspraak">+</button>
 
-<!-- ============ INFO / BEKIJKEN MODAL ============ -->
+<!-- ===============================
+👁️ VIEW MODAL
+================================ -->
 <div id="eventViewModal" class="modal">
   <div class="modal-content view-content">
-    <button class="modal-close" id="closeViewX" type="button" aria-label="Sluiten">&times;</button>
+    <button class="modal-close" id="closeViewX">&times;</button>
 
     <span class="view-badge" id="viewBadge">Categorie</span>
     <h2 id="viewTitle">Afspraak</h2>
 
     <div class="view-meta">
-      <div class="view-row"><span class="view-icon">📅</span><span id="viewDate">-</span></div>
-      <div class="view-row"><span class="view-icon">⏰</span><span id="viewTime">-</span></div>
-      <div class="view-row"><span class="view-icon">🏷️</span><span id="viewCategoryName">-</span></div>
+      <div class="view-row"><span>📅</span><span id="viewDate">-</span></div>
+      <div class="view-row"><span>⏰</span><span id="viewTime">-</span></div>
+      <div class="view-row"><span>🏷️</span><span id="viewCategoryName">-</span></div>
     </div>
 
     <div class="view-desc">
@@ -53,18 +84,20 @@
     </div>
 
     <div class="modal-buttons">
-      <button id="doneFromViewButton" class="btn btn-done" type="button">✅ Gedaan</button>
-      <button id="editFromViewButton" class="btn btn-edit" type="button">✏️ Bewerken</button>
-      <button id="deleteFromViewButton" class="btn btn-delete" type="button">🗑️ Verwijderen</button>
-      <button id="closeViewButton" class="btn btn-cancel" type="button">Sluiten</button>
+      <button id="doneFromViewButton" class="btn btn-done">✅ Gedaan</button>
+      <button id="editFromViewButton" class="btn btn-edit">✏️ Bewerken</button>
+      <button id="deleteFromViewButton" class="btn btn-delete">🗑️ Verwijderen</button>
+      <button id="closeViewButton" class="btn btn-cancel">Sluiten</button>
     </div>
   </div>
 </div>
 
-<!-- ============ NIEUW / BEWERKEN MODAL ============ -->
+<!-- ===============================
+✏️ FORM MODAL
+================================ -->
 <div id="eventModal" class="modal">
   <div class="modal-content form-content">
-    <button class="modal-close" id="closeFormX" type="button" aria-label="Sluiten">&times;</button>
+    <button class="modal-close" id="closeFormX">&times;</button>
 
     <h2 id="formTitle">Nieuwe afspraak</h2>
 
@@ -76,7 +109,7 @@
 
       <div class="form-group">
         <label for="eventDescription">Omschrijving</label>
-        <textarea id="eventDescription" rows="3" placeholder="Extra informatie..."></textarea>
+        <textarea id="eventDescription"></textarea>
       </div>
 
       <div class="form-row">
@@ -97,23 +130,27 @@
           <option value="holiday">🟢 Vakantie</option>
           <option value="activity">🟩 Activiteit</option>
           <option value="birthday">🟠 Verjaardag</option>
-          <option value="holidayofficial">🟡 Officiële feestdag</option>
+          <option value="holidayofficial">🟡 Feestdag</option>
         </select>
       </div>
 
       <label class="checkbox-line">
         <input id="allDay" type="checkbox"> Hele dag
       </label>
-    </div>
 
-    <div class="modal-buttons">
-      <button id="saveEventButton" class="btn btn-save" type="button">💾 Opslaan</button>
-      <button id="cancelEventButton" class="btn btn-cancel" type="button">Annuleren</button>
+      <div class="modal-buttons">
+        <button id="saveEventButton" class="btn btn-save">💾 Opslaan</button>
+        <button id="cancelEventButton" class="btn btn-cancel">Annuleren</button>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- ===============================
+📦 SCRIPTS
+================================ -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script type="module" src="agenda.js"></script>
+
 </body>
 </html>
