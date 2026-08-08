@@ -1,6 +1,6 @@
 // ======================================================
 // SNEJIN AGENDA
-// COMPLETE AGENDA.JS
+// VOLLEDIG WERKENDE AGENDA.JS
 // ======================================================
 
 import { db } from "./firebase.js";
@@ -16,14 +16,6 @@ import {
 
 
 // ======================================================
-// FIREBASE COLLECTIONS
-// ======================================================
-
-const appointmentsRef = collection(db, "appointments");
-const completedAppointmentsRef = collection(db, "completedAppointments");
-
-
-// ======================================================
 // GLOBALS
 // ======================================================
 
@@ -33,7 +25,18 @@ let selectedEventId = null;
 let currentViewEvent = null;
 let editingEventId = null;
 
-let allAppointments = [];
+let allCalendarEvents = [];
+
+
+// ======================================================
+// FIREBASE COLLECTIONS
+// ======================================================
+
+const appointmentsRef =
+    collection(db, "appointments");
+
+const completedAppointmentsRef =
+    collection(db, "completedAppointments");
 
 
 // ======================================================
@@ -81,85 +84,220 @@ const categoryConfig = {
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-    setupButtons();
+    try {
 
-    setupTheme();
+        setupTheme();
 
-    setupSearch();
+        setupButtons();
 
-    setupModalCloseEvents();
+        setupModals();
 
-    initializeCalendar();
+        setupSearch();
 
-    await loadAppointments();
+        createCalendar();
+
+        await loadAppointments();
+
+    } catch (error) {
+
+        console.error(
+            "Agenda initialiseren mislukt:",
+            error
+        );
+
+        showError(
+            "De agenda kon niet worden geladen. Controleer je Firebase-configuratie en of FullCalendar geladen is."
+        );
+
+    }
 
 });
 
 
 // ======================================================
-// KALENDER INITIALISEREN
+// CALENDAR MAKEN
 // ======================================================
 
-function initializeCalendar() {
+function createCalendar() {
 
-    const calendarEl = document.getElementById("calendar");
+    const calendarEl =
+        document.getElementById("calendar");
 
     if (!calendarEl) {
-        console.error("Element #calendar bestaat niet.");
-        return;
+
+        throw new Error(
+            "Element #calendar bestaat niet in agenda.html."
+        );
+
     }
 
-    calendar = new FullCalendar.Calendar(calendarEl, {
 
-        initialView: "dayGridMonth",
+    // Controle of FullCalendar geladen is
 
-        locale: "nl",
+    if (
+        typeof FullCalendar === "undefined" ||
+        !FullCalendar.Calendar
+    ) {
 
-        firstDay: 1,
+        throw new Error(
+            "FullCalendar is niet geladen."
+        );
 
-        height: "auto",
-
-        selectable: true,
-
-        editable: false,
-
-        dayMaxEvents: true,
-
-        headerToolbar: {
-
-            left: "prev,next today",
-
-            center: "title",
-
-            right: "dayGridMonth,timeGridWeek,listWeek"
-
-        },
+    }
 
 
-        // --------------------------------------------------
-        // DATUM SELECTEREN
-        // --------------------------------------------------
+    calendar =
+        new FullCalendar.Calendar(
+            calendarEl,
+            {
 
-        select(info) {
+                initialView: "dayGridMonth",
 
-            openFormModal(info.startStr);
+                locale: "nl",
 
-        },
+                firstDay: 1,
+
+                height: "auto",
+
+                contentHeight: "auto",
+
+                selectable: true,
+
+                editable: false,
+
+                dayMaxEvents: 4,
+
+                navLinks: true,
+
+                nowIndicator: true,
+
+                headerToolbar: {
+
+                    left: "prev,next today",
+
+                    center: "title",
+
+                    right: "dayGridMonth,timeGridWeek,listWeek"
+
+                },
 
 
-        // --------------------------------------------------
-        // EVENT AANKLIKKEN
-        // --------------------------------------------------
+                // ==========================================
+                // DATUM AANKLIKKEN
+                // ==========================================
 
-        eventClick(info) {
+                dateClick(info) {
 
-            currentViewEvent = info.event;
+                    openFormModal(
+                        info.dateStr
+                    );
 
-            openViewModal(info.event);
+                },
 
-        }
 
-    });
+                // ==========================================
+                // DATUM SELECTEREN
+                // ==========================================
+
+                select(info) {
+
+                    const date =
+                        info.startStr;
+
+                    calendar.unselect();
+
+                    openFormModal(date);
+
+                },
+
+
+                // ==========================================
+                // AFSPRAAK AANKLIKKEN
+                // ==========================================
+
+                eventClick(info) {
+
+                    info.jsEvent.preventDefault();
+
+                    currentViewEvent =
+                        info.event;
+
+                    selectedEventId =
+                        info.event.id;
+
+                    openViewModal(
+                        info.event
+                    );
+
+                },
+
+
+                // ==========================================
+                // EVENTS RENDEREN
+                // ==========================================
+
+                eventDidMount(info) {
+
+                    const category =
+                        info.event.extendedProps.category ||
+                        "activity";
+
+                    const config =
+                        categoryConfig[category] ||
+                        categoryConfig.activity;
+
+
+                    info.el.title =
+                        info.event.title;
+
+
+                    info.el.style.cursor =
+                        "pointer";
+
+
+                    info.el.style.borderRadius =
+                        "8px";
+
+
+                    info.el.style.border =
+                        "none";
+
+
+                    info.el.style.backgroundColor =
+                        config.color;
+
+
+                    // Kleine animatie
+
+                    info.el.style.transition =
+                        "transform .2s ease, opacity .2s ease";
+
+
+                    info.el.addEventListener(
+                        "mouseenter",
+                        () => {
+
+                            info.el.style.transform =
+                                "scale(1.02)";
+
+                        }
+                    );
+
+
+                    info.el.addEventListener(
+                        "mouseleave",
+                        () => {
+
+                            info.el.style.transform =
+                                "scale(1)";
+
+                        }
+                    );
+
+                }
+
+            }
+        );
 
 
     calendar.render();
@@ -175,233 +313,291 @@ async function loadAppointments() {
 
     if (!calendar) return;
 
+
     try {
 
         calendar.removeAllEvents();
 
-        allAppointments = [];
+        allCalendarEvents = [];
 
-        const snapshot = await getDocs(appointmentsRef);
 
-        snapshot.forEach((docSnap) => {
+        const snapshot =
+            await getDocs(
+                appointmentsRef
+            );
 
-            const data = docSnap.data();
 
-            const appointment = {
+        snapshot.forEach(
+            docSnap => {
 
-                id: docSnap.id,
+                const data =
+                    docSnap.data();
 
-                title: data.title || "Afspraak",
 
-                description: data.description || "",
+                if (!data.start) {
 
-                start: data.start || "",
+                    console.warn(
+                        "Afspraak zonder datum:",
+                        docSnap.id
+                    );
 
-                time: data.time || "",
+                    return;
 
-                allDay: data.allDay !== false,
+                }
 
-                category: data.category || "activity"
 
-            };
+                const category =
+                    data.category ||
+                    "activity";
 
-            allAppointments.push(appointment);
 
-            addAppointmentToCalendar(appointment);
+                const config =
+                    categoryConfig[category] ||
+                    categoryConfig.activity;
 
-        });
+
+                const title =
+                    data.title ||
+                    "Afspraak";
+
+
+                const emoji =
+                    config.emoji ||
+                    "";
+
+
+                const event = {
+
+                    id: docSnap.id,
+
+                    title:
+                        `${emoji} ${title}`,
+
+                    start:
+                        data.start,
+
+                    allDay:
+                        data.allDay !== false,
+
+                    color:
+                        config.color,
+
+                    backgroundColor:
+                        config.color,
+
+                    borderColor:
+                        config.color,
+
+                    extendedProps: {
+
+                        originalTitle:
+                            title,
+
+                        description:
+                            data.description || "",
+
+                        category:
+                            category,
+
+                        allDay:
+                            data.allDay !== false
+
+                    }
+
+                };
+
+
+                allCalendarEvents.push(
+                    event
+                );
+
+
+                calendar.addEvent(
+                    event
+                );
+
+            }
+        );
+
+
+        // Oude afspraken controleren
+
+        await cleanupOldEvents();
+
 
     } catch (error) {
 
-        console.error("Afspraken laden mislukt:", error);
+        console.error(
+            "Afspraken laden mislukt:",
+            error
+        );
 
-        alert("De afspraken konden niet worden geladen.");
-
-    }
-
-}
-
-
-// ======================================================
-// EVENT AAN KALENDER TOEVOEGEN
-// ======================================================
-
-function addAppointmentToCalendar(data) {
-
-    const config =
-        categoryConfig[data.category] ||
-        categoryConfig.activity;
-
-    const emoji = config.emoji;
-
-    let start = data.start;
-
-    // Als het geen hele dag is en er is een tijd,
-    // voeg de tijd toe aan de datum.
-    if (!data.allDay && data.time && data.start) {
-
-        start = `${data.start}T${data.time}`;
+        showError(
+            "De afspraken konden niet worden geladen."
+        );
 
     }
 
-    calendar.addEvent({
-
-        id: data.id,
-
-        title: `${emoji} ${data.title}`,
-
-        start: start,
-
-        allDay: data.allDay,
-
-        backgroundColor: config.color,
-
-        borderColor: config.color,
-
-        textColor: "#ffffff",
-
-        extendedProps: {
-
-            description: data.description,
-
-            category: data.category,
-
-            time: data.time || ""
-
-        }
-
-    });
-
 }
 
 
 // ======================================================
-// NIEUWE AFSPRAAK / BEWERKEN OPENEN
-// ======================================================
-
-function openFormModal(date = "") {
-
-    const modal = document.getElementById("eventModal");
-
-    if (!modal) return;
-
-    editingEventId = null;
-
-    document.getElementById("formTitle").textContent =
-        "Nieuwe afspraak";
-
-    document.getElementById("eventTitle").value = "";
-
-    document.getElementById("eventDescription").value = "";
-
-    document.getElementById("eventDate").value =
-        formatDateForInput(date);
-
-    document.getElementById("eventTime").value = "";
-
-    document.getElementById("eventType").value =
-        "activity";
-
-    document.getElementById("allDay").checked = true;
-
-    openModal(modal);
-
-}
-
-
-// ======================================================
-// AFSPRAAK BEWERKEN
-// ======================================================
-
-function openEditModal(event) {
-
-    if (!event) return;
-
-    editingEventId = event.id;
-
-    closeViewModal();
-
-    const modal = document.getElementById("eventModal");
-
-    document.getElementById("formTitle").textContent =
-        "Afspraak bewerken";
-
-    document.getElementById("eventTitle").value =
-        removeEmojiFromTitle(event.title);
-
-    document.getElementById("eventDescription").value =
-        event.extendedProps.description || "";
-
-    document.getElementById("eventDate").value =
-        event.startStr.substring(0, 10);
-
-    document.getElementById("eventTime").value =
-        event.extendedProps.time || "";
-
-    document.getElementById("eventType").value =
-        event.extendedProps.category || "activity";
-
-    document.getElementById("allDay").checked =
-        event.allDay;
-
-    openModal(modal);
-
-}
-
-
-// ======================================================
-// OPSLAAN
+// NIEUWE AFSPRAAK OPSLAAN
 // ======================================================
 
 async function saveEvent() {
 
-    const title =
-        document.getElementById("eventTitle").value.trim();
+    const titleInput =
+        document.getElementById(
+            "eventTitle"
+        );
 
-    const description =
-        document.getElementById("eventDescription").value.trim();
+    const descriptionInput =
+        document.getElementById(
+            "eventDescription"
+        );
 
-    const date =
-        document.getElementById("eventDate").value;
+    const dateInput =
+        document.getElementById(
+            "eventDate"
+        );
 
-    const time =
-        document.getElementById("eventTime").value;
+    const timeInput =
+        document.getElementById(
+            "eventTime"
+        );
 
-    const category =
-        document.getElementById("eventType").value;
+    const categoryInput =
+        document.getElementById(
+            "eventType"
+        );
 
-    const allDay =
-        document.getElementById("allDay").checked;
+    const allDayInput =
+        document.getElementById(
+            "allDay"
+        );
 
 
-    if (!title || !date) {
+    if (
+        !titleInput ||
+        !descriptionInput ||
+        !dateInput ||
+        !timeInput ||
+        !categoryInput ||
+        !allDayInput
+    ) {
 
-        alert("Vul minimaal een naam en datum in.");
+        showError(
+            "Een of meer formulier-elementen ontbreken in agenda.html."
+        );
 
         return;
 
     }
 
 
+    const title =
+        titleInput.value.trim();
+
+    const description =
+        descriptionInput.value.trim();
+
+    const date =
+        dateInput.value;
+
+    const time =
+        timeInput.value;
+
+    const category =
+        categoryInput.value ||
+        "activity";
+
+    const allDay =
+        allDayInput.checked;
+
+
+    if (!title) {
+
+        alert(
+            "Vul een naam voor de afspraak in."
+        );
+
+        titleInput.focus();
+
+        return;
+
+    }
+
+
+    if (!date) {
+
+        alert(
+            "Kies een datum."
+        );
+
+        dateInput.focus();
+
+        return;
+
+    }
+
+
+    let start;
+
+
+    if (allDay) {
+
+        start = date;
+
+    } else {
+
+        if (!time) {
+
+            alert(
+                "Kies een tijd of vink 'Hele dag' aan."
+            );
+
+            timeInput.focus();
+
+            return;
+
+        }
+
+
+        start =
+            `${date}T${time}:00`;
+
+    }
+
+
     try {
+
+        disableSaveButton(true);
+
+
+        // ==========================================
+        // BESTAANDE AFSPRAAK BIJWERKEN
+        // ==========================================
 
         if (editingEventId) {
 
-            // ----------------------------------------------
-            // BESTAANDE AFSPRAAK BIJWERKEN
-            // ----------------------------------------------
+            const eventRef =
+                doc(
+                    db,
+                    "appointments",
+                    editingEventId
+                );
+
 
             await updateDoc(
-                doc(db, "appointments", editingEventId),
+                eventRef,
                 {
 
                     title,
 
                     description,
 
-                    start: date,
-
-                    time: allDay ? "" : time,
+                    start,
 
                     allDay,
 
@@ -410,46 +606,166 @@ async function saveEvent() {
                 }
             );
 
-        } else {
 
-            // ----------------------------------------------
-            // NIEUWE AFSPRAAK
-            // ----------------------------------------------
+            const existingEvent =
+                calendar.getEventById(
+                    editingEventId
+                );
 
-            await addDoc(
-                appointmentsRef,
-                {
 
-                    title,
+            if (existingEvent) {
+
+                const config =
+                    categoryConfig[category] ||
+                    categoryConfig.activity;
+
+
+                existingEvent.setProp(
+                    "title",
+                    `${config.emoji} ${title}`
+                );
+
+
+                existingEvent.setStart(
+                    start
+                );
+
+
+                existingEvent.setAllDay(
+                    allDay
+                );
+
+
+                existingEvent.setProp(
+                    "backgroundColor",
+                    config.color
+                );
+
+
+                existingEvent.setProp(
+                    "borderColor",
+                    config.color
+                );
+
+
+                existingEvent.setExtendedProp(
+                    "originalTitle",
+                    title
+                );
+
+
+                existingEvent.setExtendedProp(
+                    "description",
+                    description
+                );
+
+
+                existingEvent.setExtendedProp(
+                    "category",
+                    category
+                );
+
+
+                existingEvent.setExtendedProp(
+                    "allDay",
+                    allDay
+                );
+
+            }
+
+        }
+
+        // ==========================================
+        // NIEUWE AFSPRAAK
+        // ==========================================
+
+        else {
+
+            const newDoc =
+                await addDoc(
+                    appointmentsRef,
+                    {
+
+                        title,
+
+                        description,
+
+                        start,
+
+                        allDay,
+
+                        category,
+
+                        createdAt:
+                            new Date().toISOString()
+
+                    }
+                );
+
+
+            const config =
+                categoryConfig[category] ||
+                categoryConfig.activity;
+
+
+            calendar.addEvent({
+
+                id:
+                    newDoc.id,
+
+                title:
+                    `${config.emoji} ${title}`,
+
+                start,
+
+                allDay,
+
+                color:
+                    config.color,
+
+                backgroundColor:
+                    config.color,
+
+                borderColor:
+                    config.color,
+
+                extendedProps: {
+
+                    originalTitle:
+                        title,
 
                     description,
 
-                    start: date,
-
-                    time: allDay ? "" : time,
-
-                    allDay,
-
                     category,
 
-                    createdAt:
-                        new Date().toISOString()
+                    allDay
 
                 }
-            );
+
+            });
 
         }
 
 
         closeFormModal();
 
-        await loadAppointments();
+        resetForm();
+
 
     } catch (error) {
 
-        console.error("Opslaan mislukt:", error);
+        console.error(
+            "Opslaan mislukt:",
+            error
+        );
 
-        alert("Opslaan van de afspraak is mislukt.");
+        showError(
+            "Opslaan mislukt. Controleer je Firebase Firestore-regels."
+        );
+
+    } finally {
+
+        disableSaveButton(false);
 
     }
 
@@ -457,73 +773,142 @@ async function saveEvent() {
 
 
 // ======================================================
-// AFSPRAAK BEKIJKEN
+// AFSPRAAK BEWERKEN
 // ======================================================
 
-function openViewModal(event) {
+function editCurrentEvent() {
 
-    if (!event) return;
+    if (!currentViewEvent) {
 
-    const modal =
-        document.getElementById("eventViewModal");
+        return;
 
-    currentViewEvent = event;
-
-    const category =
-        event.extendedProps.category || "activity";
-
-    const config =
-        categoryConfig[category] ||
-        categoryConfig.activity;
+    }
 
 
-    document.getElementById("viewBadge").textContent =
-        `${config.emoji} ${config.label}`;
-
-    document.getElementById("viewBadge").style.background =
-        config.color;
+    const event =
+        currentViewEvent;
 
 
-    document.getElementById("viewTitle").textContent =
-        removeEmojiFromTitle(event.title);
+    editingEventId =
+        event.id;
 
 
-    document.getElementById("viewDate").textContent =
-        formatDutchDate(event.start);
+    const originalTitle =
+        event.extendedProps.originalTitle ||
+        removeEmojiFromTitle(
+            event.title
+        );
 
 
-    document.getElementById("viewTime").textContent =
-        event.allDay
-            ? "Hele dag"
-            : (
-                event.extendedProps.time ||
-                formatTime(event.start)
+    document.getElementById(
+        "formTitle"
+    ).textContent =
+        "Afspraak bewerken";
+
+
+    document.getElementById(
+        "eventTitle"
+    ).value =
+        originalTitle;
+
+
+    document.getElementById(
+        "eventDescription"
+    ).value =
+        event.extendedProps.description ||
+        "";
+
+
+    document.getElementById(
+        "eventType"
+    ).value =
+        event.extendedProps.category ||
+        "activity";
+
+
+    document.getElementById(
+        "allDay"
+    ).checked =
+        event.allDay;
+
+
+    if (event.start) {
+
+        const date =
+            formatDateForInput(
+                event.start
             );
 
 
-    document.getElementById("viewCategoryName").textContent =
-        config.label;
+        document.getElementById(
+            "eventDate"
+        ).value =
+            date;
 
 
-    document.getElementById("viewDescription").textContent =
-        event.extendedProps.description ||
-        "Geen omschrijving.";
+        if (
+            !event.allDay
+        ) {
+
+            document.getElementById(
+                "eventTime"
+            ).value =
+                formatTimeForInput(
+                    event.start
+                );
+
+        } else {
+
+            document.getElementById(
+                "eventTime"
+            ).value =
+                "";
+
+        }
+
+    }
 
 
-    openModal(modal);
+    updateTimeInputState();
+
+
+    closeViewModal();
+
+    openModal(
+        "eventModal"
+    );
 
 }
 
 
 // ======================================================
-// MARKEREN ALS GEDAAN
+// AFSPRAAK MARKEREN ALS GEDAAN
 // ======================================================
 
 async function markEventAsDone() {
 
-    if (!currentViewEvent) return;
+    if (!currentViewEvent) {
 
-    const event = currentViewEvent;
+        return;
+
+    }
+
+
+    const event =
+        currentViewEvent;
+
+
+    const originalTitle =
+        event.extendedProps.originalTitle ||
+        removeEmojiFromTitle(
+            event.title
+        );
+
+
+    const category =
+        event.extendedProps.category ||
+        "activity";
+
 
     try {
 
@@ -532,54 +917,67 @@ async function markEventAsDone() {
             {
 
                 title:
-                    removeEmojiFromTitle(event.title),
+                    originalTitle,
 
                 description:
-                    event.extendedProps.description || "",
+                    event.extendedProps.description ||
+                    "",
 
                 start:
-                    event.startStr.substring(0, 10),
-
-                time:
-                    event.extendedProps.time || "",
+                    event.startStr,
 
                 allDay:
                     event.allDay,
 
-                category:
-                    event.extendedProps.category ||
-                    "activity",
-
-                originalId:
-                    event.id,
+                category,
 
                 completedAt:
-                    new Date().toISOString()
+                    new Date().toISOString(),
+
+                originalId:
+                    event.id
 
             }
         );
 
 
         await deleteDoc(
-            doc(db, "appointments", event.id)
+            doc(
+                db,
+                "appointments",
+                event.id
+            )
         );
+
+
+        event.remove();
+
+
+        currentViewEvent =
+            null;
+
+        selectedEventId =
+            null;
 
 
         closeViewModal();
 
-        await loadAppointments();
 
+        alert(
+            "Afspraak is gemarkeerd als gedaan."
+        );
 
-        alert("Afspraak is gemarkeerd als gedaan.");
 
     } catch (error) {
 
         console.error(
-            "Afspraak afronden mislukt:",
+            "Afronden mislukt:",
             error
         );
 
-        alert("De afspraak kon niet worden afgerond.");
+        showError(
+            "De afspraak kon niet als gedaan worden gemarkeerd."
+        );
 
     }
 
@@ -587,32 +985,72 @@ async function markEventAsDone() {
 
 
 // ======================================================
-// VERWIJDEREN
+// AFSPRAAK VERWIJDEREN
 // ======================================================
 
 async function deleteCurrentEvent() {
 
-    if (!currentViewEvent) return;
+    const id =
+        currentViewEvent
+            ? currentViewEvent.id
+            : selectedEventId;
 
-    const id = currentViewEvent.id;
+
+    if (!id) {
+
+        return;
+
+    }
+
 
     const confirmed =
         confirm(
             "Weet je zeker dat je deze afspraak wilt verwijderen?"
         );
 
-    if (!confirmed) return;
+
+    if (!confirmed) {
+
+        return;
+
+    }
 
 
     try {
 
         await deleteDoc(
-            doc(db, "appointments", id)
+            doc(
+                db,
+                "appointments",
+                id
+            )
         );
+
+
+        const event =
+            calendar.getEventById(
+                id
+            );
+
+
+        if (event) {
+
+            event.remove();
+
+        }
+
+
+        currentViewEvent =
+            null;
+
+        selectedEventId =
+            null;
+
 
         closeViewModal();
 
-        await loadAppointments();
+        closeFormModal();
+
 
     } catch (error) {
 
@@ -621,7 +1059,9 @@ async function deleteCurrentEvent() {
             error
         );
 
-        alert("Verwijderen is mislukt.");
+        showError(
+            "Verwijderen mislukt."
+        );
 
     }
 
@@ -629,416 +1069,65 @@ async function deleteCurrentEvent() {
 
 
 // ======================================================
-// MODAL OPEN
+// OUDE AFSPRAKEN AUTOMATISCH OPRUIMEN
+//
+// Oude afspraken worden verplaatst naar
+// completedAppointments.
+//
+// Ze worden dus NIET definitief verwijderd.
 // ======================================================
 
-function openModal(modal) {
+async function cleanupOldEvents() {
 
-    if (!modal) return;
+    try {
 
-    modal.classList.add("open");
-
-    modal.setAttribute(
-        "aria-hidden",
-        "false"
-    );
-
-}
-
-
-// ======================================================
-// MODAL SLUITEN
-// ======================================================
-
-function closeModal(modal) {
-
-    if (!modal) return;
-
-    modal.classList.remove("open");
-
-    modal.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-}
-
-
-// ======================================================
-// FORM MODAL SLUITEN
-// ======================================================
-
-function closeFormModal() {
-
-    closeModal(
-        document.getElementById("eventModal")
-    );
-
-    editingEventId = null;
-
-}
-
-
-// ======================================================
-// VIEW MODAL SLUITEN
-// ======================================================
-
-function closeViewModal() {
-
-    closeModal(
-        document.getElementById("eventViewModal")
-    );
-
-    currentViewEvent = null;
-
-}
-
-
-// ======================================================
-// BUTTONS
-// ======================================================
-
-function setupButtons() {
-
-    // Nieuwe afspraak
-    document
-        .getElementById("addEventButton")
-        ?.addEventListener(
-            "click",
-            () => openFormModal()
-        );
-
-
-    // Opslaan
-    document
-        .getElementById("saveEventButton")
-        ?.addEventListener(
-            "click",
-            saveEvent
-        );
-
-
-    // Annuleren
-    document
-        .getElementById("cancelEventButton")
-        ?.addEventListener(
-            "click",
-            closeFormModal
-        );
-
-
-    // Form X
-    document
-        .getElementById("closeFormX")
-        ?.addEventListener(
-            "click",
-            closeFormModal
-        );
-
-
-    // Gedaan
-    document
-        .getElementById("doneFromViewButton")
-        ?.addEventListener(
-            "click",
-            markEventAsDone
-        );
-
-
-    // Bewerken
-    document
-        .getElementById("editFromViewButton")
-        ?.addEventListener(
-            "click",
-            () => {
-
-                if (currentViewEvent) {
-
-                    openEditModal(
-                        currentViewEvent
-                    );
-
-                }
-
-            }
-        );
-
-
-    // Verwijderen
-    document
-        .getElementById("deleteFromViewButton")
-        ?.addEventListener(
-            "click",
-            deleteCurrentEvent
-        );
-
-
-    // View sluiten
-    document
-        .getElementById("closeViewButton")
-        ?.addEventListener(
-            "click",
-            closeViewModal
-        );
-
-
-    // View X
-    document
-        .getElementById("closeViewX")
-        ?.addEventListener(
-            "click",
-            closeViewModal
-        );
-
-}
-
-
-// ======================================================
-// MODALS SLUITEN VIA ACHTERGROND / ESC
-// ======================================================
-
-function setupModalCloseEvents() {
-
-    document
-        .getElementById("eventModal")
-        ?.addEventListener(
-            "click",
-            (event) => {
-
-                if (
-                    event.target.id ===
-                    "eventModal"
-                ) {
-
-                    closeFormModal();
-
-                }
-
-            }
-        );
-
-
-    document
-        .getElementById("eventViewModal")
-        ?.addEventListener(
-            "click",
-            (event) => {
-
-                if (
-                    event.target.id ===
-                    "eventViewModal"
-                ) {
-
-                    closeViewModal();
-
-                }
-
-            }
-        );
-
-
-    document.addEventListener(
-        "keydown",
-        (event) => {
-
-            if (event.key === "Escape") {
-
-                closeFormModal();
-
-                closeViewModal();
-
-            }
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// ZOEKEN
-// ======================================================
-
-function setupSearch() {
-
-    const searchInput =
-        document.getElementById("search");
-
-    if (!searchInput) return;
-
-
-    searchInput.addEventListener(
-        "input",
-        () => {
-
-            const query =
-                searchInput.value
-                    .trim()
-                    .toLowerCase();
-
-
-            if (!calendar) return;
-
-
-            calendar.getEvents().forEach(
-                (event) => {
-
-                    if (!query) {
-
-                        event.setProp(
-                            "display",
-                            "auto"
-                        );
-
-                        return;
-
-                    }
-
-
-                    const title =
-                        removeEmojiFromTitle(
-                            event.title
-                        ).toLowerCase();
-
-
-                    const description =
-                        (
-                            event.extendedProps
-                                .description || ""
-                        ).toLowerCase();
-
-
-                    const matches =
-                        title.includes(query) ||
-                        description.includes(query);
-
-
-                    event.setProp(
-                        "display",
-                        matches
-                            ? "auto"
-                            : "none"
-                    );
-
-                }
-            );
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// DARK MODE
-// ======================================================
-
-function setupTheme() {
-
-    const button =
-        document.getElementById("themeButton");
-
-    if (!button) return;
-
-
-    const savedTheme =
-        localStorage.getItem(
-            "snejin-theme"
-        );
-
-
-    if (savedTheme === "dark") {
-
-        document.body.classList.add("dark");
-
-        button.textContent = "☀️";
-
-    }
-
-
-    button.addEventListener(
-        "click",
-        () => {
-
-            document.body.classList.toggle(
-                "dark"
+        const snapshot =
+            await getDocs(
+                appointmentsRef
             );
 
 
-            const isDark =
-                document.body.classList.contains(
-                    "dark"
+        const today =
+            new Date();
+
+        today.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+
+        for (
+            const docSnap of snapshot.docs
+        ) {
+
+            const data =
+                docSnap.data();
+
+
+            if (!data.start) {
+
+                continue;
+
+            }
+
+
+            const eventDate =
+                parseFirestoreDate(
+                    data.start
                 );
 
 
-            localStorage.setItem(
-                "snejin-theme",
-                isDark
-                    ? "dark"
-                    : "light"
-            );
+            if (!eventDate) {
+
+                continue;
+
+            }
 
 
-            button.textContent =
-                isDark
-                    ? "☀️"
-                    : "🌙";
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// DATUM FORMATTEREN
-// ======================================================
-
-function formatDutchDate(date) {
-
-    if (!date) return "-";
-
-
-    return new Intl.DateTimeFormat(
-        "nl-NL",
-        {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-        }
-    ).format(date);
-
-}
-
-
-// ======================================================
-// TIJD FORMATTEREN
-// ======================================================
-
-function formatTime(date) {
-
-    if (!date) return "-";
-
-
-    return new Intl.DateTimeFormat(
-        "nl-NL",
-        {
-            hour: "2-digit",
-            minute: "2-digit"
-        }
-    ).format(date);
-
-}
-
-
-// ======================================================
-// INPUT DATUM
-// ======================================================
-
-function formatDateForInput(date) {
-
-    if (!date) {
-
-        const today =
-    
+            eventDate.setHours(
+                0,
+                0,
+                0,
+         
