@@ -1,229 +1,346 @@
 // ===============================
-// IMPORTS
+// 🔥 FIREBASE SETUP (pas aan naar jouw config)
 // ===============================
-import { db } from "./firebase.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-collection,
-addDoc,
-getDocs,
-deleteDoc,
-doc
+    getFirestore, collection, addDoc, getDocs,
+    deleteDoc, doc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ===============================
-// GLOBALS
-// ===============================
-let calendar;
-let selectedEventId = null;
-let currentViewEvent = null;
+const firebaseConfig = {
+    // jouw config hier
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const appointmentsRef = collection(db, "appointments");
 const completedAppointmentsRef = collection(db, "completedAppointments");
 
 // ===============================
-// 🎨 CATEGORIE DATA
+// 📅 GLOBALS
 // ===============================
-const categoryConfig = {
-work: {
-label: "🔴 Werken",
-color: "#ff3b3b",
-emoji: "🔴"
-},
-holiday: {
-label: "🟢 Vakantie",
-color: "#28a745",
-emoji: "🟢"
-},
-activity: {
-label: "🟩 Activiteit",
-color: "#198754",
-emoji: "🟩"
-},
-birthday: {
-label: "🟠 Verjaardag",
-color: "#fd7e14",
-emoji: "🎂"
-},
-holidayofficial: {
-label: "🟡 Feestdag",
-color: "#ffc107",
-emoji: "🟡"
+let calendar;
+let selectedEvent = null;
+
+// ===============================
+// 🌙 DARK MODE
+// ===============================
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+    localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
 }
-};
 
-// ===============================
-// INIT CALENDAR
-// ===============================
-document.addEventListener("DOMContentLoaded", async () => {
-const calendarEl = document.getElementById("calendar");
-
-calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: "dayGridMonth",
-    selectable: true,
-
-    select: function(info) {
-        selectedEventId = null;
-        openFormModal(info.startStr);
-    },
-
-    eventClick: function(info) {
-        currentViewEvent = info.event;
-        openViewModal(info.event);
+function loadDarkMode() {
+    if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark-mode");
     }
-});
-
-calendar.render();
-await loadAppointments();
-
-});
+}
 
 // ===============================
-// LOAD EVENTS
+// 🔔 NOTIFICATIES (LOCAL)
+// ===============================
+let notificationsEnabled = false;
+
+function loadNotificationSetting() {
+    notificationsEnabled = localStorage.getItem("notificationsEnabled") === "true";
+    updateNotifButton();
+}
+
+function updateNotifButton() {
+    const btn = document.getElementById("notifToggle");
+    if (!btn) return;
+
+    btn.textContent = notificationsEnabled
+        ? "🔔 Notificaties: AAN"
+        : "🔕 Notificaties: UIT";
+}
+
+async function toggleNotifications() {
+    if (!notificationsEnabled) {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") return;
+    }
+
+    notificationsEnabled = !notificationsEnabled;
+    localStorage.setItem("notificationsEnabled", notificationsEnabled);
+    updateNotifButton();
+}
+
+// ===============================
+// 📱 PUSH NOTIFICATIES
+// ===============================
+let pushEnabled = false;
+let notifyMinutes = 5;
+
+function loadPushSettings() {
+    pushEnabled = localStorage.getItem("pushEnabled") === "true";
+    notifyMinutes = parseInt(localStorage.getItem("notifyMinutes")) || 5;
+    updatePushUI();
+}
+
+function updatePushUI() {
+    const btn = document.getElementById("pushToggle");
+    const select = document.getElementById("notifyTime");
+
+    if (btn) {
+        btn.textContent = pushEnabled ? "📱 Push: AAN" : "📱 Push: UIT";
+    }
+
+    if (select) {
+        select.value = notifyMinutes;
+    }
+}
+
+async function togglePush() {
+    if (!pushEnabled) {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") return;
+
+        await navigator.serviceWorker.register("/sw.js");
+    }
+
+    pushEnabled = !pushEnabled;
+    localStorage.setItem("pushEnabled", pushEnabled);
+    updatePushUI();
+}
+
+// ===============================
+// 📅 LOAD APPOINTMENTS
 // ===============================
 async function loadAppointments() {
-calendar.removeAllEvents();
+    const snapshot = await getDocs(appointmentsRef);
 
-const snapshot = await getDocs(appointmentsRef);
-
-snapshot.forEach(docSnap => {
-    const data = docSnap.data();
-
-    const category = data.category || "activity";
-    const config = categoryConfig[category] || {};
-
-    const color = config.color || "#6c757d";
-    const emoji = config.emoji || "";
-
-    calendar.addEvent({
+    const events = snapshot.docs.map(docSnap => ({
         id: docSnap.id,
+        ...docSnap.data()
+    }));
 
-        // 🎉 EMOJI IN TITEL
-        title: `${emoji} ${data.title}`,
+    calendar.removeAllEvents();
+    calendar.addEventSource(events);
+}
 
-        start: data.start,
-        allDay: data.allDay,
+// ===============================
+// 📂 LOAD COMPLETED
+// ===============================
+async function loadCompletedAppointments() {
+    const list = document.getElementById("completedList");
+    if (!list) return;
 
-        color: color,
+    list.innerHTML = "";
 
-        extendedProps: {
-            description: data.description || "",
-            category: category
-        }
+    const snapshot = await getDocs(completedAppointmentsRef);
+
+    snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+            <span>${data.title} (${data.start.split("T")[0]})</span>
+            <button class="restore-btn">↩️</button>
+        `;
+
+        li.querySelector(".restore-btn").addEventListener("click", () => {
+            restoreCompletedEvent(docSnap.id, data);
+        });
+
+        list.appendChild(li);
     });
-});
-
 }
 
 // ===============================
-// SAVE EVENT
+// ➕ ADD EVENT
 // ===============================
-async function saveEvent() {
-const title = document.getElementById("title").value;
-const date = document.getElementById("date").value;
-const description = document.getElementById("description").value;
-const category = document.getElementById("category").value;
+async function addEvent() {
+    const title = document.getElementById("title").value;
+    const start = document.getElementById("start").value;
 
-if (!title || !date) {
-    alert("Vul titel en datum in.");
-    return;
-}
+    if (!title || !start) return alert("Vul alles in");
 
-await addDoc(appointmentsRef, {
-    title,
-    start: date,
-    description,
-    allDay: true,
-    category
-});
+    await addDoc(appointmentsRef, {
+        title,
+        start
+    });
 
-closeFormModal();
-await loadAppointments();
-
+    await loadAppointments();
 }
 
 // ===============================
-// AFSPRAAK AFRONDEN
+// ❌ DELETE
+// ===============================
+async function deleteEvent() {
+    if (!selectedEvent) return;
+
+    await deleteDoc(doc(db, "appointments", selectedEvent.id));
+    selectedEvent = null;
+
+    await loadAppointments();
+}
+
+// ===============================
+// ✏️ UPDATE
+// ===============================
+async function updateEvent() {
+    if (!selectedEvent) return;
+
+    const title = document.getElementById("title").value;
+    const start = document.getElementById("start").value;
+
+    await updateDoc(doc(db, "appointments", selectedEvent.id), {
+        title,
+        start
+    });
+
+    await loadAppointments();
+}
+
+// ===============================
+// ✅ MARK AS DONE
 // ===============================
 async function markEventAsDone() {
-if (!currentViewEvent) return;
-
-try {
-    const event = currentViewEvent;
+    if (!selectedEvent) return;
 
     await addDoc(completedAppointmentsRef, {
-        title: event.title,
-        description: event.extendedProps.description || "",
-        start: event.startStr,
-        allDay: event.allDay,
-        category: event.extendedProps.category || "activity",
+        ...selectedEvent,
         completedAt: new Date().toISOString()
     });
 
-    await deleteDoc(doc(db, "appointments", event.id));
+    await deleteDoc(doc(db, "appointments", selectedEvent.id));
+    selectedEvent = null;
 
-    closeViewModal();
     await loadAppointments();
-
-    alert("Afspraak afgerond!");
-} catch (error) {
-    console.error(error);
-    alert("Fout bij afronden.");
-}
-
+    await loadCompletedAppointments();
 }
 
 // ===============================
-// DELETE EVENT
+// ↩️ RESTORE
 // ===============================
-async function deleteCurrentEvent() {
-const id = currentViewEvent ? currentViewEvent.id : selectedEventId;
+async function restoreCompletedEvent(id, data) {
+    await addDoc(appointmentsRef, data);
+    await deleteDoc(doc(db, "completedAppointments", id));
 
-if (!id) return;
-
-const confirmDelete = confirm("Weet je zeker dat je wilt verwijderen?");
-if (!confirmDelete) return;
-
-try {
-    await deleteDoc(doc(db, "appointments", id));
-    closeViewModal();
-    closeFormModal();
     await loadAppointments();
-} catch (error) {
-    console.error(error);
-    alert("Verwijderen mislukt.");
-}
-
+    await loadCompletedAppointments();
 }
 
 // ===============================
-// MODALS
+// 🧹 AUTO CLEANUP
 // ===============================
-function openFormModal(date) {
-document.getElementById("formModal").style.display = "block";
-document.getElementById("date").value = date;
-}
+async function cleanupOldEvents() {
+    const snapshot = await getDocs(appointmentsRef);
+    const now = new Date();
 
-function closeFormModal() {
-document.getElementById("formModal").style.display = "none";
-}
+    snapshot.forEach(async docSnap => {
+        const data = docSnap.data();
+        const date = new Date(data.start);
 
-function openViewModal(event) {
-document.getElementById("viewTitle").innerText = event.title;
-document.getElementById("viewDate").innerText = event.startStr;
-document.getElementById("viewDescription").innerText =
-event.extendedProps.description || "";
+        if (date < now) {
+            await addDoc(completedAppointmentsRef, {
+                ...data,
+                autoMoved: true
+            });
 
-document.getElementById("viewModal").style.display = "block";
-
-}
-
-function closeViewModal() {
-document.getElementById("viewModal").style.display = "none";
+            await deleteDoc(doc(db, "appointments", docSnap.id));
+        }
+    });
 }
 
 // ===============================
-// BUTTONS
+// ⏰ CHECK NOTIFICATIONS
 // ===============================
-document.getElementById("saveBtn")?.addEventListener("click", saveEvent);
-document.getElementById("deleteBtn")?.addEventListener("click", deleteCurrentEvent);
-document.getElementById("doneBtn")?.addEventListener("click", markEventAsDone);
+function startNotificationChecker() {
+    setInterval(async () => {
+        if (!notificationsEnabled) return;
+
+        const snapshot = await getDocs(appointmentsRef);
+        const now = new Date();
+
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const eventTime = new Date(data.start);
+
+            const diff = (eventTime - now) / 60000;
+
+            if (diff > 0 && diff < 5) {
+                new Notification("Aankomende afspraak", {
+                    body: data.title
+                });
+            }
+        });
+
+    }, 60000);
+}
+
+// ===============================
+// 📱 PUSH CHECKER
+// ===============================
+function startPushChecker() {
+    setInterval(async () => {
+        if (!pushEnabled) return;
+
+        const snapshot = await getDocs(appointmentsRef);
+        const now = new Date();
+
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const eventTime = new Date(data.start);
+
+            const diff = (eventTime - now) / 60000;
+
+            if (diff > 0 && diff < notifyMinutes) {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification("Aankomende afspraak", {
+                        body: data.title
+                    });
+                });
+            }
+        });
+
+    }, 60000);
+}
+
+// ===============================
+// 🚀 INIT
+// ===============================
+document.addEventListener("DOMContentLoaded", async () => {
+
+    loadDarkMode();
+    loadNotificationSetting();
+    loadPushSettings();
+
+    document.getElementById("darkModeToggle")?.addEventListener("click", toggleDarkMode);
+    document.getElementById("notifToggle")?.addEventListener("click", toggleNotifications);
+    document.getElementById("pushToggle")?.addEventListener("click", togglePush);
+
+    document.getElementById("notifyTime")?.addEventListener("change", (e) => {
+        notifyMinutes = parseInt(e.target.value);
+        localStorage.setItem("notifyMinutes", notifyMinutes);
+    });
+
+    document.getElementById("addBtn")?.addEventListener("click", addEvent);
+    document.getElementById("deleteBtn")?.addEventListener("click", deleteEvent);
+    document.getElementById("updateBtn")?.addEventListener("click", updateEvent);
+    document.getElementById("doneFromViewButton")?.addEventListener("click", markEventAsDone);
+
+    const calendarEl = document.getElementById("calendar");
+
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        eventClick: function(info) {
+            selectedEvent = info.event;
+
+            document.getElementById("title").value = info.event.title;
+            document.getElementById("start").value = info.event.startStr;
+        }
+    });
+
+    calendar.render();
+
+    await cleanupOldEvents();
+    await loadAppointments();
+    await loadCompletedAppointments();
+
+    startNotificationChecker();
+    startPushChecker();
+});
