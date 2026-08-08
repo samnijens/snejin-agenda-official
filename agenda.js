@@ -14,6 +14,15 @@ import {
     doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+
+// ======================================================
+// FIREBASE COLLECTIONS
+// ======================================================
+
+const appointmentsRef = collection(db, "appointments");
+const completedAppointmentsRef = collection(db, "completedAppointments");
+
+
 // ======================================================
 // GLOBALS
 // ======================================================
@@ -25,17 +34,7 @@ let currentViewEvent = null;
 let editingEventId = null;
 
 let allAppointments = [];
-let completedAppointments = [];
 
-let notificationsEnabled =
-    localStorage.getItem("snejin_notifications") === "true";
-
-let notificationMinutes =
-    Number(localStorage.getItem("snejin_notification_minutes")) || 10;
-
-const appointmentsRef = collection(db, "appointments");
-const completedAppointmentsRef =
-    collection(db, "completedAppointments");
 
 // ======================================================
 // CATEGORIEËN
@@ -75,45 +74,38 @@ const categoryConfig = {
 
 };
 
+
 // ======================================================
 // DOM READY
 // ======================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-    setupTheme();
-
     setupButtons();
 
-    setupNotifications();
+    setupTheme();
 
     setupSearch();
 
-    setupModalButtons();
+    setupModalCloseEvents();
 
-    setupCalendar();
+    initializeCalendar();
 
     await loadAppointments();
-
-    await loadCompletedAppointments();
-
-    cleanupOldAppointments();
-
-    updateNotificationButton();
 
 });
 
 
 // ======================================================
-// CALENDAR INITIALISEREN
+// KALENDER INITIALISEREN
 // ======================================================
 
-function setupCalendar() {
+function initializeCalendar() {
 
     const calendarEl = document.getElementById("calendar");
 
     if (!calendarEl) {
-        console.error("❌ #calendar ontbreekt in agenda.html");
+        console.error("Element #calendar bestaat niet.");
         return;
     }
 
@@ -125,34 +117,41 @@ function setupCalendar() {
 
         firstDay: 1,
 
+        height: "auto",
+
         selectable: true,
 
         editable: false,
 
         dayMaxEvents: true,
 
-        height: "auto",
-
         headerToolbar: {
+
             left: "prev,next today",
+
             center: "title",
+
             right: "dayGridMonth,timeGridWeek,listWeek"
+
         },
 
-        buttonText: {
-            today: "Vandaag",
-            month: "Maand",
-            week: "Week",
-            list: "Lijst"
-        },
 
-        select: function(info) {
+        // --------------------------------------------------
+        // DATUM SELECTEREN
+        // --------------------------------------------------
+
+        select(info) {
 
             openFormModal(info.startStr);
 
         },
 
-        eventClick: function(info) {
+
+        // --------------------------------------------------
+        // EVENT AANKLIKKEN
+        // --------------------------------------------------
+
+        eventClick(info) {
 
             currentViewEvent = info.event;
 
@@ -161,6 +160,7 @@ function setupCalendar() {
         }
 
     });
+
 
     calendar.render();
 
@@ -193,9 +193,11 @@ async function loadAppointments() {
 
                 title: data.title || "Afspraak",
 
-                start: data.start,
-
                 description: data.description || "",
+
+                start: data.start || "",
+
+                time: data.time || "",
 
                 allDay: data.allDay !== false,
 
@@ -211,7 +213,7 @@ async function loadAppointments() {
 
     } catch (error) {
 
-        console.error("Fout bij laden afspraken:", error);
+        console.error("Afspraken laden mislukt:", error);
 
         alert("De afspraken konden niet worden geladen.");
 
@@ -224,22 +226,33 @@ async function loadAppointments() {
 // EVENT AAN KALENDER TOEVOEGEN
 // ======================================================
 
-function addAppointmentToCalendar(appointment) {
+function addAppointmentToCalendar(data) {
 
     const config =
-        categoryConfig[appointment.category] ||
+        categoryConfig[data.category] ||
         categoryConfig.activity;
+
+    const emoji = config.emoji;
+
+    let start = data.start;
+
+    // Als het geen hele dag is en er is een tijd,
+    // voeg de tijd toe aan de datum.
+    if (!data.allDay && data.time && data.start) {
+
+        start = `${data.start}T${data.time}`;
+
+    }
 
     calendar.addEvent({
 
-        id: appointment.id,
+        id: data.id,
 
-        title:
-            `${config.emoji} ${appointment.title}`,
+        title: `${emoji} ${data.title}`,
 
-        start: appointment.start,
+        start: start,
 
-        allDay: appointment.allDay,
+        allDay: data.allDay,
 
         backgroundColor: config.color,
 
@@ -249,11 +262,11 @@ function addAppointmentToCalendar(appointment) {
 
         extendedProps: {
 
-            description: appointment.description,
+            description: data.description,
 
-            category: appointment.category,
+            category: data.category,
 
-            originalTitle: appointment.title
+            time: data.time || ""
 
         }
 
@@ -263,107 +276,109 @@ function addAppointmentToCalendar(appointment) {
 
 
 // ======================================================
-// NIEUWE AFSPRAAK / BEWERKEN
+// NIEUWE AFSPRAAK / BEWERKEN OPENEN
+// ======================================================
+
+function openFormModal(date = "") {
+
+    const modal = document.getElementById("eventModal");
+
+    if (!modal) return;
+
+    editingEventId = null;
+
+    document.getElementById("formTitle").textContent =
+        "Nieuwe afspraak";
+
+    document.getElementById("eventTitle").value = "";
+
+    document.getElementById("eventDescription").value = "";
+
+    document.getElementById("eventDate").value =
+        formatDateForInput(date);
+
+    document.getElementById("eventTime").value = "";
+
+    document.getElementById("eventType").value =
+        "activity";
+
+    document.getElementById("allDay").checked = true;
+
+    openModal(modal);
+
+}
+
+
+// ======================================================
+// AFSPRAAK BEWERKEN
+// ======================================================
+
+function openEditModal(event) {
+
+    if (!event) return;
+
+    editingEventId = event.id;
+
+    closeViewModal();
+
+    const modal = document.getElementById("eventModal");
+
+    document.getElementById("formTitle").textContent =
+        "Afspraak bewerken";
+
+    document.getElementById("eventTitle").value =
+        removeEmojiFromTitle(event.title);
+
+    document.getElementById("eventDescription").value =
+        event.extendedProps.description || "";
+
+    document.getElementById("eventDate").value =
+        event.startStr.substring(0, 10);
+
+    document.getElementById("eventTime").value =
+        event.extendedProps.time || "";
+
+    document.getElementById("eventType").value =
+        event.extendedProps.category || "activity";
+
+    document.getElementById("allDay").checked =
+        event.allDay;
+
+    openModal(modal);
+
+}
+
+
+// ======================================================
+// OPSLAAN
 // ======================================================
 
 async function saveEvent() {
 
-    const titleEl =
-        document.getElementById("eventTitle");
-
-    const descriptionEl =
-        document.getElementById("eventDescription");
-
-    const dateEl =
-        document.getElementById("eventDate");
-
-    const timeEl =
-        document.getElementById("eventTime");
-
-    const categoryEl =
-        document.getElementById("eventType");
-
-    const allDayEl =
-        document.getElementById("allDay");
-
-
-    if (
-        !titleEl ||
-        !descriptionEl ||
-        !dateEl ||
-        !timeEl ||
-        !categoryEl ||
-        !allDayEl
-    ) {
-
-        console.error("Formuliervelden ontbreken.");
-
-        return;
-
-    }
-
-
     const title =
-        titleEl.value.trim();
+        document.getElementById("eventTitle").value.trim();
 
     const description =
-        descriptionEl.value.trim();
+        document.getElementById("eventDescription").value.trim();
 
     const date =
-        dateEl.value;
+        document.getElementById("eventDate").value;
 
     const time =
-        timeEl.value;
+        document.getElementById("eventTime").value;
 
     const category =
-        categoryEl.value || "activity";
+        document.getElementById("eventType").value;
 
     const allDay =
-        allDayEl.checked;
+        document.getElementById("allDay").checked;
 
 
-    if (!title) {
+    if (!title || !date) {
 
-        alert("Vul een naam in.");
-
-        titleEl.focus();
+        alert("Vul minimaal een naam en datum in.");
 
         return;
-
-    }
-
-
-    if (!date) {
-
-        alert("Kies een datum.");
-
-        dateEl.focus();
-
-        return;
-
-    }
-
-
-    let start;
-
-
-    if (allDay) {
-
-        start = date;
-
-    } else {
-
-        if (!time) {
-
-            alert("Kies een tijd.");
-
-            timeEl.focus();
-
-            return;
-
-        }
-
-        start = `${date}T${time}`;
 
     }
 
@@ -372,19 +387,21 @@ async function saveEvent() {
 
         if (editingEventId) {
 
+            // ----------------------------------------------
+            // BESTAANDE AFSPRAAK BIJWERKEN
+            // ----------------------------------------------
+
             await updateDoc(
-                doc(
-                    db,
-                    "appointments",
-                    editingEventId
-                ),
+                doc(db, "appointments", editingEventId),
                 {
 
                     title,
 
                     description,
 
-                    start,
+                    start: date,
+
+                    time: allDay ? "" : time,
 
                     allDay,
 
@@ -394,6 +411,10 @@ async function saveEvent() {
             );
 
         } else {
+
+            // ----------------------------------------------
+            // NIEUWE AFSPRAAK
+            // ----------------------------------------------
 
             await addDoc(
                 appointmentsRef,
@@ -403,11 +424,16 @@ async function saveEvent() {
 
                     description,
 
-                    start,
+                    start: date,
+
+                    time: allDay ? "" : time,
 
                     allDay,
 
-                    category
+                    category,
+
+                    createdAt:
+                        new Date().toISOString()
 
                 }
             );
@@ -415,30 +441,15 @@ async function saveEvent() {
         }
 
 
-        editingEventId = null;
-
         closeFormModal();
-
-        closeViewModal();
 
         await loadAppointments();
 
-        await loadCompletedAppointments();
-
-        alert(
-            "Afspraak opgeslagen!"
-        );
-
     } catch (error) {
 
-        console.error(
-            "Fout bij opslaan:",
-            error
-        );
+        console.error("Opslaan mislukt:", error);
 
-        alert(
-            "De afspraak kon niet worden opgeslagen."
-        );
+        alert("Opslaan van de afspraak is mislukt.");
 
     }
 
@@ -446,327 +457,73 @@ async function saveEvent() {
 
 
 // ======================================================
-// FORM MODAL OPENEN
-// ======================================================
-
-function openFormModal(date = null, event = null) {
-
-    const modal =
-        document.getElementById("eventModal");
-
-    if (!modal) return;
-
-
-    const titleEl =
-        document.getElementById("eventTitle");
-
-    const descriptionEl =
-        document.getElementById("eventDescription");
-
-    const dateEl =
-        document.getElementById("eventDate");
-
-    const timeEl =
-        document.getElementById("eventTime");
-
-    const categoryEl =
-        document.getElementById("eventType");
-
-    const allDayEl =
-        document.getElementById("allDay");
-
-    const formTitle =
-        document.getElementById("formTitle");
-
-
-    if (!titleEl) return;
-
-
-    if (event) {
-
-        editingEventId = event.id;
-
-        const props =
-            event.extendedProps || {};
-
-
-        titleEl.value =
-            props.originalTitle ||
-            event.title.replace(
-                /^[^\s]+\s/,
-                ""
-            );
-
-
-        descriptionEl.value =
-            props.description || "";
-
-
-        const eventDate =
-            event.startStr.substring(
-                0,
-                10
-            );
-
-        dateEl.value = eventDate;
-
-
-        if (event.allDay) {
-
-            timeEl.value = "";
-
-        } else {
-
-            const dateObject =
-                event.start;
-
-            timeEl.value =
-                dateObject
-                    .toTimeString()
-                    .substring(0, 5);
-
-        }
-
-
-        categoryEl.value =
-            props.category || "activity";
-
-
-        allDayEl.checked =
-            event.allDay;
-
-
-        if (formTitle) {
-
-            formTitle.textContent =
-                "Afspraak bewerken";
-
-        }
-
-    } else {
-
-        editingEventId = null;
-
-        titleEl.value = "";
-
-        descriptionEl.value = "";
-
-        dateEl.value =
-            date ||
-            getTodayString();
-
-        timeEl.value = "";
-
-        categoryEl.value =
-            "activity";
-
-        allDayEl.checked = true;
-
-
-        if (formTitle) {
-
-            formTitle.textContent =
-                "Nieuwe afspraak";
-
-        }
-
-    }
-
-
-    modal.style.display = "flex";
-
-    requestAnimationFrame(() => {
-
-        modal.classList.add("open");
-
-    });
-
-
-    setTimeout(() => {
-
-        titleEl.focus();
-
-    }, 100);
-
-}
-
-
-// ======================================================
-// VIEW MODAL
+// AFSPRAAK BEKIJKEN
 // ======================================================
 
 function openViewModal(event) {
 
+    if (!event) return;
+
     const modal =
-        document.getElementById(
-            "eventViewModal"
-        );
+        document.getElementById("eventViewModal");
 
-    if (!modal) return;
-
-
-    const props =
-        event.extendedProps || {};
-
+    currentViewEvent = event;
 
     const category =
-        props.category || "activity";
+        event.extendedProps.category || "activity";
 
     const config =
         categoryConfig[category] ||
         categoryConfig.activity;
 
 
-    const title =
-        props.originalTitle ||
-        event.title;
-
-
-    document.getElementById(
-        "viewTitle"
-    ).textContent = title;
-
-
-    document.getElementById(
-        "viewDate"
-    ).textContent =
-        formatDate(event.start);
-
-
-    document.getElementById(
-        "viewTime"
-    ).textContent =
-        event.allDay
-            ? "Hele dag"
-            : formatTime(event.start);
-
-
-    document.getElementById(
-        "viewCategoryName"
-    ).textContent =
+    document.getElementById("viewBadge").textContent =
         `${config.emoji} ${config.label}`;
 
+    document.getElementById("viewBadge").style.background =
+        config.color;
 
-    document.getElementById(
-        "viewDescription"
-    ).textContent =
-        props.description ||
+
+    document.getElementById("viewTitle").textContent =
+        removeEmojiFromTitle(event.title);
+
+
+    document.getElementById("viewDate").textContent =
+        formatDutchDate(event.start);
+
+
+    document.getElementById("viewTime").textContent =
+        event.allDay
+            ? "Hele dag"
+            : (
+                event.extendedProps.time ||
+                formatTime(event.start)
+            );
+
+
+    document.getElementById("viewCategoryName").textContent =
+        config.label;
+
+
+    document.getElementById("viewDescription").textContent =
+        event.extendedProps.description ||
         "Geen omschrijving.";
 
 
-    const badge =
-        document.getElementById(
-            "viewBadge"
-        );
-
-
-    if (badge) {
-
-        badge.textContent =
-            `${config.emoji} ${config.label}`;
-
-        badge.style.background =
-            config.color;
-
-    }
-
-
-    modal.style.display = "flex";
-
-    requestAnimationFrame(() => {
-
-        modal.classList.add("open");
-
-    });
+    openModal(modal);
 
 }
 
 
 // ======================================================
-// MODALS SLUITEN
-// ======================================================
-
-function closeViewModal() {
-
-    const modal =
-        document.getElementById(
-            "eventViewModal"
-        );
-
-    if (!modal) return;
-
-    modal.classList.remove("open");
-
-    setTimeout(() => {
-
-        modal.style.display = "none";
-
-    }, 250);
-
-}
-
-
-function closeFormModal() {
-
-    const modal =
-        document.getElementById(
-            "eventModal"
-        );
-
-    if (!modal) return;
-
-    modal.classList.remove("open");
-
-    setTimeout(() => {
-
-        modal.style.display = "none";
-
-    }, 250);
-
-}
-
-
-// ======================================================
-// BEWERKEN
-// ======================================================
-
-function editCurrentEvent() {
-
-    if (!currentViewEvent) return;
-
-    const event =
-        currentViewEvent;
-
-    closeViewModal();
-
-    setTimeout(() => {
-
-        openFormModal(
-            null,
-            event
-        );
-
-    }, 250);
-
-}
-
-
-// ======================================================
-// AFSPRAAK AFRONDEN
+// MARKEREN ALS GEDAAN
 // ======================================================
 
 async function markEventAsDone() {
 
     if (!currentViewEvent) return;
 
-
-    const event =
-        currentViewEvent;
-
-
-    const props =
-        event.extendedProps || {};
-
+    const event = currentViewEvent;
 
     try {
 
@@ -774,25 +531,27 @@ async function markEventAsDone() {
             completedAppointmentsRef,
             {
 
-                originalId: event.id,
-
                 title:
-                    props.originalTitle ||
-                    event.title,
+                    removeEmojiFromTitle(event.title),
 
                 description:
-                    props.description ||
-                    "",
+                    event.extendedProps.description || "",
 
                 start:
-                    event.startStr,
+                    event.startStr.substring(0, 10),
+
+                time:
+                    event.extendedProps.time || "",
 
                 allDay:
                     event.allDay,
 
                 category:
-                    props.category ||
+                    event.extendedProps.category ||
                     "activity",
+
+                originalId:
+                    event.id,
 
                 completedAt:
                     new Date().toISOString()
@@ -802,39 +561,25 @@ async function markEventAsDone() {
 
 
         await deleteDoc(
-            doc(
-                db,
-                "appointments",
-                event.id
-            )
+            doc(db, "appointments", event.id)
         );
-
-
-        currentViewEvent = null;
 
 
         closeViewModal();
 
         await loadAppointments();
 
-        await loadCompletedAppointments();
 
-
-        alert(
-            "Afspraak gemarkeerd als gedaan!"
-        );
-
+        alert("Afspraak is gemarkeerd als gedaan.");
 
     } catch (error) {
 
         console.error(
-            "Fout bij afronden:",
+            "Afspraak afronden mislukt:",
             error
         );
 
-        alert(
-            "De afspraak kon niet worden afgerond."
-        );
+        alert("De afspraak kon niet worden afgerond.");
 
     }
 
@@ -849,16 +594,12 @@ async function deleteCurrentEvent() {
 
     if (!currentViewEvent) return;
 
-
-    const id =
-        currentViewEvent.id;
-
+    const id = currentViewEvent.id;
 
     const confirmed =
         confirm(
             "Weet je zeker dat je deze afspraak wilt verwijderen?"
         );
-
 
     if (!confirmed) return;
 
@@ -866,34 +607,21 @@ async function deleteCurrentEvent() {
     try {
 
         await deleteDoc(
-            doc(
-                db,
-                "appointments",
-                id
-            )
+            doc(db, "appointments", id)
         );
-
-
-        currentViewEvent = null;
-
 
         closeViewModal();
 
-        closeFormModal();
-
         await loadAppointments();
 
-
     } catch (error) {
 
         console.error(
-            "Fout bij verwijderen:",
+            "Verwijderen mislukt:",
             error
         );
 
-        alert(
-            "Verwijderen mislukt."
-        );
+        alert("Verwijderen is mislukt.");
 
     }
 
@@ -901,465 +629,227 @@ async function deleteCurrentEvent() {
 
 
 // ======================================================
-// ARCHIEF LADEN
+// MODAL OPEN
 // ======================================================
 
-async function loadCompletedAppointments() {
+function openModal(modal) {
 
-    const list =
-        document.getElementById(
-            "completedList"
-        );
+    if (!modal) return;
 
+    modal.classList.add("open");
 
-    if (!list) return;
-
-
-    list.innerHTML =
-        `<li>Archief laden...</li>`;
-
-
-    try {
-
-        completedAppointments = [];
-
-
-        const snapshot =
-            await getDocs(
-                completedAppointmentsRef
-            );
-
-
-        snapshot.forEach(
-            (docSnap) => {
-
-                completedAppointments.push({
-
-                    id: docSnap.id,
-
-                    ...docSnap.data()
-
-                });
-
-            }
-        );
-
-
-        renderCompletedAppointments();
-
-
-    } catch (error) {
-
-        console.error(
-            "Fout bij laden archief:",
-            error
-        );
-
-
-        list.innerHTML =
-            `<li>Archief kon niet worden geladen.</li>`;
-
-    }
-
-}
-
-
-// ======================================================
-// ARCHIEF WEERGEVEN
-// ======================================================
-
-function renderCompletedAppointments() {
-
-    const list =
-        document.getElementById(
-            "completedList"
-        );
-
-
-    if (!list) return;
-
-
-    list.innerHTML = "";
-
-
-    if (
-        completedAppointments.length === 0
-    ) {
-
-        const empty =
-            document.createElement("li");
-
-        empty.textContent =
-            "Nog geen afgeronde afspraken.";
-
-        list.appendChild(empty);
-
-        return;
-
-    }
-
-
-    completedAppointments
-        .sort(
-            (a, b) =>
-                new Date(
-                    b.completedAt ||
-                    b.start ||
-                    0
-                ) -
-                new Date(
-                    a.completedAt ||
-                    a.start ||
-                    0
-                )
-        )
-        .forEach(
-            (appointment) => {
-
-                const li =
-                    document.createElement(
-                        "li"
-                    );
-
-
-                const info =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                const title =
-                    document.createElement(
-                        "strong"
-                    );
-
-
-                title.textContent =
-                    appointment.title ||
-                    "Afspraak";
-
-
-                const date =
-                    document.createElement(
-                        "small"
-                    );
-
-
-                date.textContent =
-                    appointment.start
-                        ? formatDateString(
-                            appointment.start
-                        )
-                        : "";
-
-
-                info.appendChild(title);
-
-                info.appendChild(
-                    document.createElement("br")
-                );
-
-                info.appendChild(date);
-
-
-                const buttons =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                const restore =
-                    document.createElement(
-                        "button"
-                    );
-
-
-                restore.type = "button";
-
-                restore.textContent =
-                    "↩️ Terugzetten";
-
-
-                restore.addEventListener(
-                    "click",
-                    () =>
-                        restoreAppointment(
-                            appointment
-                        )
-                );
-
-
-                const remove =
-                    document.createElement(
-                        "button"
-                    );
-
-
-                remove.type = "button";
-
-                remove.textContent =
-                    "🗑️";
-
-
-                remove.addEventListener(
-                    "click",
-                    () =>
-                        deleteCompletedAppointment(
-                            appointment.id
-                        )
-                );
-
-
-                buttons.appendChild(
-                    restore
-                );
-
-                buttons.appendChild(
-                    remove
-                );
-
-
-                li.appendChild(info);
-
-                li.appendChild(buttons);
-
-
-                list.appendChild(li);
-
-            }
-        );
-
-}
-
-
-// ======================================================
-// AFSPRAAK TERUGZETTEN
-// ======================================================
-
-async function restoreAppointment(
-    appointment
-) {
-
-    try {
-
-        await addDoc(
-            appointmentsRef,
-            {
-
-                title:
-                    appointment.title ||
-                    "Afspraak",
-
-                description:
-                    appointment.description ||
-                    "",
-
-                start:
-                    appointment.start ||
-                    getTodayString(),
-
-                allDay:
-                    appointment.allDay !== false,
-
-                category:
-                    appointment.category ||
-                    "activity"
-
-            }
-        );
-
-
-        await deleteDoc(
-            doc(
-                db,
-                "completedAppointments",
-                appointment.id
-            )
-        );
-
-
-        await loadAppointments();
-
-        await loadCompletedAppointments();
-
-
-        alert(
-            "Afspraak is teruggezet in de agenda!"
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Fout bij terugzetten:",
-            error
-        );
-
-        alert(
-            "Terugzetten mislukt."
-        );
-
-    }
-
-}
-
-
-// ======================================================
-// ARCHIEF ITEM DEFINITIEF VERWIJDEREN
-// ======================================================
-
-async function deleteCompletedAppointment(
-    id
-) {
-
-    if (
-        !confirm(
-            "Deze afspraak definitief verwijderen?"
-        )
-    ) return;
-
-
-    try {
-
-        await deleteDoc(
-            doc(
-                db,
-                "completedAppointments",
-                id
-            )
-        );
-
-
-        await loadCompletedAppointments();
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Verwijderen uit archief mislukt."
-        );
-
-    }
-
-}
-
-
-// ======================================================
-// OUDE EVENTS AUTOMATISCH ARCHIVEREN
-// ======================================================
-
-async function cleanupOldAppointments() {
-
-    try {
-
-        const now =
-            new Date();
-
-
-        const snapshot =
-            await getDocs(
-                appointmentsRef
-            );
-
-
-        for (
-            const docSnap of snapshot.docs
-        ) {
-
-            const data =
-                docSnap.data();
-
-
-            if (!data.start) continue;
-
-
-            const eventDate =
-                new Date(data.start);
-
-
-            if (
-                eventDate < now &&
-                data.allDay !== true
-            ) {
-
-                await moveToCompleted(
-                    docSnap.id,
-                    data
-                );
-
-            }
-
-        }
-
-
-        await loadAppointments();
-
-        await loadCompletedAppointments();
-
-
-    } catch (error) {
-
-        console.error(
-            "Automatisch opruimen mislukt:",
-            error
-        );
-
-    }
-
-}
-
-
-// ======================================================
-// EVENT NAAR ARCHIEF
-// ======================================================
-
-async function moveToCompleted(
-    id,
-    data
-) {
-
-    await addDoc(
-        completedAppointmentsRef,
-        {
-
-            originalId: id,
-
-            title:
-                data.title ||
-                "Afspraak",
-
-            description:
-                data.description ||
-                "",
-
-            start:
-                data.start,
-
-            allDay:
-                data.allDay !== false,
-
-            category:
-                data.category ||
-                "activity",
-
-            completedAt:
-                new Date().toISOString(),
-
-            automaticallyArchived:
-                true
-
-        }
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
     );
 
+}
 
-    await deleteDoc(
-        doc(
-            db,
-            "appointments",
-            id
-        )
+
+// ======================================================
+// MODAL SLUITEN
+// ======================================================
+
+function closeModal(modal) {
+
+    if (!modal) return;
+
+    modal.classList.remove("open");
+
+    modal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+}
+
+
+// ======================================================
+// FORM MODAL SLUITEN
+// ======================================================
+
+function closeFormModal() {
+
+    closeModal(
+        document.getElementById("eventModal")
+    );
+
+    editingEventId = null;
+
+}
+
+
+// ======================================================
+// VIEW MODAL SLUITEN
+// ======================================================
+
+function closeViewModal() {
+
+    closeModal(
+        document.getElementById("eventViewModal")
+    );
+
+    currentViewEvent = null;
+
+}
+
+
+// ======================================================
+// BUTTONS
+// ======================================================
+
+function setupButtons() {
+
+    // Nieuwe afspraak
+    document
+        .getElementById("addEventButton")
+        ?.addEventListener(
+            "click",
+            () => openFormModal()
+        );
+
+
+    // Opslaan
+    document
+        .getElementById("saveEventButton")
+        ?.addEventListener(
+            "click",
+            saveEvent
+        );
+
+
+    // Annuleren
+    document
+        .getElementById("cancelEventButton")
+        ?.addEventListener(
+            "click",
+            closeFormModal
+        );
+
+
+    // Form X
+    document
+        .getElementById("closeFormX")
+        ?.addEventListener(
+            "click",
+            closeFormModal
+        );
+
+
+    // Gedaan
+    document
+        .getElementById("doneFromViewButton")
+        ?.addEventListener(
+            "click",
+            markEventAsDone
+        );
+
+
+    // Bewerken
+    document
+        .getElementById("editFromViewButton")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                if (currentViewEvent) {
+
+                    openEditModal(
+                        currentViewEvent
+                    );
+
+                }
+
+            }
+        );
+
+
+    // Verwijderen
+    document
+        .getElementById("deleteFromViewButton")
+        ?.addEventListener(
+            "click",
+            deleteCurrentEvent
+        );
+
+
+    // View sluiten
+    document
+        .getElementById("closeViewButton")
+        ?.addEventListener(
+            "click",
+            closeViewModal
+        );
+
+
+    // View X
+    document
+        .getElementById("closeViewX")
+        ?.addEventListener(
+            "click",
+            closeViewModal
+        );
+
+}
+
+
+// ======================================================
+// MODALS SLUITEN VIA ACHTERGROND / ESC
+// ======================================================
+
+function setupModalCloseEvents() {
+
+    document
+        .getElementById("eventModal")
+        ?.addEventListener(
+            "click",
+            (event) => {
+
+                if (
+                    event.target.id ===
+                    "eventModal"
+                ) {
+
+                    closeFormModal();
+
+                }
+
+            }
+        );
+
+
+    document
+        .getElementById("eventViewModal")
+        ?.addEventListener(
+            "click",
+            (event) => {
+
+                if (
+                    event.target.id ===
+                    "eventViewModal"
+                ) {
+
+                    closeViewModal();
+
+                }
+
+            }
+        );
+
+
+    document.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (event.key === "Escape") {
+
+                closeFormModal();
+
+                closeViewModal();
+
+            }
+
+        }
     );
 
 }
@@ -1371,21 +861,18 @@ async function moveToCompleted(
 
 function setupSearch() {
 
-    const search =
-        document.getElementById(
-            "search"
-        );
+    const searchInput =
+        document.getElementById("search");
+
+    if (!searchInput) return;
 
 
-    if (!search) return;
-
-
-    search.addEventListener(
+    searchInput.addEventListener(
         "input",
         () => {
 
             const query =
-                search.value
+                searchInput.value
                     .trim()
                     .toLowerCase();
 
@@ -1393,43 +880,48 @@ function setupSearch() {
             if (!calendar) return;
 
 
-            calendar.getEvents()
-                .forEach(
-                    (event) => {
+            calendar.getEvents().forEach(
+                (event) => {
 
-                        const title =
-                            (
-                                event.extendedProps
-                                    ?.originalTitle ||
-                                event.title
-                            )
-                                .toLowerCase();
-
-
-                        const description =
-                            (
-                                event.extendedProps
-                                    ?.description ||
-                                ""
-                            )
-                                .toLowerCase();
-
-
-                        const match =
-                            !query ||
-                            title.includes(query) ||
-                            description.includes(query);
-
+                    if (!query) {
 
                         event.setProp(
                             "display",
-                            match
-                                ? "auto"
-                                : "none"
+                            "auto"
                         );
 
+                        return;
+
                     }
-                );
+
+
+                    const title =
+                        removeEmojiFromTitle(
+                            event.title
+                        ).toLowerCase();
+
+
+                    const description =
+                        (
+                            event.extendedProps
+                                .description || ""
+                        ).toLowerCase();
+
+
+                    const matches =
+                        title.includes(query) ||
+                        description.includes(query);
+
+
+                    event.setProp(
+                        "display",
+                        matches
+                            ? "auto"
+                            : "none"
+                    );
+
+                }
+            );
 
         }
     );
@@ -1438,383 +930,59 @@ function setupSearch() {
 
 
 // ======================================================
-// THEME / DARK MODE
+// DARK MODE
 // ======================================================
 
 function setupTheme() {
 
     const button =
-        document.getElementById(
-            "themeButton"
-        );
-
-
-    const saved =
-        localStorage.getItem(
-            "snejin_theme"
-        );
-
-
-    if (saved === "dark") {
-
-        document.body.classList.add(
-            "dark"
-        );
-
-    }
-
-
-    updateThemeButton();
-
+        document.getElementById("themeButton");
 
     if (!button) return;
+
+
+    const savedTheme =
+        localStorage.getItem(
+            "snejin-theme"
+        );
+
+
+    if (savedTheme === "dark") {
+
+        document.body.classList.add("dark");
+
+        button.textContent = "☀️";
+
+    }
 
 
     button.addEventListener(
         "click",
         () => {
 
-            const fade =
-                document.createElement(
-                    "div"
+            document.body.classList.toggle(
+                "dark"
+            );
+
+
+            const isDark =
+                document.body.classList.contains(
+                    "dark"
                 );
-
-
-            fade.className =
-                "theme-fade";
-
-
-            document.body.appendChild(
-                fade
-            );
-
-
-            requestAnimationFrame(
-                () => {
-
-                    fade.classList.add(
-                        "active"
-                    );
-
-                }
-            );
-
-
-            setTimeout(
-                () => {
-
-                    document.body.classList.toggle(
-                        "dark"
-                    );
-
-
-                    const isDark =
-                        document.body.classList.contains(
-                            "dark"
-                        );
-
-
-                    localStorage.setItem(
-                        "snejin_theme",
-                        isDark
-                            ? "dark"
-                            : "light"
-                    );
-
-
-                    updateThemeButton();
-
-
-                    setTimeout(
-                        () => {
-
-                            fade.classList.remove(
-                                "active"
-                            );
-
-
-                            setTimeout(
-                                () =>
-                                    fade.remove(),
-                                350
-                            );
-
-                        },
-                        100
-                    );
-
-                },
-                180
-            );
-
-        }
-    );
-
-}
-
-
-function updateThemeButton() {
-
-    const button =
-        document.getElementById(
-            "themeButton"
-        );
-
-
-    if (!button) return;
-
-
-    const isDark =
-        document.body.classList.contains(
-            "dark"
-        );
-
-
-    button.textContent =
-        isDark
-            ? "☀️"
-            : "🌙";
-
-}
-
-
-// ======================================================
-// NOTIFICATIES
-// ======================================================
-
-function setupNotifications() {
-
-    const button =
-        document.getElementById(
-            "notifToggle"
-        );
-
-
-    const selector =
-        document.getElementById(
-            "notifyTime"
-        );
-
-
-    if (selector) {
-
-        selector.value =
-            String(notificationMinutes);
-
-
-        selector.addEventListener(
-            "change",
-            () => {
-
-                notificationMinutes =
-                    Number(
-                        selector.value
-                    );
-
-
-                localStorage.setItem(
-                    "snejin_notification_minutes",
-                    notificationMinutes
-                );
-
-            }
-        );
-
-    }
-
-
-    if (!button) return;
-
-
-    button.addEventListener(
-        "click",
-        async () => {
-
-            if (!notificationsEnabled) {
-
-                if (
-                    !("Notification" in window)
-                ) {
-
-                    alert(
-                        "Deze browser ondersteunt geen notificaties."
-                    );
-
-                    return;
-
-                }
-
-
-                const permission =
-                    await Notification.requestPermission();
-
-
-                if (
-                    permission !== "granted"
-                ) {
-
-                    alert(
-                        "Notificaties zijn niet toegestaan in je browser."
-                    );
-
-                    return;
-
-                }
-
-
-                notificationsEnabled = true;
-
-            } else {
-
-                notificationsEnabled = false;
-
-            }
 
 
             localStorage.setItem(
-                "snejin_notifications",
-                String(
-                    notificationsEnabled
-                )
+                "snejin-theme",
+                isDark
+                    ? "dark"
+                    : "light"
             );
 
 
-            updateNotificationButton();
-
-        }
-    );
-
-
-    updateNotificationButton();
-
-}
-
-
-// ======================================================
-// NOTIFICATIE KNOP
-// ======================================================
-
-function updateNotificationButton() {
-
-    const button =
-        document.getElementById(
-            "notifToggle"
-        );
-
-
-    if (!button) return;
-
-
-    if (notificationsEnabled) {
-
-        button.textContent =
-            "🔔";
-
-        button.classList.add(
-            "active"
-        );
-
-        button.title =
-            `Notificaties aan (${notificationMinutes} min)`;
-
-    } else {
-
-        button.textContent =
-            "🔕";
-
-        button.classList.remove(
-            "active"
-        );
-
-        button.title =
-            "Notificaties uit";
-
-    }
-
-}
-
-
-// ======================================================
-// NOTIFICATIES CONTROLEREN
-// ======================================================
-
-setInterval(
-    checkNotifications,
-    30000
-);
-
-
-function checkNotifications() {
-
-    if (
-        !notificationsEnabled ||
-        !("Notification" in window) ||
-        Notification.permission !== "granted"
-    ) return;
-
-
-    const now =
-        new Date();
-
-
-    allAppointments.forEach(
-        (appointment) => {
-
-            if (appointment.allDay) return;
-
-            if (!appointment.start) return;
-
-
-            const eventDate =
-                new Date(
-                    appointment.start
-                );
-
-
-            const difference =
-                eventDate - now;
-
-
-            const minutes =
-                difference /
-                60000;
-
-
-            if (
-                minutes > 0 &&
-                minutes <= notificationMinutes &&
-                minutes > notificationMinutes - 0.5
-            ) {
-
-                const key =
-                    `notification_${appointment.id}_${Math.floor(eventDate.getTime() / 60000)}`;
-
-
-                if (
-                    localStorage.getItem(key)
-                ) return;
-
-
-                localStorage.setItem(
-                    key,
-                    "true"
-                );
-
-
-                new Notification(
-                    appointment.title,
-                    {
-
-                        body:
-                            `Begint over ongeveer ${Math.ceil(minutes)} minuten.`,
-
-                        icon:
-                            "logo.png"
-
-                    }
-                );
-
-            }
+            button.textContent =
+                isDark
+                    ? "☀️"
+                    : "🌙";
 
         }
     );
@@ -1823,280 +991,10 @@ function checkNotifications() {
 
 
 // ======================================================
-// ALLE KNOPPEN
+// DATUM FORMATTEREN
 // ======================================================
 
-function setupButtons() {
-
-    const addButton =
-        document.getElementById(
-            "addEventButton"
-        );
-
-
-    const logoutButton =
-        document.getElementById(
-            "logoutButton"
-        );
-
-
-    if (addButton) {
-
-        addButton.addEventListener(
-            "click",
-            () => {
-
-                openFormModal(
-                    getTodayString()
-                );
-
-            }
-        );
-
-    }
-
-
-    if (logoutButton) {
-
-        logoutButton.addEventListener(
-            "click",
-            () => {
-
-                window.location.href =
-                    "index.html";
-
-            }
-        );
-
-    }
-
-}
-
-
-// ======================================================
-// MODAL KNOPPEN
-// ======================================================
-
-function setupModalButtons() {
-
-    const saveButton =
-        document.getElementById(
-            "saveEventButton"
-        );
-
-
-    const cancelButton =
-        document.getElementById(
-            "cancelEventButton"
-        );
-
-
-    const closeFormX =
-        document.getElementById(
-            "closeFormX"
-        );
-
-
-    const closeViewX =
-        document.getElementById(
-            "closeViewX"
-        );
-
-
-    const closeViewButton =
-        document.getElementById(
-            "closeViewButton"
-        );
-
-
-    const editButton =
-        document.getElementById(
-            "editFromViewButton"
-        );
-
-
-    const deleteButton =
-        document.getElementById(
-            "deleteFromViewButton"
-        );
-
-
-    const doneButton =
-        document.getElementById(
-            "doneFromViewButton"
-        );
-
-
-    if (saveButton) {
-
-        saveButton.addEventListener(
-            "click",
-            saveEvent
-        );
-
-    }
-
-
-    if (cancelButton) {
-
-        cancelButton.addEventListener(
-            "click",
-            closeFormModal
-        );
-
-    }
-
-
-    if (closeFormX) {
-
-        closeFormX.addEventListener(
-            "click",
-            closeFormModal
-        );
-
-    }
-
-
-    if (closeViewX) {
-
-        closeViewX.addEventListener(
-            "click",
-            closeViewModal
-        );
-
-    }
-
-
-    if (closeViewButton) {
-
-        closeViewButton.addEventListener(
-            "click",
-            closeViewModal
-        );
-
-    }
-
-
-    if (editButton) {
-
-        editButton.addEventListener(
-            "click",
-            editCurrentEvent
-        );
-
-    }
-
-
-    if (deleteButton) {
-
-        deleteButton.addEventListener(
-            "click",
-            deleteCurrentEvent
-        );
-
-    }
-
-
-    if (doneButton) {
-
-        doneButton.addEventListener(
-            "click",
-            markEventAsDone
-        );
-
-    }
-
-
-    document.querySelectorAll(
-        ".modal"
-    ).forEach(
-        (modal) => {
-
-            modal.addEventListener(
-                "click",
-                (event) => {
-
-                    if (
-                        event.target === modal
-                    ) {
-
-                        if (
-                            modal.id ===
-                            "eventModal"
-                        ) {
-
-                            closeFormModal();
-
-                        } else {
-
-                            closeViewModal();
-
-                        }
-
-                    }
-
-                }
-            );
-
-        }
-    );
-
-
-    document.addEventListener(
-        "keydown",
-        (event) => {
-
-            if (
-                event.key !== "Escape"
-            ) return;
-
-
-            closeFormModal();
-
-            closeViewModal();
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// DATUM HELPERS
-// ======================================================
-
-function getTodayString() {
-
-    const now =
-        new Date();
-
-
-    const year =
-        now.getFullYear();
-
-
-    const month =
-        String(
-            now.getMonth() + 1
-        ).padStart(2, "0");
-
-
-    const day =
-        String(
-            now.getDate()
-        ).padStart(2, "0");
-
-
-    return `${year}-${month}-${day}`;
-
-}
-
-
-// ======================================================
-// DATUM FORMATTER
-// ======================================================
-
-function formatDate(date) {
+function formatDutchDate(date) {
 
     if (!date) return "-";
 
@@ -2104,56 +1002,19 @@ function formatDate(date) {
     return new Intl.DateTimeFormat(
         "nl-NL",
         {
-
             weekday: "long",
-
             day: "numeric",
-
             month: "long",
-
             year: "numeric"
-
         }
     ).format(date);
 
 }
 
 
-function formatDateString(dateString) {
-
-    if (!dateString) return "-";
-
-
-    const date =
-        new Date(dateString);
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return dateString;
-
-    }
-
-
-    return new Intl.DateTimeFormat(
-        "nl-NL",
-        {
-
-            day: "numeric",
-
-            month: "long",
-
-            year: "numeric"
-
-        }
-    ).format(date);
-
-}
-
+// ======================================================
+// TIJD FORMATTEREN
+// ======================================================
 
 function formatTime(date) {
 
@@ -2163,12 +1024,21 @@ function formatTime(date) {
     return new Intl.DateTimeFormat(
         "nl-NL",
         {
-
             hour: "2-digit",
-
             minute: "2-digit"
-
         }
     ).format(date);
 
 }
+
+
+// ======================================================
+// INPUT DATUM
+// ======================================================
+
+function formatDateForInput(date) {
+
+    if (!date) {
+
+        const today =
+    
