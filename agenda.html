@@ -1,109 +1,384 @@
-<!DOCTYPE html><html lang="nl">
+<!DOCTYPE html>
+<html lang="nl">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Snejin Agenda</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="icon" href="logo.png">
-<link rel="stylesheet" href="style.css">
+    <title>Snejin Agenda</title>
 
-<!-- FullCalendar -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-<script type="module" src="agenda.js"></script>
-</head><body class="agenda-page"><header class="topbar"><div class="logo-area">
-    <img
-        src="logo.png"
-        class="logo-small"
-        alt="Snejin Agenda logo"
+    <meta name="theme-color" content="#00A896">
+
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- FullCalendar -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js"></script>
+
+    <script type="module" src="agenda.js"></script>
+</head>
+
+<body>
+
+    <header class="topbar">
+
+        <div class="brand">
+            <img src="logo.png" alt="Snejin Agenda">
+            <span>Snejin Agenda</span>
+        </div>
+
+        <div class="top-buttons">
+
+            <input
+                id="search"
+                type="search"
+                placeholder="Zoeken..."
+                aria-label="Zoeken in agenda"
+            >
+
+            <button
+                id="themeButton"
+                type="button"
+                title="Donkere modus"
+                aria-label="Donkere modus"
+            >
+                🌙
+            </button>
+
+            <button
+                id="logoutButton"
+                type="button"
+            >
+                Uitloggen
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <main class="main-content">
+
+        <section class="calendar-card">
+
+            <div id="calendar"></div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Nieuwe afspraak / afspraak bewerken -->
+    <div
+        id="eventModal"
+        class="modal"
+        aria-hidden="true"
     >
 
-    <div>
-        <h1>Snejin Agenda</h1>
-        <span>Familieagenda</span>
+        <div
+            class="modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="formTitle"
+        >
+
+            <button
+                id="closeFormX"
+                class="modal-close"
+                type="button"
+                aria-label="Sluiten"
+            >
+                ×
+            </button>
+
+            <h2 id="formTitle">
+                Nieuwe afspraak
+            </h2>
+
+            <div class="form-body">
+
+                <div class="form-group">
+
+                    <label for="eventTitle">
+                        Titel
+                    </label>
+
+                    <input
+                        id="eventTitle"
+                        type="text"
+                        placeholder="Bijvoorbeeld: Tandarts"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="eventDescription">
+                        Omschrijving
+                    </label>
+
+                    <textarea
+                        id="eventDescription"
+                        rows="4"
+                        placeholder="Extra informatie..."
+                    ></textarea>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="eventDate">
+                            Datum
+                        </label>
+
+                        <input
+                            id="eventDate"
+                            type="date"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="eventTime">
+                            Tijd
+                        </label>
+
+                        <input
+                            id="eventTime"
+                            type="time"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="eventType">
+                        Type
+                    </label>
+
+                    <select id="eventType">
+
+                        <option value="activity">
+                            🟩 Activiteit
+                        </option>
+
+                        <option value="work">
+                            🔴 Werken
+                        </option>
+
+                        <option value="holiday">
+                            🟢 Vakantie
+                        </option>
+
+                        <option value="birthday">
+                            🎂 Verjaardag
+                        </option>
+
+                        <option value="holidayofficial">
+                            🟡 Officiële feestdag
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="checkbox-group">
+
+                    <label>
+
+                        <input
+                            id="allDay"
+                            type="checkbox"
+                            checked
+                        >
+
+                        Hele dag
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    id="cancelEventButton"
+                    type="button"
+                    class="btn secondary"
+                >
+                    Annuleren
+                </button>
+
+                <button
+                    id="saveEventButton"
+                    type="button"
+                    class="btn primary"
+                >
+                    💾 Opslaan
+                </button>
+
+            </div>
+
+        </div>
+
     </div>
-</div>
 
-<div class="top-buttons">
 
-    <input
-        id="search"
-        type="search"
-        placeholder="🔍 Zoek afspraak"
-        autocomplete="off"
+    <!-- Afspraak bekijken -->
+    <div
+        id="eventViewModal"
+        class="modal"
+        aria-hidden="true"
     >
 
+        <div
+            class="modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="viewTitle"
+        >
+
+            <button
+                id="closeViewX"
+                class="modal-close"
+                type="button"
+                aria-label="Sluiten"
+            >
+                ×
+            </button>
+
+
+            <div
+                id="viewBadge"
+                class="event-badge"
+            >
+                🟩 Activiteit
+            </div>
+
+
+            <h2 id="viewTitle">
+                Afspraak
+            </h2>
+
+
+            <div class="event-details">
+
+                <div class="event-detail">
+
+                    <strong>📅 Datum</strong>
+
+                    <span id="viewDate">
+                        -
+                    </span>
+
+                </div>
+
+
+                <div class="event-detail">
+
+                    <strong>🕐 Tijd</strong>
+
+                    <span id="viewTime">
+                        -
+                    </span>
+
+                </div>
+
+
+                <div class="event-detail">
+
+                    <strong>🏷️ Type</strong>
+
+                    <span id="viewCategoryName">
+                        -
+                    </span>
+
+                </div>
+
+
+                <div class="event-detail">
+
+                    <strong>📝 Omschrijving</strong>
+
+                    <span id="viewDescription">
+                        Geen omschrijving.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    id="closeViewButton"
+                    type="button"
+                    class="btn secondary"
+                >
+                    Sluiten
+                </button>
+
+                <button
+                    id="doneFromViewButton"
+                    type="button"
+                    class="btn success"
+                >
+                    ✓ Gereed
+                </button>
+
+                <button
+                    id="editFromViewButton"
+                    type="button"
+                    class="btn primary"
+                >
+                    ✏️ Bewerken
+                </button>
+
+                <button
+                    id="deleteFromViewButton"
+                    type="button"
+                    class="btn danger"
+                >
+                    🗑️ Verwijderen
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Nieuwe afspraak knop -->
     <button
-        id="themeButton"
+        id="addEventButton"
+        class="floatingButton"
         type="button"
-        aria-label="Donkere modus"
-        title="Donkere modus"
+        aria-label="Nieuwe afspraak toevoegen"
+        title="Nieuwe afspraak"
     >
-        🌙
+        +
     </button>
 
-    <button
-        id="logoutButton"
-        type="button"
-    >
-        🚪 Uitloggen
-    </button>
+</body>
 
-</div>
-
-</header><main><section class="calendar-card">
-
-    <div id="calendar"></div>
-
-</section>
-
-</main><!-- NIEUWE AFSPRAAK --><button
-id="addEventButton"
-class="floatingButton"
-type="button"
-title="Nieuwe afspraak"
-aria-label="Nieuwe afspraak"
-
-«»
-
-+
-
-</button><!-- ======================================================
-     AFSPRAAK BEKIJKEN
-====================================================== --><div
-    id="eventViewModal"
-    class="modal"
-    aria-hidden="true"
-><div
-    class="modal-content view-content"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="viewTitle"
->
-
-    <button
-        class="modal-close"
-        id="closeViewX"
-        type="button"
-        aria-label="Sluiten"
-    >
-        &times;
-    </button>
-
-
-    <span
-        class="view-badge"
-        id="viewBadge"
-    >
-        Categorie
-    </span>
-
-
-    <h2 id="viewTitle">
-        Afspraak
-    </h2>
-
-
-    <div class="view-meta">
-
+</html>
         <div class="view-row">
             <span class="view-icon">📅</span>
             <span id="viewDate">-</span>
