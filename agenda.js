@@ -1,29 +1,20 @@
-import { db, auth } from "./firebase.js";
-import {
-    collection,
-    addDoc,
-    getDocs,
-    updateDoc,
-    deleteDoc,
-    doc,
-    setDoc
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-import {
-    onAuthStateChanged,
-    signOut
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+let db = null;
+let auth = null;
+let firestoreFns = null;
+let authFns = null;
+let firebaseReady = false;
 
 let calendar = null;
 let selectedEventId = null;
 let currentViewEvent = null;
 let editingEventId = null;
 let activeCategoryFilter = "all";
-let firestoreAvailable = true;
+let firestoreAvailable = false;
 let miniCalDate = new Date();
 
-const appointmentsRef = collection(db, "appointments");
-const completedAppointmentsRef = collection(db, "completedAppointments");
-const categoriesRef = collection(db, "categories");
+let appointmentsRef = null;
+let completedAppointmentsRef = null;
+let categoriesRef = null;
 
 const DEFAULT_CATEGORIES = {
     work: { id: "work", label: "Werken", color: "#0B57D0", emoji: "🔵", isDefault: true },
@@ -35,32 +26,65 @@ const DEFAULT_CATEGORIES = {
 
 let categoryConfig = { ...DEFAULT_CATEGORIES };
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     setupTheme();
     setupButtons();
     setupModals();
     setupSearch();
     setupBackupAndTools();
-    renderMiniCalendar();
 
-    onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-            window.location.replace("index.html");
+    loadCategoriesLocalFirst();
+    renderCategoryUI();
+    renderMiniCalendar();
+    createCalendar();
+    loadAppointmentsLocalFirst();
+    updateStats();
+    syncHeaderTitle();
+
+    await initFirebaseSafely();
+});
+
+async function initFirebaseSafely() {
+    try {
+        const fbModule = await import("./firebase.js");
+        const fsModule = await import("https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js");
+        const authModule = await import("https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js");
+
+        db = fbModule.db;
+        auth = fbModule.auth;
+        firestoreFns = fsModule;
+        authFns = authModule;
+
+        if (!db || !auth) {
             return;
         }
 
-        try {
-            await loadCategories();
-            createCalendar();
-            await loadAppointments();
+        appointmentsRef = firestoreFns.collection(db, "appointments");
+        completedAppointmentsRef = firestoreFns.collection(db, "completedAppointments");
+        categoriesRef = firestoreFns.collection(db, "categories");
+        firebaseReady = true;
+
+        authFns.onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                // Alleen doorsturen naar index.html als de gebruiker niet al op index.html zit
+                if (!window.location.pathname.endsWith("index.html")) {
+                    // Laat de agenda direct werken met lokale opslag als er nog niet is ingelogd via Firebase
+                    firestoreAvailable = false;
+                }
+                return;
+            }
+
+            firestoreAvailable = true;
+            await loadCategoriesFromFirestore();
+            await loadAppointmentsFromFirestore();
             updateStats();
             syncHeaderTitle();
-        } catch (error) {
-            console.error("Agenda initialiseren mislukt:", error);
-            showMessage("De agenda kon niet worden geladen.", "error");
-        }
-    });
-});
+        });
+    } catch (err) {
+        console.warn("Firebase niet actief of lokaal gestart; lokale opslag is actief:", err);
+        firestoreAvailable = false;
+    }
+}
 
 function syncHeaderTitle() {
     if (!calendar) return;
@@ -87,7 +111,7 @@ function renderMiniCalendar() {
     labelEl.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
 
     const firstDayOfMonth = new Date(year, month, 1);
-    const startOffset = (firstDayOfMonth.getDay() + 6) % 7; // maandag = 0
+    const startOffset = (firstDayOfMonth.getDay() + 6) % 7;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const prevMonthDays = new Date(year, month, 0).getDate();
 
@@ -142,14 +166,20 @@ function renderMiniCalendar() {
     }
 }
 
-async function loadCategories() {
+function loadCategoriesLocalFirst() {
     categoryConfig = { ...DEFAULT_CATEGORIES };
-
-    const localCats = JSON.parse(localStorage.getItem("snejin_categories") || "{}");
-    Object.assign(categoryConfig, localCats);
-
     try {
-        const snapshot = await getDocs(categoriesRef);
+        const localCats = JSON.parse(localStorage.getItem("snejin_categories") || "{}");
+        Object.assign(categoryConfig, localCats);
+    } catch (e) {
+        console.warn("Kon lokale categorieën niet lezen:", e);
+    }
+}
+
+async function loadCategoriesFromFirestore() {
+    if (!firestoreAvailable || !categoriesRef || !firestoreFns) return;
+    try {
+        const snapshot = await firestoreFns.getDocs(categoriesRef);
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             categoryConfig[docSnap.id] = {
@@ -160,13 +190,10 @@ async function loadCategories() {
                 isDefault: Boolean(data.isDefault)
             };
         });
-        firestoreAvailable = true;
+        renderCategoryUI();
     } catch (error) {
-        console.warn("Kon categorieën niet uit Firestore laden, lokale opslag gebruikt:", error);
-        firestoreAvailable = false;
+        console.warn("Categorieën laden uit Firestore mislukt:", error);
     }
-
-    renderCategoryUI();
 }
 
 function saveCategoriesLocal() {
@@ -244,12 +271,13 @@ async function createCategory() {
     const emojiInput = document.getElementById("newCategoryEmoji");
     const colorInput = document.getElementById("newCategoryColor");
 
-    const label = nameInput.value.trim();
-    const emoji = emojiInput.value || "🟦";
-    const color = colorInput.value || "#0B57D0";
+    const label = (nameInput?.value || "").trim();
+    const emoji = emojiInput?.value || "🟦";
+    const color = colorInput?.value || "#0B57D0";
 
     if (!label) {
         showMessage("Vul een naam in voor de categorie.", "error");
+        nameInput?.focus();
         return;
     }
 
@@ -259,17 +287,17 @@ async function createCategory() {
     categoryConfig[slugId] = newCat;
     saveCategoriesLocal();
 
-    if (firestoreAvailable) {
+    if (firestoreAvailable && db && firestoreFns) {
         try {
-            await setDoc(doc(db, "categories", slugId), newCat);
+            await firestoreFns.setDoc(firestoreFns.doc(db, "categories", slugId), newCat);
         } catch (error) {
-            console.warn("Categorie opslaan in Firestore mislukt, lokaal opgeslagen:", error);
+            console.warn("Categorie opslaan in Firestore mislukt:", error);
         }
     }
 
     renderCategoryUI();
     closeModal("categoryModal");
-    nameInput.value = "";
+    if (nameInput) nameInput.value = "";
     showMessage(`Categorie '${label}' toegevoegd.`, "success");
 }
 
@@ -282,15 +310,14 @@ async function deleteCategory(catId) {
         return;
     }
 
-    const confirmed = confirm(`Weet je zeker dat je de categorie '${cat.label}' wilt verwijderen?`);
-    if (!confirmed) return;
+    if (!confirm(`Weet je zeker dat je de categorie '${cat.label}' wilt verwijderen?`)) return;
 
     delete categoryConfig[catId];
     saveCategoriesLocal();
 
-    if (firestoreAvailable) {
+    if (firestoreAvailable && db && firestoreFns) {
         try {
-            await deleteDoc(doc(db, "categories", catId));
+            await firestoreFns.deleteDoc(firestoreFns.doc(db, "categories", catId));
         } catch (error) {
             console.warn("Categorie verwijderen uit Firestore mislukt:", error);
         }
@@ -321,9 +348,11 @@ async function deleteCategory(catId) {
 
 function createCalendar() {
     const calendarEl = document.getElementById("calendar");
-    if (!calendarEl) throw new Error("Element #calendar ontbreekt.");
+    if (!calendarEl) return;
+
     if (typeof FullCalendar === "undefined" || !FullCalendar.Calendar) {
-        throw new Error("FullCalendar is niet geladen.");
+        calendarEl.innerHTML = "<p style='padding:16px;'>Kalenderbibliotheek kon niet laden. Controleer de internetverbinding.</p>";
+        return;
     }
 
     calendar = new FullCalendar.Calendar(calendarEl, {
@@ -374,14 +403,14 @@ function createCalendar() {
                 category: ev.extendedProps.category || "activity"
             });
 
-            if (firestoreAvailable && !ev.id.startsWith("local_")) {
+            if (firestoreAvailable && db && firestoreFns && !ev.id.startsWith("local_")) {
                 try {
-                    await updateDoc(doc(db, "appointments", ev.id), {
+                    await firestoreFns.updateDoc(firestoreFns.doc(db, "appointments", ev.id), {
                         start: newStart,
                         allDay: ev.allDay
                     });
                 } catch (err) {
-                    console.warn("Kon versleepte datum niet in Firestore bijwerken:", err);
+                    console.warn("Versleepte datum bijwerken in Firestore mislukt:", err);
                 }
             }
             updateStats();
@@ -426,6 +455,7 @@ function removeLocalAppointment(id) {
 }
 
 function addEventToCalendarObject(id, data) {
+    if (!calendar) return;
     const category = categoryConfig[data.category] ? data.category : "activity";
     const config = categoryConfig[category] || { label: "Activiteit", color: "#1A73E8", emoji: "🟦" };
     const title = data.title || "Afspraak";
@@ -447,33 +477,33 @@ function addEventToCalendarObject(id, data) {
     });
 }
 
-async function loadAppointments() {
+function loadAppointmentsLocalFirst() {
     if (!calendar) return;
-
     calendar.removeAllEvents();
-    const combined = { ...getLocalAppointments() };
+    const localData = getLocalAppointments();
+    Object.entries(localData).forEach(([id, data]) => {
+        if (data && data.start) {
+            addEventToCalendarObject(id, data);
+        }
+    });
+    applyFilters();
+    updateStats();
+}
 
+async function loadAppointmentsFromFirestore() {
+    if (!calendar || !firestoreAvailable || !appointmentsRef || !firestoreFns) return;
     try {
-        const snapshot = await getDocs(appointmentsRef);
+        const snapshot = await firestoreFns.getDocs(appointmentsRef);
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             if (data && data.start) {
-                combined[docSnap.id] = data;
+                saveLocalAppointment(docSnap.id, data);
             }
         });
-        firestoreAvailable = true;
+        loadAppointmentsLocalFirst();
     } catch (error) {
-        console.warn("Firestore afspraken laden mislukt, lokale afspraken geladen:", error);
-        firestoreAvailable = false;
+        console.warn("Firestore afspraken laden mislukt:", error);
     }
-
-    Object.entries(combined).forEach(([id, data]) => {
-        if (!data || !data.start) return;
-        addEventToCalendarObject(id, data);
-    });
-
-    applyFilters();
-    updateStats();
 }
 
 function buildOccurrenceDates(baseDateStr, timeStr, allDay, repeatMode) {
@@ -495,16 +525,17 @@ function buildOccurrenceDates(baseDateStr, timeStr, allDay, repeatMode) {
 }
 
 async function saveEvent() {
-    const title = document.getElementById("eventTitle").value.trim();
-    const description = document.getElementById("eventDescription").value.trim();
-    const date = document.getElementById("eventDate").value;
-    const time = document.getElementById("eventTime").value;
-    const category = document.getElementById("eventType").value || "activity";
+    const title = (document.getElementById("eventTitle")?.value || "").trim();
+    const description = (document.getElementById("eventDescription")?.value || "").trim();
+    const date = document.getElementById("eventDate")?.value || "";
+    const time = document.getElementById("eventTime")?.value || "";
+    const category = document.getElementById("eventType")?.value || "activity";
     const repeatMode = document.getElementById("eventRepeat")?.value || "none";
-    const allDay = document.getElementById("allDay").checked;
+    const allDay = Boolean(document.getElementById("allDay")?.checked);
 
     if (!title) {
         showMessage("Voeg een titel toe voor de afspraak.", "error");
+        document.getElementById("eventTitle")?.focus();
         return;
     }
     if (!date) {
@@ -525,11 +556,15 @@ async function saveEvent() {
             const payload = { title, description, start, allDay, category };
             saveLocalAppointment(editingEventId, payload);
 
-            if (firestoreAvailable && !editingEventId.startsWith("local_")) {
-                await updateDoc(doc(db, "appointments", editingEventId), payload);
+            if (firestoreAvailable && db && firestoreFns && !editingEventId.startsWith("local_")) {
+                try {
+                    await firestoreFns.updateDoc(firestoreFns.doc(db, "appointments", editingEventId), payload);
+                } catch (err) {
+                    console.warn("Update in Firestore mislukt, lokaal bijgewerkt:", err);
+                }
             }
 
-            const event = calendar.getEventById(editingEventId);
+            const event = calendar?.getEventById(editingEventId);
             if (event) {
                 const config = categoryConfig[category] || categoryConfig.activity;
                 event.setProp("title", title);
@@ -556,9 +591,9 @@ async function saveEvent() {
                 };
 
                 let createdId = "local_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
-                if (firestoreAvailable) {
+                if (firestoreAvailable && appointmentsRef && firestoreFns) {
                     try {
-                        const newDoc = await addDoc(appointmentsRef, payload);
+                        const newDoc = await firestoreFns.addDoc(appointmentsRef, payload);
                         createdId = newDoc.id;
                     } catch (err) {
                         console.warn("Firestore addDoc mislukt, lokaal opgeslagen:", err);
@@ -634,11 +669,11 @@ async function markEventAsDone() {
             originalId: event.id
         };
 
-        if (firestoreAvailable) {
+        if (firestoreAvailable && completedAppointmentsRef && db && firestoreFns) {
             try {
-                await addDoc(completedAppointmentsRef, donePayload);
+                await firestoreFns.addDoc(completedAppointmentsRef, donePayload);
                 if (!event.id.startsWith("local_")) {
-                    await deleteDoc(doc(db, "appointments", event.id));
+                    await firestoreFns.deleteDoc(firestoreFns.doc(db, "appointments", event.id));
                 }
             } catch (err) {
                 console.warn("Kon voltooide afspraak niet naar Firestore verplaatsen:", err);
@@ -666,16 +701,16 @@ async function deleteCurrentEvent() {
     if (!confirm("Weet je zeker dat je deze afspraak wilt verwijderen?")) return;
 
     try {
-        if (firestoreAvailable && !id.startsWith("local_")) {
+        if (firestoreAvailable && db && firestoreFns && !id.startsWith("local_")) {
             try {
-                await deleteDoc(doc(db, "appointments", id));
+                await firestoreFns.deleteDoc(firestoreFns.doc(db, "appointments", id));
             } catch (err) {
                 console.warn("Kon afspraak niet uit Firestore verwijderen:", err);
             }
         }
 
         removeLocalAppointment(id);
-        const event = calendar.getEventById(id);
+        const event = calendar?.getEventById(id);
         if (event) event.remove();
 
         currentViewEvent = null;
@@ -692,14 +727,18 @@ async function deleteCurrentEvent() {
 
 function setupButtons() {
     document.getElementById("addEventButton")?.addEventListener("click", () => openFormModal());
+
     document.getElementById("gcalTodayBtn")?.addEventListener("click", () => {
         calendar?.today();
         syncHeaderTitle();
+        showMessage("Terug naar vandaag.", "info");
     });
+
     document.getElementById("gcalPrevBtn")?.addEventListener("click", () => {
         calendar?.prev();
         syncHeaderTitle();
     });
+
     document.getElementById("gcalNextBtn")?.addEventListener("click", () => {
         calendar?.next();
         syncHeaderTitle();
@@ -730,19 +769,21 @@ function setupButtons() {
     });
 
     document.getElementById("openCategoryModalBtn")?.addEventListener("click", () => {
-        document.getElementById("newCategoryName").value = "";
+        const input = document.getElementById("newCategoryName");
+        if (input) input.value = "";
         openModal("categoryModal");
-        setTimeout(() => document.getElementById("newCategoryName")?.focus(), 50);
+        setTimeout(() => input?.focus(), 50);
     });
 
     document.getElementById("logoutButton")?.addEventListener("click", async () => {
-        try {
-            await signOut(auth);
-            window.location.replace("index.html");
-        } catch (error) {
-            console.error("Uitloggen mislukt:", error);
-            showMessage("Uitloggen mislukt.", "error");
+        if (firebaseReady && auth && authFns) {
+            try {
+                await authFns.signOut(auth);
+            } catch (err) {
+                console.warn("Uitloggen bij Firebase overgeslagen:", err);
+            }
         }
+        window.location.href = "index.html";
     });
 }
 
@@ -806,6 +847,7 @@ function setupBackupAndTools() {
         activeCategoryFilter = "all";
         renderCategoryUI();
         applyFilters();
+        showMessage("Alle categorieën zichtbaar.", "info");
     });
 
     document.getElementById("printAgendaBtn")?.addEventListener("click", () => {
@@ -850,7 +892,7 @@ function setupBackupAndTools() {
                 Object.assign(existing, parsed.appointments);
                 localStorage.setItem("snejin_appointments", JSON.stringify(existing));
             }
-            await loadAppointments();
+            loadAppointmentsLocalFirst();
             showMessage("Back-up succesvol geïmporteerd.", "success");
         } catch (err) {
             console.error("Import mislukt:", err);
@@ -925,6 +967,7 @@ function setupTheme() {
     if (isDark) {
         document.body.classList.add("dark");
         document.body.classList.add("dark-mode");
+        if (themeBtn) themeBtn.textContent = "☀️";
     }
 
     themeBtn?.addEventListener("click", () => {
@@ -932,6 +975,7 @@ function setupTheme() {
         document.body.classList.toggle("dark-mode");
         const darkModeActive = document.body.classList.contains("dark");
         localStorage.setItem("theme", darkModeActive ? "dark" : "light");
+        if (themeBtn) themeBtn.textContent = darkModeActive ? "☀️" : "🌙";
     });
 }
 
@@ -1025,7 +1069,7 @@ function resetForm() {
 }
 
 function updateTimeInputState() {
-    const allDayChecked = document.getElementById("allDay").checked;
+    const allDayChecked = Boolean(document.getElementById("allDay")?.checked);
     const timeInput = document.getElementById("eventTime");
     if (timeInput) {
         timeInput.disabled = allDayChecked;
@@ -1048,12 +1092,12 @@ function showMessage(text, type = "info") {
             bottom: 24px;
             left: 24px;
             padding: 12px 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             background: #1f1f1f;
             color: #ffffff;
             font-size: 14px;
             font-weight: 500;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.22);
             z-index: 10000;
             transition: all 0.25s ease;
         `;
