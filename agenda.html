@@ -29,7 +29,7 @@
             <img src="logo.png" alt="Snejin Agenda" class="logo-small">
             <div>
                 <h1>Snejin Agenda</h1>
-                <span>Overzicht & Planning</span>
+                <span>Familieagenda &amp; Planning</span>
             </div>
         </div>
 
@@ -38,8 +38,33 @@
                 id="search"
                 type="search"
                 placeholder="🔍 Zoeken in afspraken..."
-                aria-label="Zoeken in agenda"
+                aria-label="Zoeken in Snejin Agenda"
             >
+
+            <button
+                id="exportIcsButton"
+                type="button"
+                title="Exporteer naar .ICS"
+            >
+                📤 ICS
+            </button>
+
+            <button
+                id="exportJsonButton"
+                type="button"
+                title="Back-up maken (.JSON)"
+            >
+                💾 Back-up
+            </button>
+
+            <button
+                id="importJsonButton"
+                type="button"
+                title="Back-up herstellen (.JSON)"
+            >
+                📥 Import
+            </button>
+            <input id="importJsonInput" type="file" accept=".json" style="display:none;">
 
             <button
                 id="themeButton"
@@ -60,7 +85,51 @@
         </div>
     </header>
 
-    <main class="main-content">
+    <main class="agenda-layout">
+        <!-- Zijbalk met categorieën (aanmaken & verwijderen), filters en sneltools -->
+        <aside class="sidebar-card">
+            <div class="sidebar-section">
+                <button id="sidebarNewEventBtn" type="button" class="btn btn-save full-width">
+                    + Nieuwe afspraak
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h2>Categorieën</h2>
+                    <button id="openCategoryModalBtn" type="button" class="small-action-btn" title="Nieuwe categorie aanmaken">
+                        + Nieuw
+                    </button>
+                </div>
+                <p class="section-hint">Klik om te filteren of verwijder een categorie.</p>
+                <ul id="categoryList" class="category-list"></ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h2>Agenda-overzicht</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span id="statTotalEvents" class="stat-number">0</span>
+                        <span class="stat-label">Afspraken</span>
+                    </div>
+                    <div class="stat-box">
+                        <span id="statUpcomingWeek" class="stat-number">0</span>
+                        <span class="stat-label">Deze week</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h2>Handige tools</h2>
+                <div class="tool-buttons">
+                    <button id="jumpTodayBtn" type="button" class="tool-btn">📍 Ga naar vandaag</button>
+                    <button id="showAllCategoriesBtn" type="button" class="tool-btn">👁️ Alle categorieën tonen</button>
+                    <button id="printAgendaBtn" type="button" class="tool-btn">🖨️ Afdrukken</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Hoofdkalender -->
         <section class="calendar-card">
             <div id="calendar"></div>
         </section>
@@ -74,13 +143,13 @@
 
             <div class="form-body">
                 <div class="form-group">
-                    <label for="eventTitle">Titel van afspraak</label>
-                    <input id="eventTitle" type="text" placeholder="Bijv. Tandarts, Vergadering, Verjaardag..." required>
+                    <label for="eventTitle">Titel</label>
+                    <input id="eventTitle" type="text" placeholder="Bijv. Tandarts, Verjaardag, Werken..." required>
                 </div>
 
                 <div class="form-group">
-                    <label for="eventDescription">Omschrijving / Notities</label>
-                    <textarea id="eventDescription" rows="3" placeholder="Extra details, locatie of opmerkingen..."></textarea>
+                    <label for="eventDescription">Omschrijving / Locatie / Notities</label>
+                    <textarea id="eventDescription" rows="3" placeholder="Extra informatie, adres of opmerkingen..."></textarea>
                 </div>
 
                 <div class="form-row">
@@ -95,20 +164,25 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="eventType">Categorie</label>
-                    <select id="eventType">
-                        <option value="activity">🟩 Activiteit</option>
-                        <option value="work">🔴 Werken</option>
-                        <option value="holiday">🟢 Vakantie</option>
-                        <option value="birthday">🎂 Verjaardag</option>
-                        <option value="holidayofficial">🟡 Officiële feestdag</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventType">Categorie</label>
+                        <select id="eventType"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventRepeat">Herhaling</label>
+                        <select id="eventRepeat">
+                            <option value="none">Niet herhalen</option>
+                            <option value="weekly">Wekelijks (4 weken)</option>
+                            <option value="monthly">Maandelijks (3 maanden)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <label class="checkbox-line">
                     <input id="allDay" type="checkbox" checked>
-                    <span>Hele dag duurt deze afspraak</span>
+                    <span>Hele dag</span>
                 </label>
             </div>
 
@@ -119,7 +193,48 @@
         </div>
     </div>
 
-    <!-- Modal: Afspraak Details -->
+    <!-- Modal: Categorie Aanmaken -->
+    <div id="categoryModal" class="modal" aria-hidden="true">
+        <div class="modal-content form-content" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+            <button id="closeCategoryX" class="modal-close" type="button" aria-label="Sluiten">&times;</button>
+            <h2 id="categoryModalTitle">Nieuwe categorie aanmaken</h2>
+
+            <div class="form-body">
+                <div class="form-group">
+                    <label for="newCategoryName">Naam van categorie</label>
+                    <input id="newCategoryName" type="text" placeholder="Bijv. Sport, School, Huisdier..." required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newCategoryEmoji">Emoji / Icoon</label>
+                        <select id="newCategoryEmoji">
+                            <option value="🟦">🟦 Blauw blok</option>
+                            <option value="🟪">🟪 Paars blok</option>
+                            <option value="🟧">🟧 Oranje blok</option>
+                            <option value="⚽">⚽ Sport</option>
+                            <option value="🎓">🎓 School</option>
+                            <option value="🏠">🏠 Thuis</option>
+                            <option value="❤️">❤️ Familie</option>
+                            <option value="⭐">⭐ Belangrijk</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newCategoryColor">Kleur</label>
+                        <input id="newCategoryColor" type="color" value="#0ea5e9">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button id="cancelCategoryButton" type="button" class="btn btn-cancel">Annuleren</button>
+                <button id="saveCategoryButton" type="button" class="btn btn-save">✅ Categorie toevoegen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Afspraak Bekijken -->
     <div id="eventViewModal" class="modal" aria-hidden="true">
         <div class="modal-content view-content" role="dialog" aria-modal="true" aria-labelledby="viewTitle">
             <button id="closeViewX" class="modal-close" type="button" aria-label="Sluiten">&times;</button>
