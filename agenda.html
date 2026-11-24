@@ -534,7 +534,7 @@
         </div>
       </div>
       <label class="check-row">
-        <input id="eventAllDayInput" type="checkbox" checked />
+        <input id="eventAllDayInput" type="checkbox" />
         <span>Hele dag</span>
       </label>
       <div class="field">
@@ -1037,7 +1037,7 @@
         document.getElementById("eventTitleInput").value = "";
         document.getElementById("eventDateInput").value = defaultDate || fmtDate(anchorDate);
         document.getElementById("eventTimeInput").value = "";
-        document.getElementById("eventAllDayInput").checked = true;
+        document.getElementById("eventAllDayInput").checked = false;
         document.getElementById("eventCategorySelect").value = categories.activity ? "activity" : Object.keys(categories)[0];
         document.getElementById("eventDescInput").value = "";
       }
