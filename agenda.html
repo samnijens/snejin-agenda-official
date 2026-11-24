@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snejin Agenda</title>
 
-    <meta name="theme-color" content="#00A896">
+    <meta name="theme-color" content="#0B57D0">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="style.css">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- FullCalendar -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
@@ -22,156 +22,177 @@
     <script type="module" src="agenda.js"></script>
 </head>
 
-<body class="agenda-page">
+<body class="gcal-body">
 
-    <header class="topbar">
-        <div class="logo-area">
-            <img src="logo.png" alt="Snejin Agenda" class="logo-small">
-            <div>
-                <h1>Snejin Agenda</h1>
-                <span>Familieagenda &amp; Planning</span>
+    <!-- Bovenste balk (stijl Google Calendar) -->
+    <header class="gcal-header">
+        <div class="gcal-header-left">
+            <button id="toggleSidebarBtn" type="button" class="gcal-icon-btn" title="Zijbalk in- of uitklappen" aria-label="Menu">
+                ☰
+            </button>
+
+            <a href="agenda.html" class="gcal-brand">
+                <img src="logo.png" alt="Snejin Agenda" class="gcal-logo">
+                <span class="gcal-brand-text">Snejin Agenda</span>
+            </a>
+
+            <button id="gcalTodayBtn" type="button" class="gcal-outlined-btn">
+                Vandaag
+            </button>
+
+            <div class="gcal-nav-arrows">
+                <button id="gcalPrevBtn" type="button" class="gcal-icon-btn" title="Vorige periode" aria-label="Vorige">
+                    ‹
+                </button>
+                <button id="gcalNextBtn" type="button" class="gcal-icon-btn" title="Volgende periode" aria-label="Volgende">
+                    ›
+                </button>
+            </div>
+
+            <h1 id="gcalCurrentTitle" class="gcal-current-title">November 2026</h1>
+        </div>
+
+        <div class="gcal-header-center">
+            <div class="gcal-search-box">
+                <span class="gcal-search-icon">🔍</span>
+                <input
+                    id="search"
+                    type="search"
+                    placeholder="Zoeken in Snejin Agenda..."
+                    aria-label="Zoeken in Snejin Agenda"
+                >
             </div>
         </div>
 
-        <div class="top-buttons">
-            <input
-                id="search"
-                type="search"
-                placeholder="🔍 Zoeken in afspraken..."
-                aria-label="Zoeken in Snejin Agenda"
-            >
+        <div class="gcal-header-right">
+            <div class="gcal-view-switcher" role="group" aria-label="Weergave kiezen">
+                <button type="button" class="gcal-view-btn" data-view="timeGridDay">Dag</button>
+                <button type="button" class="gcal-view-btn" data-view="timeGridWeek">Week</button>
+                <button type="button" class="gcal-view-btn active" data-view="dayGridMonth">Maand</button>
+                <button type="button" class="gcal-view-btn" data-view="listWeek">Agenda</button>
+            </div>
 
-            <button
-                id="exportIcsButton"
-                type="button"
-                title="Exporteer naar .ICS"
-            >
-                📤 ICS
+            <button id="exportIcsButton" type="button" class="gcal-subtle-btn" title="Exporteer naar .ICS">
+                .ICS
             </button>
-
-            <button
-                id="exportJsonButton"
-                type="button"
-                title="Back-up maken (.JSON)"
-            >
-                💾 Back-up
+            <button id="exportJsonButton" type="button" class="gcal-subtle-btn" title="Back-up opslaan (.JSON)">
+                Back-up
             </button>
-
-            <button
-                id="importJsonButton"
-                type="button"
-                title="Back-up herstellen (.JSON)"
-            >
-                📥 Import
+            <button id="importJsonButton" type="button" class="gcal-subtle-btn" title="Back-up herstellen (.JSON)">
+                Import
             </button>
             <input id="importJsonInput" type="file" accept=".json" style="display:none;">
 
-            <button
-                id="themeButton"
-                type="button"
-                title="Donkere modus"
-                aria-label="Donkere modus"
-            >
+            <button id="themeButton" type="button" class="gcal-icon-btn" title="Donkere modus" aria-label="Donkere modus">
                 🌙
             </button>
 
-            <button
-                id="logoutButton"
-                type="button"
-                class="logout-btn"
-            >
+            <button id="logoutButton" type="button" class="gcal-logout-btn">
                 Uitloggen
             </button>
         </div>
     </header>
 
-    <main class="agenda-layout">
-        <!-- Zijbalk met categorieën (aanmaken & verwijderen), filters en sneltools -->
-        <aside class="sidebar-card">
-            <div class="sidebar-section">
-                <button id="sidebarNewEventBtn" type="button" class="btn btn-save full-width">
-                    + Nieuwe afspraak
-                </button>
+    <!-- Hoofdwerkruimte: Zijbalk links + Kalender rechts -->
+    <div class="gcal-workspace">
+        <aside id="gcalSidebar" class="gcal-sidebar">
+            <!-- Maken knop zoals Google Calendar -->
+            <button id="addEventButton" type="button" class="gcal-create-btn">
+                <span class="gcal-plus">+</span>
+                <span>Maken</span>
+            </button>
+
+            <!-- Mini-kalender / Maandoverzicht -->
+            <div class="gcal-mini-cal">
+                <div class="gcal-mini-header">
+                    <span id="miniCalMonthLabel">November 2026</span>
+                    <div class="gcal-mini-arrows">
+                        <button id="miniPrevMonth" type="button" aria-label="Vorige maand">‹</button>
+                        <button id="miniNextMonth" type="button" aria-label="Volgende maand">›</button>
+                    </div>
+                </div>
+                <div class="gcal-mini-weekdays">
+                    <span>M</span><span>D</span><span>W</span><span>D</span><span>V</span><span>Z</span><span>Z</span>
+                </div>
+                <div id="miniCalGrid" class="gcal-mini-grid"></div>
             </div>
 
-            <div class="sidebar-section">
-                <div class="section-header">
-                    <h2>Categorieën</h2>
-                    <button id="openCategoryModalBtn" type="button" class="small-action-btn" title="Nieuwe categorie aanmaken">
+            <!-- Mijn categorieën (aanmaken, filteren, verwijderen) -->
+            <div class="gcal-sidebar-block">
+                <div class="gcal-block-header">
+                    <h2>Mijn categorieën</h2>
+                    <button id="openCategoryModalBtn" type="button" class="gcal-mini-add-btn" title="Nieuwe categorie aanmaken">
                         + Nieuw
                     </button>
                 </div>
-                <p class="section-hint">Klik om te filteren of verwijder een categorie.</p>
-                <ul id="categoryList" class="category-list"></ul>
+                <ul id="categoryList" class="gcal-cat-list"></ul>
             </div>
 
-            <div class="sidebar-section">
-                <h2>Agenda-overzicht</h2>
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <span id="statTotalEvents" class="stat-number">0</span>
-                        <span class="stat-label">Afspraken</span>
+            <!-- Overzicht & Snelacties -->
+            <div class="gcal-sidebar-block">
+                <h2>Overzicht &amp; Tools</h2>
+                <div class="gcal-stats-row">
+                    <div class="gcal-stat-card">
+                        <strong id="statTotalEvents">0</strong>
+                        <span>Afspraken</span>
                     </div>
-                    <div class="stat-box">
-                        <span id="statUpcomingWeek" class="stat-number">0</span>
-                        <span class="stat-label">Deze week</span>
+                    <div class="gcal-stat-card">
+                        <strong id="statUpcomingWeek">0</strong>
+                        <span>Deze week</span>
                     </div>
                 </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h2>Handige tools</h2>
-                <div class="tool-buttons">
-                    <button id="jumpTodayBtn" type="button" class="tool-btn">📍 Ga naar vandaag</button>
-                    <button id="showAllCategoriesBtn" type="button" class="tool-btn">👁️ Alle categorieën tonen</button>
-                    <button id="printAgendaBtn" type="button" class="tool-btn">🖨️ Afdrukken</button>
+                <div class="gcal-quick-actions">
+                    <button id="showAllCategoriesBtn" type="button" class="gcal-text-action">
+                        Alle categorieën weergeven
+                    </button>
+                    <button id="printAgendaBtn" type="button" class="gcal-text-action">
+                        🖨️ Kalender afdrukken
+                    </button>
                 </div>
             </div>
         </aside>
 
-        <!-- Hoofdkalender -->
-        <section class="calendar-card">
-            <div id="calendar"></div>
-        </section>
-    </main>
+        <main class="gcal-main">
+            <div class="gcal-calendar-surface">
+                <div id="calendar"></div>
+            </div>
+        </main>
+    </div>
 
-    <!-- Modal: Nieuwe / Bewerken Afspraak -->
+    <!-- Modal: Afspraak aanmaken of wijzigen -->
     <div id="eventModal" class="modal" aria-hidden="true">
-        <div class="modal-content form-content" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+        <div class="modal-content gcal-dialog" role="dialog" aria-modal="true" aria-labelledby="formTitle">
             <button id="closeFormX" class="modal-close" type="button" aria-label="Sluiten">&times;</button>
-            <h2 id="formTitle">Nieuwe afspraak</h2>
+            <h2 id="formTitle" class="gcal-dialog-title">Nieuwe afspraak</h2>
 
-            <div class="form-body">
-                <div class="form-group">
-                    <label for="eventTitle">Titel</label>
-                    <input id="eventTitle" type="text" placeholder="Bijv. Tandarts, Verjaardag, Werken..." required>
+            <div class="gcal-form">
+                <div class="gcal-field">
+                    <input id="eventTitle" type="text" class="gcal-title-input" placeholder="Titel toevoegen" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="eventDescription">Omschrijving / Locatie / Notities</label>
-                    <textarea id="eventDescription" rows="3" placeholder="Extra informatie, adres of opmerkingen..."></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
+                <div class="gcal-row-2">
+                    <div class="gcal-field">
                         <label for="eventDate">Datum</label>
                         <input id="eventDate" type="date" required>
                     </div>
-
-                    <div class="form-group">
+                    <div class="gcal-field">
                         <label for="eventTime">Tijd</label>
                         <input id="eventTime" type="time">
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
+                <label class="gcal-check">
+                    <input id="allDay" type="checkbox" checked>
+                    <span>Hele dag</span>
+                </label>
+
+                <div class="gcal-row-2">
+                    <div class="gcal-field">
                         <label for="eventType">Categorie</label>
                         <select id="eventType"></select>
                     </div>
-
-                    <div class="form-group">
-                        <label for="eventRepeat">Herhaling</label>
+                    <div class="gcal-field">
+                        <label for="eventRepeat">Herhalen</label>
                         <select id="eventRepeat">
                             <option value="none">Niet herhalen</option>
                             <option value="weekly">Wekelijks (4 weken)</option>
@@ -180,103 +201,97 @@
                     </div>
                 </div>
 
-                <label class="checkbox-line">
-                    <input id="allDay" type="checkbox" checked>
-                    <span>Hele dag</span>
-                </label>
+                <div class="gcal-field">
+                    <label for="eventDescription">Omschrijving / Locatie / Notities</label>
+                    <textarea id="eventDescription" rows="3" placeholder="Beschrijving of locatie toevoegen..."></textarea>
+                </div>
             </div>
 
-            <div class="modal-buttons">
-                <button id="cancelEventButton" type="button" class="btn btn-cancel">Annuleren</button>
-                <button id="saveEventButton" type="button" class="btn btn-save">💾 Opslaan</button>
+            <div class="gcal-dialog-footer">
+                <button id="cancelEventButton" type="button" class="gcal-btn-secondary">Annuleren</button>
+                <button id="saveEventButton" type="button" class="gcal-btn-primary">Opslaan</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Categorie Aanmaken -->
+    <!-- Modal: Categorie aanmaken -->
     <div id="categoryModal" class="modal" aria-hidden="true">
-        <div class="modal-content form-content" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+        <div class="modal-content gcal-dialog" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
             <button id="closeCategoryX" class="modal-close" type="button" aria-label="Sluiten">&times;</button>
-            <h2 id="categoryModalTitle">Nieuwe categorie aanmaken</h2>
+            <h2 id="categoryModalTitle" class="gcal-dialog-title">Nieuwe categorie</h2>
 
-            <div class="form-body">
-                <div class="form-group">
-                    <label for="newCategoryName">Naam van categorie</label>
-                    <input id="newCategoryName" type="text" placeholder="Bijv. Sport, School, Huisdier..." required>
+            <div class="gcal-form">
+                <div class="gcal-field">
+                    <label for="newCategoryName">Naam</label>
+                    <input id="newCategoryName" type="text" placeholder="Bijv. Sport, Werk, Familie..." required>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="newCategoryEmoji">Emoji / Icoon</label>
+                <div class="gcal-row-2">
+                    <div class="gcal-field">
+                        <label for="newCategoryEmoji">Pictogram</label>
                         <select id="newCategoryEmoji">
-                            <option value="🟦">🟦 Blauw blok</option>
-                            <option value="🟪">🟪 Paars blok</option>
-                            <option value="🟧">🟧 Oranje blok</option>
+                            <option value="🟦">🟦 Blauw</option>
+                            <option value="🟪">🟪 Paars</option>
+                            <option value="🟧">🟧 Oranje</option>
                             <option value="⚽">⚽ Sport</option>
+                            <option value="💼">💼 Werk</option>
                             <option value="🎓">🎓 School</option>
                             <option value="🏠">🏠 Thuis</option>
-                            <option value="❤️">❤️ Familie</option>
                             <option value="⭐">⭐ Belangrijk</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="gcal-field">
                         <label for="newCategoryColor">Kleur</label>
-                        <input id="newCategoryColor" type="color" value="#0ea5e9">
+                        <input id="newCategoryColor" type="color" value="#0B57D0">
                     </div>
                 </div>
             </div>
 
-            <div class="modal-buttons">
-                <button id="cancelCategoryButton" type="button" class="btn btn-cancel">Annuleren</button>
-                <button id="saveCategoryButton" type="button" class="btn btn-save">✅ Categorie toevoegen</button>
+            <div class="gcal-dialog-footer">
+                <button id="cancelCategoryButton" type="button" class="gcal-btn-secondary">Annuleren</button>
+                <button id="saveCategoryButton" type="button" class="gcal-btn-primary">Toevoegen</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Afspraak Bekijken -->
+    <!-- Modal: Afspraak bekijken / bewerken / gereed / verwijderen -->
     <div id="eventViewModal" class="modal" aria-hidden="true">
-        <div class="modal-content view-content" role="dialog" aria-modal="true" aria-labelledby="viewTitle">
-            <button id="closeViewX" class="modal-close" type="button" aria-label="Sluiten">&times;</button>
+        <div class="modal-content gcal-dialog gcal-view-card" role="dialog" aria-modal="true" aria-labelledby="viewTitle">
+            <div class="gcal-view-top-actions">
+                <button id="editFromViewButton" type="button" class="gcal-icon-btn" title="Afspraak wijzigen" aria-label="Wijzigen">✏️</button>
+                <button id="doneFromViewButton" type="button" class="gcal-icon-btn" title="Markeren als gereed" aria-label="Gereed">✓</button>
+                <button id="deleteFromViewButton" type="button" class="gcal-icon-btn gcal-danger-icon" title="Afspraak verwijderen" aria-label="Verwijderen">🗑️</button>
+                <button id="closeViewX" type="button" class="modal-close gcal-inline-close" title="Sluiten" aria-label="Sluiten">&times;</button>
+            </div>
 
-            <span id="viewBadge" class="view-badge">🟩 Activiteit</span>
-            <h2 id="viewTitle">Afspraak</h2>
-
-            <div class="view-meta">
-                <div class="view-row">
-                    <span class="view-icon">📅</span>
-                    <span id="viewDate">-</span>
+            <div class="gcal-view-header">
+                <span id="viewBadge" class="gcal-color-swatch"></span>
+                <div>
+                    <h2 id="viewTitle" class="gcal-view-title">Afspraak</h2>
+                    <p id="viewDate" class="gcal-view-sub">-</p>
                 </div>
+            </div>
 
-                <div class="view-row">
-                    <span class="view-icon">🕐</span>
+            <div class="gcal-view-body">
+                <div class="gcal-view-line">
+                    <span>🕐</span>
                     <span id="viewTime">-</span>
                 </div>
-
-                <div class="view-row">
-                    <span class="view-icon">🏷️</span>
+                <div class="gcal-view-line">
+                    <span>🏷️</span>
                     <span id="viewCategoryName">-</span>
+                </div>
+                <div class="gcal-view-desc-box">
+                    <p id="viewDescription">Geen omschrijving beschikbaar.</p>
                 </div>
             </div>
 
-            <div class="view-desc">
-                <h3>Omschrijving</h3>
-                <p id="viewDescription">Geen omschrijving beschikbaar.</p>
-            </div>
-
-            <div class="modal-buttons">
-                <button id="closeViewButton" type="button" class="btn btn-cancel">Sluiten</button>
-                <button id="doneFromViewButton" type="button" class="btn btn-done">✓ Gereed</button>
-                <button id="editFromViewButton" type="button" class="btn btn-edit">✏️ Bewerken</button>
-                <button id="deleteFromViewButton" type="button" class="btn btn-delete">🗑️ Verwijderen</button>
+            <div class="gcal-dialog-footer">
+                <button id="closeViewButton" type="button" class="gcal-btn-primary">Sluiten</button>
             </div>
         </div>
     </div>
-
-    <!-- Floating Action Button -->
-    <button id="addEventButton" class="floatingButton" type="button" aria-label="Nieuwe afspraak" title="Nieuwe afspraak">
-        +
-    </button>
 
 </body>
 
