@@ -8,890 +8,3027 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* =========================================================
+       SNEJIN AGENDA — GOOGLE CALENDAR STIJL + SEIZOENSTHEMA'S
+       ========================================================= */
     :root {
-      --bg-grad: radial-gradient(circle at 12% 10%, rgba(168, 199, 250, 0.38), transparent 44%),
-                radial-gradient(circle at 90% 85%, rgba(194, 231, 255, 0.50), transparent 48%),
-                linear-gradient(160deg, #f2f7fe 0%, #f8fafd 55%, #eaf2fd 100%);
-      --surface: rgba(255, 255, 255, 0.92);
-      --glass: rgba(255, 255, 255, 0.78);
-      --header-bg: rgba(248, 250, 253, 0.88);
-      --border: rgba(218, 220, 224, 0.85);
-      --text: #1f1f1f;
-      --muted: #5f6368;
-      --primary: #0b57d0;
-      --primary-hover: #0842a0;
-      --pill-active: #c2e7ff;
-      --pill-active-text: #001d35;
-      --search-bg: rgba(234, 241, 251, 0.92);
-      --hover-bg: rgba(68, 71, 70, 0.08);
-      --shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+      --bg-glow-1: rgba(168, 199, 250, 0.42);
+      --bg-glow-2: rgba(194, 231, 255, 0.54);
+      --bg-base-start: #eef5ff;
+      --bg-base-mid: #f7faff;
+      --bg-base-end: #e9f1fc;
+      --surface-header: rgba(248, 250, 253, 0.88);
+      --surface-card: rgba(255, 255, 255, 0.94);
+      --surface-subtle: rgba(255, 255, 255, 0.78);
+      --surface-search: #eaf1fb;
+      --surface-search-focus: #ffffff;
+      --surface-hover: #eef2f8;
+      --surface-active-pill: #c2e7ff;
+      --text-active-pill: #001d35;
+      --text-primary: #1f1f1f;
+      --text-secondary: #444746;
+      --text-muted: #5f6368;
+      --text-faint: #9aa0a6;
+      --border-color: #dadce0;
+      --border-soft: rgba(218, 220, 224, 0.78);
+      --accent: #0b57d0;
+      --accent-hover: #0842a0;
+      --accent-soft: #d3e3fd;
+      --danger: #c5221f;
+      --danger-soft: #fce8e6;
+      --today-tint: rgba(11, 87, 208, 0.06);
+      --shadow-card: 0 10px 30px rgba(15, 23, 42, 0.07);
+      --shadow-fab: 0 3px 8px rgba(15, 23, 42, 0.14), 0 8px 18px rgba(11, 87, 208, 0.12);
+      --shadow-modal: 0 24px 54px rgba(15, 23, 42, 0.25);
     }
-    body.dark {
-      --bg-grad: radial-gradient(circle at 15% 15%, rgba(11, 87, 208, 0.24), transparent 45%),
-                radial-gradient(circle at 85% 85%, rgba(76, 29, 149, 0.18), transparent 50%),
-                linear-gradient(160deg, #0f1117 0%, #131314 60%, #161822 100%);
-      --surface: rgba(30, 31, 32, 0.94);
-      --glass: rgba(30, 31, 32, 0.84);
-      --header-bg: rgba(19, 19, 20, 0.88);
-      --border: #2c2d30;
-      --text: #e3e3e3;
-      --muted: #9aa0a6;
-      --primary: #a8c7fa;
-      --primary-hover: #8ab4f8;
-      --pill-active: #004a77;
-      --pill-active-text: #c2e7ff;
-      --search-bg: #282a2c;
-      --hover-bg: rgba(255, 255, 255, 0.08);
-      --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-    }
-    html, body {
-      min-height: 100%;
-      font-family: "Google Sans", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-grad);
-      background-attachment: fixed;
-      color: var(--text);
-    }
-    button, input, select, textarea { font: inherit; color: inherit; }
 
-    .header {
-      height: 64px;
-      padding: 0 16px;
-      background: var(--header-bg);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border);
+    /* Seizoensthema's (Licht) */
+    body[data-season="spring"] {
+      --bg-glow-1: rgba(244, 143, 177, 0.34);
+      --bg-glow-2: rgba(165, 214, 167, 0.45);
+      --bg-base-start: #f2fbf4;
+      --bg-base-mid: #f9fcf9;
+      --bg-base-end: #eef7f0;
+      --surface-search: #e8f5ea;
+      --surface-active-pill: #c8e6c9;
+      --text-active-pill: #0d3b1e;
+      --accent: #1e7e34;
+      --accent-hover: #155d27;
+      --accent-soft: rgba(30, 126, 52, 0.14);
+      --today-tint: rgba(30, 126, 52, 0.07);
+    }
+
+    body[data-season="summer"] {
+      --bg-glow-1: rgba(255, 213, 79, 0.42);
+      --bg-glow-2: rgba(129, 212, 250, 0.44);
+      --bg-base-start: #fffbeb;
+      --bg-base-mid: #fdfcf7;
+      --bg-base-end: #eef8ff;
+      --surface-search: #fff4cc;
+      --surface-active-pill: #ffe082;
+      --text-active-pill: #3b2500;
+      --accent: #0277bd;
+      --accent-hover: #01579b;
+      --accent-soft: rgba(255, 179, 0, 0.18);
+      --today-tint: rgba(255, 179, 0, 0.08);
+    }
+
+    body[data-season="autumn"] {
+      --bg-glow-1: rgba(255, 167, 86, 0.38);
+      --bg-glow-2: rgba(215, 130, 90, 0.34);
+      --bg-base-start: #fff5ec;
+      --bg-base-mid: #fcf8f5;
+      --bg-base-end: #faefe6;
+      --surface-search: #fae8d8;
+      --surface-active-pill: #ffd8b5;
+      --text-active-pill: #3d1d05;
+      --accent: #c25917;
+      --accent-hover: #99430d;
+      --accent-soft: rgba(194, 89, 23, 0.15);
+      --today-tint: rgba(194, 89, 23, 0.07);
+    }
+
+    body[data-season="winter"] {
+      --bg-glow-1: rgba(144, 202, 249, 0.45);
+      --bg-glow-2: rgba(207, 216, 220, 0.55);
+      --bg-base-start: #edf6ff;
+      --bg-base-mid: #f6faff;
+      --bg-base-end: #e7f1fa;
+      --surface-search: #e3effa;
+      --surface-active-pill: #bbdefb;
+      --text-active-pill: #0a2a4a;
+      --accent: #1565c0;
+      --accent-hover: #0d47a1;
+      --accent-soft: rgba(21, 101, 192, 0.15);
+      --today-tint: rgba(21, 101, 192, 0.07);
+    }
+
+    /* Donkere modus + Seizoensthema's */
+    body.dark,
+    body.dark-mode {
+      --bg-glow-1: rgba(11, 87, 208, 0.24);
+      --bg-glow-2: rgba(56, 139, 253, 0.14);
+      --bg-base-start: #0e1117;
+      --bg-base-mid: #131418;
+      --bg-base-end: #151923;
+      --surface-header: rgba(19, 20, 24, 0.88);
+      --surface-card: rgba(30, 31, 34, 0.95);
+      --surface-subtle: rgba(30, 31, 34, 0.82);
+      --surface-search: #282a2f;
+      --surface-search-focus: #30333a;
+      --surface-hover: rgba(255, 255, 255, 0.07);
+      --surface-active-pill: #004a77;
+      --text-active-pill: #c2e7ff;
+      --text-primary: #e3e3e3;
+      --text-secondary: #c4c7c5;
+      --text-muted: #9aa0a6;
+      --text-faint: #6e737b;
+      --border-color: #35373c;
+      --border-soft: rgba(60, 64, 67, 0.65);
+      --accent: #a8c7fa;
+      --accent-hover: #8ab4f8;
+      --accent-soft: rgba(168, 199, 250, 0.16);
+      --danger: #f28b82;
+      --danger-soft: rgba(242, 139, 130, 0.16);
+      --today-tint: rgba(168, 199, 250, 0.08);
+      --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.36);
+      --shadow-fab: 0 4px 12px rgba(0, 0, 0, 0.45);
+      --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.65);
+    }
+
+    body.dark[data-season="spring"],
+    body.dark-mode[data-season="spring"] {
+      --bg-glow-1: rgba(76, 175, 80, 0.22);
+      --bg-glow-2: rgba(240, 98, 146, 0.16);
+      --bg-base-start: #0f1712;
+      --bg-base-mid: #121714;
+      --bg-base-end: #131c16;
+      --surface-active-pill: #1b4328;
+      --text-active-pill: #b9f6ca;
+      --accent: #81c784;
+    }
+
+    body.dark[data-season="summer"],
+    body.dark-mode[data-season="summer"] {
+      --bg-glow-1: rgba(255, 193, 7, 0.22);
+      --bg-glow-2: rgba(3, 169, 244, 0.18);
+      --bg-base-start: #17150e;
+      --bg-base-mid: #141416;
+      --bg-base-end: #0f161f;
+      --surface-active-pill: #4a3800;
+      --text-active-pill: #ffe082;
+      --accent: #ffd54f;
+    }
+
+    body.dark[data-season="autumn"],
+    body.dark-mode[data-season="autumn"] {
+      --bg-glow-1: rgba(230, 126, 34, 0.24);
+      --bg-glow-2: rgba(160, 82, 45, 0.18);
+      --bg-base-start: #1a120d;
+      --bg-base-mid: #151312;
+      --bg-base-end: #1c1410;
+      --surface-active-pill: #4d260b;
+      --text-active-pill: #ffcc80;
+      --accent: #ffb74d;
+    }
+
+    body.dark[data-season="winter"],
+    body.dark-mode[data-season="winter"] {
+      --bg-glow-1: rgba(66, 165, 245, 0.25);
+      --bg-glow-2: rgba(144, 202, 249, 0.16);
+      --bg-base-start: #0d141d;
+      --bg-base-mid: #11151b;
+      --bg-base-end: #0f1924;
+      --surface-active-pill: #0d3b66;
+      --text-active-pill: #bbdefb;
+      --accent: #90caf9;
+    }
+
+    /* Zomer zonnegloed overlay */
+    .sun-glow-layer {
+      position: fixed;
+      top: -110px;
+      right: -110px;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 224, 102, 0.55) 0%, rgba(255, 193, 7, 0.18) 45%, transparent 72%);
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      animation: sunPulse 7s ease-in-out infinite;
+    }
+
+    body[data-season="summer"] .sun-glow-layer {
+      opacity: 1;
+    }
+
+    @keyframes sunPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    /* Zwevende seizoensdeeltjes (sneeuwvlokjes, blaadjes, bloemetjes) */
+    .season-particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .season-particle {
+      position: absolute;
+      top: -36px;
+      user-select: none;
+      will-change: transform, opacity;
+      animation-name: seasonFall;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+    }
+
+    @keyframes seasonFall {
+      0% {
+        transform: translate3d(0, -24px, 0) rotate(0deg);
+        opacity: 0;
+      }
+      12% {
+        opacity: 0.85;
+      }
+      88% {
+        opacity: 0.85;
+      }
+      100% {
+        transform: translate3d(var(--drift-x, 45px), calc(100vh + 48px), 0) rotate(var(--spin-deg, 260deg));
+        opacity: 0;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      width: 100%;
+      font-family: "Google Sans", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-primary);
+      background:
+        radial-gradient(circle at 12% 10%, var(--bg-glow-1), transparent 44%),
+        radial-gradient(circle at 88% 86%, var(--bg-glow-2), transparent 50%),
+        linear-gradient(155deg, var(--bg-base-start) 0%, var(--bg-base-mid) 55%, var(--bg-base-end) 100%);
+      background-attachment: fixed;
+      transition: background 0.3s ease, color 0.2s ease;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* =========================================================
+       BOVENSTE BALK (HEADER)
+       ========================================================= */
+    .gcal-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      min-height: 64px;
+      padding: 8px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: var(--surface-header);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .gcal-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .gcal-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 10px 4px 4px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+      margin-right: 4px;
+    }
+
+    .gcal-brand-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), #4285f4);
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      box-shadow: 0 3px 8px rgba(11, 87, 208, 0.22);
+    }
+
+    .gcal-brand-text {
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+    }
+
+    .gcal-icon-btn {
+      width: 38px;
+      height: 38px;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .gcal-icon-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .gcal-icon-btn:active {
+      transform: scale(0.96);
+    }
+
+    .gcal-outlined-btn {
+      height: 36px;
+      padding: 0 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      background: var(--surface-card);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .gcal-outlined-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--accent);
+    }
+
+    .gcal-nav-arrows {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .gcal-current-title {
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: -0.2px;
+      margin-left: 6px;
+      white-space: nowrap;
+    }
+
+    .gcal-header-center {
+      flex: 1 1 200px;
+      max-width: 380px;
+      min-width: 170px;
+    }
+
+    .gcal-search-box {
+      height: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: var(--surface-search);
+      border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .gcal-search-box:focus-within {
+      background: var(--surface-search-focus);
+      border-color: var(--accent);
+      box-shadow: 0 2px 8px rgba(11, 87, 208, 0.12);
+    }
+
+    .gcal-search-box input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .gcal-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .gcal-season-select {
+      height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      background: var(--surface-card);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .gcal-season-select:hover,
+    .gcal-season-select:focus {
+      border-color: var(--accent);
+      background: var(--surface-hover);
+    }
+
+    .gcal-view-switcher {
+      display: inline-flex;
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--surface-card);
+    }
+
+    .gcal-view-btn {
+      height: 34px;
+      padding: 0 13px;
+      border: none;
+      border-right: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .gcal-view-btn:last-child {
+      border-right: none;
+    }
+
+    .gcal-view-btn:hover {
+      background: var(--surface-hover);
+    }
+
+    .gcal-view-btn.active {
+      background: var(--surface-active-pill);
+      color: var(--text-active-pill);
+      font-weight: 600;
+    }
+
+    .gcal-logout-btn {
+      height: 34px;
+      padding: 0 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      background: var(--surface-card);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.15s ease;
+    }
+
+    .gcal-logout-btn:hover {
+      background: var(--surface-hover);
+    }
+
+    /* =========================================================
+       WERKRUIMTE & ZIJLBALK
+       ========================================================= */
+    .gcal-workspace {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      min-height: calc(100vh - 65px);
+      width: 100%;
+    }
+
+    .gcal-sidebar {
+      width: 282px;
+      flex-shrink: 0;
+      padding: 16px 14px 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: width 0.22s ease, padding 0.22s ease, opacity 0.2s ease;
+    }
+
+    .gcal-sidebar.collapsed {
+      width: 0;
+      padding-left: 0;
+      padding-right: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .gcal-create-btn {
+      height: 54px;
+      padding: 0 24px 0 18px;
+      border: 1px solid var(--border-soft);
+      border-radius: 16px;
+      background: var(--surface-card);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
       gap: 12px;
-      position: sticky;
-      top: 0;
-      z-index: 30;
-    }
-    .header-left, .header-right { display: flex; align-items: center; gap: 8px; }
-    .header-center { flex: 1; max-width: 480px; }
-
-    .icon-btn {
-      width: 38px; height: 38px; border: none; border-radius: 50%;
-      background: transparent; cursor: pointer; font-size: 18px;
-      display: inline-flex; align-items: center; justify-content: center;
-      transition: background .15s ease;
-    }
-    .icon-btn:hover { background: var(--hover-bg); }
-
-    .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 600; margin-right: 6px; white-space: nowrap; }
-    .brand-dot {
-      width: 28px; height: 28px; border-radius: 8px;
-      background: linear-gradient(135deg, #0b57d0, #4285f4);
-      color: #fff; font-size: 14px; font-weight: 700;
-      display: inline-flex; align-items: center; justify-content: center;
+      width: fit-content;
+      box-shadow: var(--shadow-fab);
+      transition: transform 0.15s ease, box-shadow 0.18s ease, background 0.15s ease;
     }
 
-    .outlined-btn {
-      height: 36px; padding: 0 16px; border-radius: 999px;
-      border: 1px solid var(--border); background: var(--surface);
-      font-size: 14px; font-weight: 500; cursor: pointer;
-    }
-    .outlined-btn:hover { background: var(--hover-bg); }
-
-    .title-label { font-size: 20px; font-weight: 500; margin-left: 6px; white-space: nowrap; }
-
-    .search-box {
-      height: 42px; padding: 0 16px; border-radius: 999px;
-      background: var(--search-bg); display: flex; align-items: center; gap: 8px;
-    }
-    .search-box input { width: 100%; border: none; background: transparent; outline: none; font-size: 14px; }
-
-    .view-switcher {
-      display: inline-flex; border: 1px solid var(--border);
-      border-radius: 999px; overflow: hidden; background: var(--surface);
-    }
-    .view-btn {
-      border: none; background: transparent; padding: 0 13px; height: 34px;
-      font-size: 13px; font-weight: 500; cursor: pointer; border-right: 1px solid var(--border);
-    }
-    .view-btn:last-child { border-right: none; }
-    .view-btn.active { background: var(--pill-active); color: var(--pill-active-text); font-weight: 600; }
-
-    .logout-btn {
-      height: 34px; padding: 0 14px; border-radius: 999px; border: none;
-      background: var(--hover-bg); font-size: 13px; font-weight: 500; cursor: pointer;
+    .gcal-create-btn:hover {
+      transform: translateY(-1px);
+      background: var(--surface-hover);
     }
 
-    .workspace { display: flex; min-height: calc(100vh - 64px); }
-    .sidebar {
-      width: 268px; flex-shrink: 0; padding: 14px 14px 24px 16px;
-      display: flex; flex-direction: column; gap: 16px; transition: all .2s ease;
-    }
-    .sidebar.collapsed { width: 0; padding: 0; overflow: hidden; opacity: 0; }
-
-    .create-btn {
-      height: 52px; padding: 0 22px 0 16px; border: none; border-radius: 16px;
-      background: var(--surface); font-size: 15px; font-weight: 600;
-      display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
-      box-shadow: var(--shadow); width: fit-content; transition: transform .15s ease;
-    }
-    .create-btn:hover { transform: translateY(-1px); }
-    .create-plus { font-size: 24px; color: #0b57d0; line-height: 1; }
-
-    .card-box {
-      background: var(--glass); backdrop-filter: blur(12px);
-      border: 1px solid var(--border); border-radius: 18px; padding: 12px;
-    }
-    .card-box h2 { font-size: 14px; font-weight: 600; }
-    .box-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .small-link-btn {
-      border: none; background: transparent; color: #0b57d0;
-      font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 999px;
-    }
-    .small-link-btn:hover { background: rgba(11, 87, 208, 0.1); }
-
-    .mini-weekdays, .mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 2px; }
-    .mini-weekdays { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
-    .mini-day {
-      height: 28px; border: none; border-radius: 50%; background: transparent;
-      font-size: 12px; cursor: pointer;
-    }
-    .mini-day:hover { background: var(--hover-bg); }
-    .mini-day.muted { color: var(--muted); opacity: 0.55; }
-    .mini-day.today { background: #0b57d0; color: #fff; font-weight: 700; }
-
-    .cat-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
-    .cat-item { display: flex; align-items: center; justify-content: space-between; border-radius: 999px; padding: 2px 6px; }
-    .cat-item:hover { background: var(--hover-bg); }
-    .cat-item.active { background: var(--pill-active); color: var(--pill-active-text); }
-    .cat-filter {
-      flex: 1; border: none; background: transparent; text-align: left;
-      padding: 6px 4px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; cursor: pointer;
-    }
-    .cat-dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
-    .cat-del { border: none; background: transparent; font-size: 16px; cursor: pointer; padding: 0 6px; color: var(--muted); }
-    .cat-del:hover { color: #c5221f; }
-
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 8px; text-align: center; }
-    .stat-card strong { display: block; font-size: 18px; color: #0b57d0; }
-    .stat-card span { font-size: 11px; color: var(--muted); }
-
-    .text-action {
-      width: 100%; border: none; background: transparent; text-align: left;
-      padding: 6px 8px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer;
-    }
-    .text-action:hover { background: var(--hover-bg); }
-
-    .main { flex: 1; padding: 14px 16px 16px 0; min-width: 0; }
-    .calendar-surface {
-      background: var(--surface); backdrop-filter: blur(12px);
-      border: 1px solid var(--border); border-radius: 24px;
-      padding: 14px; min-height: calc(100vh - 94px); box-shadow: var(--shadow);
+    .gcal-plus {
+      font-size: 24px;
+      line-height: 1;
+      color: var(--accent);
+      font-weight: 500;
     }
 
-    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 6px; }
-    .cal-weekday { text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: .5px; }
-    .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--border); border-left: 1px solid var(--border); }
-    .day-cell {
-      min-height: 112px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
-      padding: 6px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: background .12s ease;
+    .gcal-panel {
+      background: var(--surface-subtle);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--border-soft);
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
     }
-    .day-cell:hover { background: var(--hover-bg); }
-    .day-cell.muted { opacity: 0.48; }
-    .day-num {
-      width: 24px; height: 24px; font-size: 12px; font-weight: 600;
-      display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
-    }
-    .day-cell.today .day-num { background: #0b57d0; color: #fff; }
 
-    .event-pill {
-      border: none; border-radius: 6px; padding: 3px 7px; font-size: 12px; font-weight: 500;
-      color: #fff; text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    .gcal-mini-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 0 4px 8px;
     }
-    .event-pill:hover { filter: brightness(0.95); }
 
-    .list-view { display: flex; flex-direction: column; gap: 8px; }
-    .list-row {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--glass); cursor: pointer;
+    .gcal-mini-arrows {
+      display: inline-flex;
+      gap: 2px;
     }
-    .list-row:hover { background: var(--hover-bg); }
 
-    .modal-backdrop {
-      display: none; position: fixed; inset: 0; z-index: 100;
-      background: rgba(15, 23, 42, 0.42); backdrop-filter: blur(4px);
-      align-items: center; justify-content: center; padding: 16px;
+    .gcal-mini-arrows button {
+      width: 26px;
+      height: 26px;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
-    .modal-backdrop.open { display: flex; }
-    .modal-card {
-      width: 100%; max-width: 450px; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 24px; padding: 22px; box-shadow: var(--shadow); position: relative;
+
+    .gcal-mini-arrows button:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
     }
+
+    .gcal-mini-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .gcal-mini-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+
+    .gcal-mini-day {
+      height: 30px;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s ease;
+    }
+
+    .gcal-mini-day:hover {
+      background: var(--surface-hover);
+    }
+
+    .gcal-mini-day.muted {
+      color: var(--text-faint);
+    }
+
+    .gcal-mini-day.today {
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .gcal-mini-day.selected-day:not(.today) {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .gcal-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .gcal-panel-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .gcal-mini-add-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: transparent;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .gcal-mini-add-btn:hover {
+      background: var(--accent-soft);
+    }
+
+    .gcal-cat-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .gcal-cat-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      border-radius: 12px;
+      padding: 3px 6px;
+      transition: background 0.12s ease;
+    }
+
+    .gcal-cat-item:hover {
+      background: var(--surface-hover);
+    }
+
+    .gcal-cat-item.active {
+      background: var(--accent-soft);
+    }
+
+    .gcal-cat-filter-btn {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 4px;
+      text-align: left;
+    }
+
+    .gcal-cat-emoji {
+      font-size: 15px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .gcal-cat-label-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .gcal-cat-square {
+      width: 11px;
+      height: 11px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .gcal-cat-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .gcal-cat-action-btn {
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+
+    .gcal-cat-action-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .gcal-cat-del-btn:hover {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .gcal-stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .gcal-stat-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .gcal-stat-card strong {
+      display: block;
+      font-size: 18px;
+      color: var(--accent);
+    }
+
+    .gcal-stat-card span {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .gcal-quick-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .gcal-text-action {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      text-align: left;
+      padding: 7px 9px;
+      border-radius: 9px;
+    }
+
+    .gcal-text-action:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    /* =========================================================
+       KALENDER VLAK & WEERGAVEN (MAAND / WEEK / DAG / AGENDA)
+       ========================================================= */
+    .gcal-main {
+      flex: 1;
+      min-width: 0;
+      padding: 16px 16px 20px 0;
+    }
+
+    .gcal-calendar-surface {
+      background: var(--surface-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-soft);
+      border-radius: 24px;
+      padding: 16px;
+      min-height: calc(100vh - 101px);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .month-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-bottom: 6px;
+    }
+
+    .month-weekday-label {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      grid-auto-rows: minmax(112px, 1fr);
+      border-top: 1px solid var(--border-color);
+      border-left: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .month-cell {
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: transparent;
+      transition: background 0.12s ease;
+      cursor: pointer;
+      min-width: 0;
+    }
+
+    .month-cell:hover {
+      background: var(--surface-hover);
+    }
+
+    .month-cell.other-month {
+      opacity: 0.45;
+    }
+
+    .month-cell.is-today {
+      background: var(--today-tint);
+    }
+
+    .month-cell-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .month-day-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .month-cell.is-today .month-day-num {
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .month-events-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .cal-event-chip {
+      border: none;
+      border-radius: 6px;
+      padding: 3px 7px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #ffffff;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+      transition: transform 0.1s ease, filter 0.12s ease;
+    }
+
+    .cal-event-chip:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+
+    /* Week- en Dagweergave */
+    .timegrid-wrap {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .timegrid-header {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--surface-subtle);
+    }
+
+    .timegrid-gutter-head {
+      width: 64px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .timegrid-days-head {
+      display: grid;
+      flex: 1;
+    }
+
+    .timegrid-day-head {
+      padding: 10px 6px;
+      text-align: center;
+      border-right: 1px solid var(--border-color);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .timegrid-day-head:last-child {
+      border-right: none;
+    }
+
+    .timegrid-day-head.is-today .tg-head-num {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .tg-head-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      margin-top: 3px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .timegrid-allday-row {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      min-height: 44px;
+      background: rgba(11, 87, 208, 0.02);
+    }
+
+    .timegrid-allday-label {
+      width: 64px;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .timegrid-allday-cols {
+      display: grid;
+      flex: 1;
+    }
+
+    .timegrid-allday-col {
+      padding: 4px;
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      cursor: pointer;
+    }
+
+    .timegrid-allday-col:last-child {
+      border-right: none;
+    }
+
+    .timegrid-body {
+      max-height: 620px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .timegrid-slot-row {
+      display: flex;
+      min-height: 44px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .timegrid-slot-row:last-child {
+      border-bottom: none;
+    }
+
+    .timegrid-time-label {
+      width: 64px;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 4px 8px 0 0;
+      text-align: right;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .timegrid-slot-cols {
+      display: grid;
+      flex: 1;
+    }
+
+    .timegrid-slot-cell {
+      border-right: 1px solid var(--border-color);
+      padding: 2px 4px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .timegrid-slot-cell:last-child {
+      border-right: none;
+    }
+
+    .timegrid-slot-cell:hover {
+      background: var(--surface-hover);
+    }
+
+    /* Agenda lijstweergave */
+    .agenda-list-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .agenda-list-empty {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .agenda-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      background: var(--surface-subtle);
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+
+    .agenda-list-item:hover {
+      transform: translateY(-1px);
+      background: var(--surface-hover);
+    }
+
+    .agenda-list-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .agenda-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .agenda-item-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .agenda-item-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .agenda-item-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .agenda-open-btn {
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      background: var(--surface-card);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .agenda-open-btn:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* =========================================================
+       MODALS / DIALOGEN
+       ========================================================= */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(15, 23, 42, 0.42);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .gcal-dialog {
+      position: relative;
+      width: 100%;
+      max-width: 470px;
+      border-radius: 24px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-soft);
+      color: var(--text-primary);
+      padding: 24px;
+      box-shadow: var(--shadow-modal);
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+
     .modal-close {
-      position: absolute; top: 14px; right: 14px; width: 32px; height: 32px;
-      border: none; border-radius: 50%; background: transparent; font-size: 20px; cursor: pointer;
-    }
-    .modal-close:hover { background: var(--hover-bg); }
-    .modal-title { font-size: 19px; font-weight: 600; margin-bottom: 14px; padding-right: 28px; }
-    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
-    .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
-    .field input, .field select, .field textarea {
-      border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px;
-      background: var(--glass); font-size: 14px; outline: none;
-    }
-    .field input:focus, .field select:focus, .field textarea:focus { border-color: #0b57d0; }
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 12px; cursor: pointer; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-    .btn-primary {
-      border: none; border-radius: 999px; height: 38px; padding: 0 20px;
-      background: #0b57d0; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
-    }
-    .btn-primary:hover { background: #0842a0; }
-    .btn-secondary {
-      border: none; border-radius: 999px; height: 38px; padding: 0 16px;
-      background: var(--hover-bg); font-size: 14px; font-weight: 500; cursor: pointer;
-    }
-    .btn-danger {
-      border: none; border-radius: 999px; height: 38px; padding: 0 16px;
-      background: #fce8e6; color: #c5221f; font-size: 14px; font-weight: 600; cursor: pointer;
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 34px;
+      height: 34px;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 22px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .toast {
-      position: fixed; bottom: 20px; left: 20px; z-index: 200;
-      background: #1f1f1f; color: #fff; padding: 11px 18px; border-radius: 12px;
-      font-size: 13px; font-weight: 500; display: none; box-shadow: var(--shadow);
+    .modal-close:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
     }
 
-    @media (max-width: 900px) {
-      .workspace { flex-direction: column; }
-      .sidebar { width: 100%; }
-      .main { padding: 0 12px 16px; }
-      .header-center { display: none; }
+    .gcal-dialog-title {
+      font-size: 19px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-right: 34px;
+    }
+
+    .gcal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .gcal-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .gcal-field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .gcal-title-input {
+      width: 100%;
+      border: none;
+      border-bottom: 2px solid var(--accent);
+      background: transparent;
+      padding: 8px 4px;
+      font-size: 18px;
+      font-weight: 500;
+      outline: none;
+    }
+
+    .gcal-field input[type="text"],
+    .gcal-field input[type="date"],
+    .gcal-field input[type="time"],
+    .gcal-field select,
+    .gcal-field textarea {
+      width: 100%;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 14px;
+      background: var(--surface-subtle);
+      outline: none;
+    }
+
+    .gcal-field input:focus,
+    .gcal-field select:focus,
+    .gcal-field textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .gcal-field input[type="color"] {
+      width: 100%;
+      height: 40px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 2px 6px;
+      background: var(--surface-subtle);
+    }
+
+    .emoji-picker-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .emoji-preset-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--border-color);
+      border-radius: 9px;
+      background: var(--surface-subtle);
+      font-size: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .emoji-preset-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      background: var(--surface-hover);
+    }
+
+    .gcal-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .gcal-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      width: fit-content;
+    }
+
+    .gcal-dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .gcal-btn-primary {
+      height: 38px;
+      padding: 0 20px;
+      border: none;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    body.dark .gcal-btn-primary,
+    body.dark-mode .gcal-btn-primary {
+      color: #0f172a;
+    }
+
+    .gcal-btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .gcal-btn-secondary {
+      height: 38px;
+      padding: 0 16px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .gcal-btn-secondary:hover {
+      background: var(--accent-soft);
+    }
+
+    .gcal-view-top-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .gcal-inline-close {
+      position: static;
+    }
+
+    .gcal-danger-icon:hover {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .gcal-view-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .gcal-color-swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .gcal-view-title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .gcal-view-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .gcal-view-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .gcal-view-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .gcal-view-desc-box {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+    }
+
+    #toast-message {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      background: #1f1f1f;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    #toast-message.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #toast-message.error {
+      background: #b3261e;
+    }
+
+    #toast-message.success {
+      background: #0f5132;
+    }
+
+    @media (max-width: 920px) {
+      .gcal-workspace {
+        flex-direction: column;
+      }
+
+      .gcal-sidebar {
+        width: 100%;
+        padding: 12px 14px 4px;
+      }
+
+      .gcal-sidebar.collapsed {
+        width: 100%;
+        height: 0;
+        padding: 0;
+      }
+
+      .gcal-main {
+        padding: 10px 12px 18px;
+      }
+
+      .month-grid {
+        grid-auto-rows: minmax(86px, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .gcal-row-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .gcal-current-title {
+        font-size: 18px;
+      }
     }
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="header-left">
-      <button id="toggleSidebarBtn" type="button" class="icon-btn" title="Zijbalk">☰</button>
-      <div class="brand">
-        <span class="brand-dot">S</span>
-        <span>Snejin Agenda</span>
+  <div class="sun-glow-layer" aria-hidden="true"></div>
+  <div id="seasonParticles" class="season-particles" aria-hidden="true"></div>
+
+  <!-- Bovenste balk -->
+  <header class="gcal-header">
+    <div class="gcal-header-left">
+      <button id="toggleSidebarBtn" type="button" class="gcal-icon-btn" title="Zijbalk in- of uitklappen" aria-label="Zijbalk in- of uitklappen">
+        ☰
+      </button>
+
+      <a href="#top" id="brandHomeLink" class="gcal-brand">
+        <span class="gcal-brand-badge">S</span>
+        <span class="gcal-brand-text">Snejin Agenda</span>
+      </a>
+
+      <button id="gcalTodayBtn" type="button" class="gcal-outlined-btn">
+        Vandaag
+      </button>
+
+      <div class="gcal-nav-arrows">
+        <button id="gcalPrevBtn" type="button" class="gcal-icon-btn" title="Vorige periode" aria-label="Vorige periode">
+          ‹
+        </button>
+        <button id="gcalNextBtn" type="button" class="gcal-icon-btn" title="Volgende periode" aria-label="Volgende periode">
+          ›
+        </button>
       </div>
-      <button id="todayBtn" type="button" class="outlined-btn">Vandaag</button>
-      <button id="prevBtn" type="button" class="icon-btn" title="Vorige">‹</button>
-      <button id="nextBtn" type="button" class="icon-btn" title="Volgende">›</button>
-      <h1 id="currentTitle" class="title-label">November 2026</h1>
+
+      <h1 id="gcalCurrentTitle" class="gcal-current-title">November 2026</h1>
     </div>
 
-    <div class="header-center">
-      <div class="search-box">
-        <span>🔍</span>
-        <input id="searchInput" type="search" placeholder="Zoeken in Snejin Agenda..." />
+    <div class="gcal-header-center">
+      <div class="gcal-search-box">
+        <span aria-hidden="true">🔍</span>
+        <input
+          id="search"
+          type="search"
+          placeholder="Zoeken in Snejin Agenda..."
+          aria-label="Zoeken in Snejin Agenda"
+        />
       </div>
     </div>
 
-    <div class="header-right">
-      <div class="view-switcher" role="group" aria-label="Weergave">
-        <button type="button" class="view-btn" data-view="day">Dag</button>
-        <button type="button" class="view-btn" data-view="week">Week</button>
-        <button type="button" class="view-btn active" data-view="month">Maand</button>
-        <button type="button" class="view-btn" data-view="agenda">Agenda</button>
+    <div class="gcal-header-right">
+      <select id="seasonSelect" class="gcal-season-select" title="Seizoensthema kiezen" aria-label="Seizoensthema kiezen">
+        <option value="auto">🌦️ Auto seizoen</option>
+        <option value="spring">🌸 Lente</option>
+        <option value="summer">☀️ Zomer</option>
+        <option value="autumn">🍂 Herfst</option>
+        <option value="winter">❄️ Winter</option>
+      </select>
+
+      <div class="gcal-view-switcher" role="group" aria-label="Weergave kiezen">
+        <button type="button" class="gcal-view-btn" data-view="day">Dag</button>
+        <button type="button" class="gcal-view-btn" data-view="week">Week</button>
+        <button type="button" class="gcal-view-btn active" data-view="month">Maand</button>
+        <button type="button" class="gcal-view-btn" data-view="agenda">Agenda</button>
       </div>
-      <button id="themeBtn" type="button" class="icon-btn" title="Donkere modus">🌙</button>
-      <button id="logoutBtn" type="button" class="logout-btn">Uitloggen</button>
+
+      <button id="themeButton" type="button" class="gcal-icon-btn" title="Donkere modus wisselen" aria-label="Donkere modus wisselen">
+        🌙
+      </button>
+
+      <button id="logoutButton" type="button" class="gcal-logout-btn">
+        Uitloggen
+      </button>
     </div>
   </header>
 
-  <div class="workspace">
-    <aside id="sidebar" class="sidebar">
-      <button id="createBtn" type="button" class="create-btn">
-        <span class="create-plus">+</span>
+  <!-- Hoofdwerkruimte -->
+  <div class="gcal-workspace">
+    <aside id="gcalSidebar" class="gcal-sidebar">
+      <button id="addEventButton" type="button" class="gcal-create-btn">
+        <span class="gcal-plus">+</span>
         <span>Maken</span>
       </button>
 
-      <div class="card-box">
-        <div class="box-top">
-          <h2 id="miniMonthLabel">November 2026</h2>
-          <div>
-            <button id="miniPrevBtn" type="button" class="small-link-btn">‹</button>
-            <button id="miniNextBtn" type="button" class="small-link-btn">›</button>
+      <!-- Mini-kalender -->
+      <section class="gcal-panel" aria-label="Mini-kalender">
+        <div class="gcal-mini-header">
+          <span id="miniCalMonthLabel">November 2026</span>
+          <div class="gcal-mini-arrows">
+            <button id="miniPrevMonth" type="button" aria-label="Vorige maand">‹</button>
+            <button id="miniNextMonth" type="button" aria-label="Volgende maand">›</button>
           </div>
         </div>
-        <div class="mini-weekdays">
+        <div class="gcal-mini-weekdays">
           <span>M</span><span>D</span><span>W</span><span>D</span><span>V</span><span>Z</span><span>Z</span>
         </div>
-        <div id="miniGrid" class="mini-grid"></div>
-      </div>
+        <div id="miniCalGrid" class="gcal-mini-grid"></div>
+      </section>
 
-      <div class="card-box">
-        <div class="box-top">
-          <h2>Mijn categorieën</h2>
-          <button id="newCategoryBtn" type="button" class="small-link-btn">+ Nieuw</button>
+      <!-- Mijn categorieën -->
+      <section class="gcal-panel" aria-label="Mijn categorieën">
+        <div class="gcal-panel-header">
+          <h2 class="gcal-panel-title">Mijn categorieën</h2>
+          <button id="openCategoryModalBtn" type="button" class="gcal-mini-add-btn" title="Nieuwe categorie aanmaken">
+            + Nieuw
+          </button>
         </div>
-        <ul id="categoryList" class="cat-list"></ul>
-      </div>
+        <ul id="categoryList" class="gcal-cat-list"></ul>
+      </section>
 
-      <div class="card-box">
-        <div class="box-top"><h2>Overzicht</h2></div>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <strong id="statTotal">0</strong>
+      <!-- Overzicht & Snelacties -->
+      <section class="gcal-panel" aria-label="Overzicht en snelacties">
+        <div class="gcal-panel-header">
+          <h2 class="gcal-panel-title">Overzicht</h2>
+          <span id="activeSeasonBadge" style="font-size:12px;color:var(--text-muted);font-weight:600;"></span>
+        </div>
+        <div class="gcal-stats-row">
+          <div class="gcal-stat-card">
+            <strong id="statTotalEvents">0</strong>
             <span>Afspraken</span>
           </div>
-          <div class="stat-card">
-            <strong id="statWeek">0</strong>
+          <div class="gcal-stat-card">
+            <strong id="statUpcomingWeek">0</strong>
             <span>Deze week</span>
           </div>
         </div>
-        <button id="showAllCatsBtn" type="button" class="text-action">Alle categorieën weergeven</button>
-        <button id="printBtn" type="button" class="text-action">🖨️ Kalender afdrukken</button>
-      </div>
+        <div class="gcal-quick-actions">
+          <button id="showAllCategoriesBtn" type="button" class="gcal-text-action">
+            Alle categorieën weergeven
+          </button>
+        </div>
+      </section>
     </aside>
 
-    <main class="main">
-      <section class="calendar-surface">
-        <div id="calendarView"></div>
-      </section>
+    <main class="gcal-main">
+      <div class="gcal-calendar-surface">
+        <div id="calendarViewContainer"></div>
+      </div>
     </main>
   </div>
 
-  <!-- Afspraak Modal -->
-  <div id="eventModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal-card">
-      <button id="closeEventModalX" type="button" class="modal-close">&times;</button>
-      <h2 id="eventModalTitle" class="modal-title">Nieuwe afspraak</h2>
-      <div class="field">
-        <label for="eventTitleInput">Titel</label>
-        <input id="eventTitleInput" type="text" placeholder="Titel toevoegen..." />
-      </div>
-      <div class="row-2">
-        <div class="field">
-          <label for="eventDateInput">Datum</label>
-          <input id="eventDateInput" type="date" />
+  <!-- Modal: Afspraak aanmaken of wijzigen -->
+  <div id="eventModal" class="modal" aria-hidden="true">
+    <div class="gcal-dialog" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+      <button id="closeFormX" class="modal-close" type="button" aria-label="Sluiten">&times;</button>
+      <h2 id="formTitle" class="gcal-dialog-title">Nieuwe afspraak</h2>
+
+      <div class="gcal-form">
+        <div class="gcal-field">
+          <input id="eventTitle" type="text" class="gcal-title-input" placeholder="Titel toevoegen" required />
         </div>
-        <div class="field">
-          <label for="eventTimeInput">Tijd</label>
-          <input id="eventTimeInput" type="time" />
+
+        <div class="gcal-row-2">
+          <div class="gcal-field">
+            <label for="eventDate">Datum</label>
+            <input id="eventDate" type="date" required />
+          </div>
+          <div class="gcal-field">
+            <label for="eventTime">Tijd</label>
+            <input id="eventTime" type="time" />
+          </div>
+        </div>
+
+        <label class="gcal-check">
+          <input id="allDay" type="checkbox" checked />
+          <span>Hele dag</span>
+        </label>
+
+        <div class="gcal-row-2">
+          <div class="gcal-field">
+            <label for="eventType">Categorie</label>
+            <select id="eventType"></select>
+          </div>
+          <div class="gcal-field">
+            <label for="eventRepeat">Herhalen</label>
+            <select id="eventRepeat">
+              <option value="none">Niet herhalen</option>
+              <option value="weekly">Wekelijks (4 weken)</option>
+              <option value="monthly">Maandelijks (3 maanden)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="gcal-field">
+          <label for="eventDescription">Omschrijving / Locatie / Notities</label>
+          <textarea id="eventDescription" rows="3" placeholder="Beschrijving of locatie toevoegen..."></textarea>
         </div>
       </div>
-      <label class="check-row">
-        <input id="eventAllDayInput" type="checkbox" checked />
-        <span>Hele dag</span>
-      </label>
-      <div class="field">
-        <label for="eventCategorySelect">Categorie</label>
-        <select id="eventCategorySelect"></select>
-      </div>
-      <div class="field">
-        <label for="eventDescInput">Omschrijving</label>
-        <textarea id="eventDescInput" rows="3" placeholder="Notities of locatie..."></textarea>
-      </div>
-      <div class="modal-actions">
-        <button id="cancelEventBtn" type="button" class="btn-secondary">Annuleren</button>
-        <button id="saveEventBtn" type="button" class="btn-primary">Opslaan</button>
+
+      <div class="gcal-dialog-footer">
+        <button id="cancelEventButton" type="button" class="gcal-btn-secondary">Annuleren</button>
+        <button id="saveEventButton" type="button" class="gcal-btn-primary">Opslaan</button>
       </div>
     </div>
   </div>
 
-  <!-- Bekijken Modal -->
-  <div id="viewModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal-card">
-      <button id="closeViewModalX" type="button" class="modal-close">&times;</button>
-      <h2 id="viewModalTitle" class="modal-title">Afspraak</h2>
-      <p id="viewModalMeta" style="font-size:13px;color:var(--muted);margin-bottom:10px;"></p>
-      <p id="viewModalDesc" style="font-size:14px;line-height:1.5;white-space:pre-wrap;"></p>
-      <div class="modal-actions">
-        <button id="deleteEventBtn" type="button" class="btn-danger">Verwijderen</button>
-        <button id="editEventBtn" type="button" class="btn-secondary">Wijzigen</button>
-        <button id="closeViewBtn" type="button" class="btn-primary">Sluiten</button>
+  <!-- Modal: Categorie aanmaken of bewerken -->
+  <div id="categoryModal" class="modal" aria-hidden="true">
+    <div class="gcal-dialog" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+      <button id="closeCategoryX" class="modal-close" type="button" aria-label="Sluiten">&times;</button>
+      <h2 id="categoryModalTitle" class="gcal-dialog-title">Nieuwe categorie</h2>
+
+      <div class="gcal-form">
+        <div class="gcal-field">
+          <label for="newCategoryName">Naam</label>
+          <input id="newCategoryName" type="text" placeholder="Bijv. Sport, Werk, Familie..." required />
+        </div>
+
+        <div class="gcal-row-2">
+          <div class="gcal-field">
+            <label for="newCategoryEmoji">Emoji</label>
+            <input id="newCategoryEmoji" type="text" maxlength="6" placeholder="Bijv. 💼 of ⚡" value="⚡" />
+          </div>
+
+          <div class="gcal-field">
+            <label for="newCategoryColor">Kleur</label>
+            <input id="newCategoryColor" type="color" value="#0B57D0" />
+          </div>
+        </div>
+
+        <div class="gcal-field">
+          <label>Snelle emoji's kiezen</label>
+          <div id="emojiPresets" class="emoji-picker-row">
+            <button type="button" class="emoji-preset-btn" data-emoji="💼">💼</button>
+            <button type="button" class="emoji-preset-btn" data-emoji="🌴">🌴</button>
+            <button type="button" class="emoji-preset-btn" data-emoji="⚡">⚡</button>
+            <button type="button" class="emoji-preset-btn" data-emoji="🎂">🎂</button>
+            <button type="button" class="emoji-preset-btn" data-emoji="🎉">🎉</button>
+            <button type="button" class="emoji-preset-btn" data-emoji="⚽">⚽</button>
+            <button type="button" class="emoji-preset-btn" data-emoji="❤️">❤️</button>
+            <button type="button" class="emoji-preset-btn" data-emoji="📚">📚</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="gcal-dialog-footer">
+        <button id="cancelCategoryButton" type="button" class="gcal-btn-secondary">Annuleren</button>
+        <button id="saveCategoryButton" type="button" class="gcal-btn-primary">Opslaan</button>
       </div>
     </div>
   </div>
 
-  <!-- Categorie Modal -->
-  <div id="categoryModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal-card">
-      <button id="closeCategoryModalX" type="button" class="modal-close">&times;</button>
-      <h2 class="modal-title">Nieuwe categorie</h2>
-      <div class="field">
-        <label for="newCatName">Naam</label>
-        <input id="newCatName" type="text" placeholder="Bijv. Sport, Familie..." />
+  <!-- Modal: Afspraak bekijken / wijzigen / gereed / verwijderen -->
+  <div id="eventViewModal" class="modal" aria-hidden="true">
+    <div class="gcal-dialog" role="dialog" aria-modal="true" aria-labelledby="viewTitle">
+      <div class="gcal-view-top-actions">
+        <button id="editFromViewButton" type="button" class="gcal-icon-btn" title="Afspraak wijzigen" aria-label="Afspraak wijzigen">✏️</button>
+        <button id="doneFromViewButton" type="button" class="gcal-icon-btn" title="Markeren als gereed" aria-label="Markeren als gereed">✓</button>
+        <button id="deleteFromViewButton" type="button" class="gcal-icon-btn gcal-danger-icon" title="Afspraak verwijderen" aria-label="Afspraak verwijderen">🗑️</button>
+        <button id="closeViewX" type="button" class="modal-close gcal-inline-close" title="Sluiten" aria-label="Sluiten">&times;</button>
       </div>
-      <div class="field">
-        <label for="newCatColor">Kleur</label>
-        <input id="newCatColor" type="color" value="#0b57d0" style="height:40px;padding:4px;" />
+
+      <div class="gcal-view-header">
+        <span id="viewBadge" class="gcal-color-swatch"></span>
+        <div>
+          <h2 id="viewTitle" class="gcal-view-title">Afspraak</h2>
+          <p id="viewDate" class="gcal-view-sub">-</p>
+        </div>
       </div>
-      <div class="modal-actions">
-        <button id="cancelCatBtn" type="button" class="btn-secondary">Annuleren</button>
-        <button id="saveCatBtn" type="button" class="btn-primary">Toevoegen</button>
+
+      <div class="gcal-view-body">
+        <div class="gcal-view-line">
+          <span>🕐</span>
+          <span id="viewTime">-</span>
+        </div>
+        <div class="gcal-view-line">
+          <span id="viewCategoryEmoji">🏷️</span>
+          <span id="viewCategoryName">-</span>
+        </div>
+        <div class="gcal-view-desc-box">
+          <p id="viewDescription">Geen omschrijving beschikbaar.</p>
+        </div>
+      </div>
+
+      <div class="gcal-dialog-footer">
+        <button id="closeViewButton" type="button" class="gcal-btn-primary">Sluiten</button>
       </div>
     </div>
   </div>
 
-  <div id="toast" class="toast"></div>
+  <div id="toast-message" role="status" aria-live="polite"></div>
 
   <script>
-    const DEFAULT_CATEGORIES = {
-      work: { id: "work", label: "Werken", color: "#0b57d0", isDefault: true },
-      holiday: { id: "holiday", label: "Vakantie", color: "#0f9d58", isDefault: true },
-      activity: { id: "activity", label: "Activiteit", color: "#1a73e8", isDefault: true },
-      birthday: { id: "birthday", label: "Verjaardag", color: "#e37400", isDefault: true },
-      holidayofficial: { id: "holidayofficial", label: "Feestdag", color: "#9334e6", isDefault: true }
-    };
+    (function () {
+      "use strict";
 
-    let categories = { ...DEFAULT_CATEGORIES };
-    let events = [];
-    let currentView = "month";
-    let anchorDate = new Date();
-    let miniAnchorDate = new Date();
-    let activeCategory = "all";
-    let editingId = null;
-    let activeEventId = null;
+      const STORAGE_EVENTS_KEY = "snejin_agenda_events_v2";
+      const STORAGE_CATS_KEY = "snejin_agenda_cats_v2";
+      const STORAGE_THEME_KEY = "snejin_agenda_theme_v2";
+      const STORAGE_SEASON_KEY = "snejin_agenda_season_pref_v1";
 
-    function loadState() {
-      try {
-        const savedCats = JSON.parse(localStorage.getItem("snejin_v4_cats") || "{}");
-        categories = { ...DEFAULT_CATEGORIES, ...savedCats };
-        const savedEvents = JSON.parse(localStorage.getItem("snejin_v4_events") || "[]");
-        events = Array.isArray(savedEvents) ? savedEvents : [];
-        if (localStorage.getItem("snejin_v4_dark") === "1") {
-          document.body.classList.add("dark");
-          document.getElementById("themeBtn").textContent = "☀️";
+      const DEFAULT_CATEGORIES = {
+        work: { id: "work", label: "Werken", color: "#0B57D0", emoji: "💼", isDefault: true },
+        holiday: { id: "holiday", label: "Vakantie", color: "#0F9D58", emoji: "🌴", isDefault: true },
+        activity: { id: "activity", label: "Activiteit", color: "#1A73E8", emoji: "⚡", isDefault: true },
+        birthday: { id: "birthday", label: "Verjaardag", color: "#E37400", emoji: "🎂", isDefault: true },
+        holidayofficial: { id: "holidayofficial", label: "Feestdag", color: "#9334E6", emoji: "🎉", isDefault: true }
+      };
+
+      const SEED_EVENTS = [
+        {
+          id: "seed-1",
+          title: "Teamoverleg Snejin",
+          description: "Weekplanning en voortgang doornemen.",
+          date: "2026-11-24",
+          time: "10:00",
+          allDay: false,
+          category: "work"
+        },
+        {
+          id: "seed-2",
+          title: "Verjaardag Anna",
+          description: "Koffie en taart 's middags.",
+          date: "2026-11-26",
+          time: "",
+          allDay: true,
+          category: "birthday"
+        },
+        {
+          id: "seed-3",
+          title: "Hardlopen in het park",
+          description: "Rustige duurloop van 7 km.",
+          date: "2026-11-25",
+          time: "18:00",
+          allDay: false,
+          category: "activity"
+        },
+        {
+          id: "seed-4",
+          title: "Vakantie plannen",
+          description: "Data en bestemmingen bekijken.",
+          date: "2026-11-28",
+          time: "",
+          allDay: true,
+          category: "holiday"
         }
-      } catch (e) {
-        console.error(e);
+      ];
+
+      let categories = {};
+      let events = [];
+      let currentView = "month";
+      let anchorDate = new Date(2026, 10, 24);
+      let miniCalMonth = new Date(2026, 10, 1);
+      let activeCategoryFilter = "all";
+      let searchQuery = "";
+      let editingEventId = null;
+      let viewingEventId = null;
+      let editingCategoryId = null;
+      let seasonPref = "auto";
+
+      function detectSeasonFromDate(dateObj) {
+        const m = dateObj.getMonth(); // 0 = jan .. 11 = dec
+        if (m === 11 || m === 0 || m === 1) return "winter";
+        if (m >= 2 && m <= 4) return "spring";
+        if (m >= 5 && m <= 7) return "summer";
+        return "autumn";
       }
-    }
 
-    function saveState() {
-      const customCats = {};
-      Object.entries(categories).forEach(([k, v]) => {
-        if (!DEFAULT_CATEGORIES[k]) customCats[k] = v;
-      });
-      localStorage.setItem("snejin_v4_cats", JSON.stringify(customCats));
-      localStorage.setItem("snejin_v4_events", JSON.stringify(events));
-    }
-
-    function fmtDate(d) {
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    }
-
-    function showToast(msg) {
-      const el = document.getElementById("toast");
-      el.textContent = msg;
-      el.style.display = "block";
-      clearTimeout(el._t);
-      el._t = setTimeout(() => { el.style.display = "none"; }, 2600);
-    }
-
-    function getFilteredEvents() {
-      const q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
-      return events.filter(ev => {
-        const catOk = activeCategory === "all" || ev.category === activeCategory;
-        const qOk = !q || (ev.title || "").toLowerCase().includes(q) || (ev.description || "").toLowerCase().includes(q);
-        return catOk && qOk;
-      });
-    }
-
-    function renderCategories() {
-      const list = document.getElementById("categoryList");
-      const select = document.getElementById("eventCategorySelect");
-      list.innerHTML = "";
-      select.innerHTML = "";
-
-      Object.values(categories).forEach(cat => {
-        const opt = document.createElement("option");
-        opt.value = cat.id;
-        opt.textContent = cat.label;
-        select.appendChild(opt);
-
-        const li = document.createElement("li");
-        li.className = "cat-item" + (activeCategory === cat.id ? " active" : "");
-
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "cat-filter";
-        btn.innerHTML = `<span class="cat-dot" style="background:${cat.color}"></span><span>${cat.label}</span>`;
-        btn.addEventListener("click", () => {
-          activeCategory = activeCategory === cat.id ? "all" : cat.id;
-          renderCategories();
-          renderAll();
-        });
-        li.appendChild(btn);
-
-        if (!cat.isDefault) {
-          const del = document.createElement("button");
-          del.type = "button";
-          del.className = "cat-del";
-          del.textContent = "×";
-          del.addEventListener("click", () => {
-            delete categories[cat.id];
-            events = events.map(ev => ev.category === cat.id ? { ...ev, category: "activity" } : ev);
-            if (activeCategory === cat.id) activeCategory = "all";
-            saveState();
-            renderCategories();
-            renderAll();
-            showToast("Categorie verwijderd.");
-          });
-          li.appendChild(del);
-        }
-        list.appendChild(li);
-      });
-      select.value = categories.activity ? "activity" : Object.keys(categories)[0];
-    }
-
-    function renderMiniCalendar() {
-      const label = document.getElementById("miniMonthLabel");
-      const grid = document.getElementById("miniGrid");
-      const y = miniAnchorDate.getFullYear();
-      const m = miniAnchorDate.getMonth();
-      const formatted = new Intl.DateTimeFormat("nl-NL", { month: "long", year: "numeric" }).format(new Date(y, m, 1));
-      label.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
-
-      const firstOffset = (new Date(y, m, 1).getDay() + 6) % 7;
-      const daysInMonth = new Date(y, m + 1, 0).getDate();
-      const prevDays = new Date(y, m, 0).getDate();
-      const todayStr = fmtDate(new Date());
-
-      grid.innerHTML = "";
-      for (let i = firstOffset - 1; i >= 0; i--) {
-        const d = new Date(y, m - 1, prevDays - i);
-        const b = document.createElement("button");
-        b.type = "button"; b.className = "mini-day muted"; b.textContent = d.getDate();
-        b.addEventListener("click", () => { anchorDate = d; renderAll(); });
-        grid.appendChild(b);
+      function getEffectiveSeason() {
+        if (seasonPref && seasonPref !== "auto") return seasonPref;
+        return detectSeasonFromDate(new Date());
       }
-      for (let day = 1; day <= daysInMonth; day++) {
-        const d = new Date(y, m, day);
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "mini-day" + (fmtDate(d) === todayStr ? " today" : "");
-        b.textContent = day;
-        b.addEventListener("click", () => { anchorDate = d; renderAll(); });
-        grid.appendChild(b);
-      }
-      const rem = grid.children.length % 7 === 0 ? 0 : 7 - (grid.children.length % 7);
-      for (let n = 1; n <= rem; n++) {
-        const d = new Date(y, m + 1, n);
-        const b = document.createElement("button");
-        b.type = "button"; b.className = "mini-day muted"; b.textContent = n;
-        b.addEventListener("click", () => { anchorDate = d; renderAll(); });
-        grid.appendChild(b);
-      }
-    }
 
-    function renderMainCalendar() {
-      const container = document.getElementById("calendarView");
-      const titleEl = document.getElementById("currentTitle");
-      const filtered = getFilteredEvents();
+      function renderSeasonEffects(season) {
+        const layer = document.getElementById("seasonParticles");
+        const badge = document.getElementById("activeSeasonBadge");
+        if (!layer) return;
 
-      const monthTitle = new Intl.DateTimeFormat("nl-NL", { month: "long", year: "numeric" }).format(anchorDate);
-      titleEl.textContent = monthTitle.charAt(0).toUpperCase() + monthTitle.slice(1);
-
-      document.querySelectorAll(".view-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.view === currentView);
-      });
-
-      if (currentView === "agenda" || currentView === "day" || currentView === "week") {
-        let listItems = [...filtered];
-        if (currentView === "day") {
-          const dStr = fmtDate(anchorDate);
-          listItems = listItems.filter(ev => ev.date === dStr);
-          titleEl.textContent = anchorDate.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-        } else if (currentView === "week") {
-          const start = new Date(anchorDate);
-          const diff = (start.getDay() + 6) % 7;
-          start.setDate(start.getDate() - diff);
-          const end = new Date(start);
-          end.setDate(start.getDate() + 7);
-          listItems = listItems.filter(ev => {
-            const ed = new Date(ev.date + "T12:00:00");
-            return ed >= start && ed < end;
-          });
-          titleEl.textContent = `Week van ${start.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`;
+        const labels = {
+          spring: "🌸 Lente",
+          summer: "☀️ Zomer",
+          autumn: "🍂 Herfst",
+          winter: "❄️ Winter"
+        };
+        if (badge) {
+          badge.textContent = labels[season] || "";
         }
 
-        container.innerHTML = `<div class="list-view" id="listContainer"></div>`;
-        const listEl = document.getElementById("listContainer");
-        if (!listItems.length) {
-          listEl.innerHTML = `<p style="padding:18px;color:var(--muted);">Geen afspraken gevonden voor deze weergave.</p>`;
+        layer.innerHTML = "";
+
+        if (season === "summer") {
+          // In de zomer vooral zonnegloed (geen vallende deeltjes nodig)
           return;
         }
-        listItems.sort((a, b) => (a.date + (a.time || "")).localeCompare(b.date + (b.time || "")));
-        listItems.forEach(ev => {
-          const cat = categories[ev.category] || categories.activity;
-          const row = document.createElement("div");
-          row.className = "list-row";
-          row.innerHTML = `
-            <div style="display:flex;align-items:center;gap:12px;">
-              <span class="cat-dot" style="background:${cat.color};width:14px;height:14px;"></span>
-              <div>
-                <div style="font-weight:600;">${ev.title}</div>
-                <div style="font-size:12px;color:var(--muted);">${ev.date} ${ev.allDay ? "• Hele dag" : (ev.time ? "• " + ev.time : "")} • ${cat.label}</div>
-              </div>
-            </div>
-            <span style="font-size:12px;color:var(--muted);">Bekijken ›</span>
-          `;
-          row.addEventListener("click", () => openViewModal(ev.id));
-          listEl.appendChild(row);
-        });
-        return;
-      }
 
-      // Maandweergave
-      const y = anchorDate.getFullYear();
-      const m = anchorDate.getMonth();
-      const firstOffset = (new Date(y, m, 1).getDay() + 6) % 7;
-      const daysInMonth = new Date(y, m + 1, 0).getDate();
-      const prevDays = new Date(y, m, 0).getDate();
-      const todayStr = fmtDate(new Date());
+        const particleGlyphs = {
+          winter: ["❄️", "❅", "❆"],
+          spring: ["🌸", "🌷", "🌼"],
+          autumn: ["🍂", "🍁"]
+        };
+        const glyphs = particleGlyphs[season] || [];
+        const count = season === "winter" ? 18 : 12;
 
-      let html = `<div class="cal-weekdays">
-        <div class="cal-weekday">Ma</div><div class="cal-weekday">Di</div><div class="cal-weekday">Wo</div>
-        <div class="cal-weekday">Do</div><div class="cal-weekday">Vr</div><div class="cal-weekday">Za</div><div class="cal-weekday">Zo</div>
-      </div><div class="month-grid">`;
+        for (let i = 0; i < count; i++) {
+          const span = document.createElement("span");
+          span.className = "season-particle";
+          span.textContent = glyphs[i % glyphs.length];
 
-      const cells = [];
-      for (let i = firstOffset - 1; i >= 0; i--) {
-        cells.push({ date: new Date(y, m - 1, prevDays - i), muted: true });
-      }
-      for (let day = 1; day <= daysInMonth; day++) {
-        cells.push({ date: new Date(y, m, day), muted: false });
-      }
-      const rem = cells.length % 7 === 0 ? 0 : 7 - (cells.length % 7);
-      for (let n = 1; n <= rem; n++) {
-        cells.push({ date: new Date(y, m + 1, n), muted: true });
-      }
+          const leftPct = Math.round(((i * 7.7) + (i % 3) * 5.5) % 98);
+          const duration = 11 + (i % 7) * 2.2;
+          const delay = -((i * 1.9) % duration);
+          const sizePx = season === "winter" ? 13 + (i % 4) * 3 : 16 + (i % 4) * 3;
+          const drift = (i % 2 === 0 ? 1 : -1) * (28 + (i % 5) * 14);
+          const spin = season === "winter" ? 140 : (i % 2 === 0 ? 320 : -320);
 
-      cells.forEach(c => {
-        const dStr = fmtDate(c.date);
-        const dayEvents = filtered.filter(ev => ev.date === dStr);
-        const isToday = dStr === todayStr;
-        html += `<div class="day-cell ${c.muted ? "muted" : ""} ${isToday ? "today" : ""}" data-date="${dStr}">
-          <span class="day-num">${c.date.getDate()}</span>
-          ${dayEvents.map(ev => {
-            const cat = categories[ev.category] || categories.activity;
-            return `<button type="button" class="event-pill" data-ev-id="${ev.id}" style="background:${cat.color}">${ev.time && !ev.allDay ? ev.time + " " : ""}${ev.title}</button>`;
-          }).join("")}
-        </div>`;
-      });
+          span.style.left = `${leftPct}%`;
+          span.style.fontSize = `${sizePx}px`;
+          span.style.animationDuration = `${duration}s`;
+          span.style.animationDelay = `${delay}s`;
+          span.style.setProperty("--drift-x", `${drift}px`);
+          span.style.setProperty("--spin-deg", `${spin}deg`);
 
-      html += `</div>`;
-      container.innerHTML = html;
-
-      container.querySelectorAll(".day-cell").forEach(cell => {
-        cell.addEventListener("click", (e) => {
-          if (e.target.closest(".event-pill")) return;
-          openEventModal(null, cell.dataset.date);
-        });
-      });
-
-      container.querySelectorAll(".event-pill").forEach(pill => {
-        pill.addEventListener("click", (e) => {
-          e.stopPropagation();
-          openViewModal(pill.dataset.evId);
-        });
-      });
-    }
-
-    function updateStats() {
-      document.getElementById("statTotal").textContent = String(events.length);
-      const now = new Date();
-      const start = new Date(now);
-      start.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(start);
-      end.setDate(start.getDate() + 7);
-      const weekCount = events.filter(ev => {
-        const d = new Date(ev.date + "T12:00:00");
-        return d >= start && d < end;
-      }).length;
-      document.getElementById("statWeek").textContent = String(weekCount);
-    }
-
-    function renderAll() {
-      renderMiniCalendar();
-      renderMainCalendar();
-      updateStats();
-    }
-
-    function openEventModal(evId = null, defaultDate = "") {
-      editingId = evId;
-      const modal = document.getElementById("eventModal");
-      if (evId) {
-        const ev = events.find(x => x.id === evId);
-        if (!ev) return;
-        document.getElementById("eventModalTitle").textContent = "Afspraak wijzigen";
-        document.getElementById("eventTitleInput").value = ev.title;
-        document.getElementById("eventDateInput").value = ev.date;
-        document.getElementById("eventTimeInput").value = ev.time || "";
-        document.getElementById("eventAllDayInput").checked = Boolean(ev.allDay);
-        document.getElementById("eventCategorySelect").value = categories[ev.category] ? ev.category : "activity";
-        document.getElementById("eventDescInput").value = ev.description || "";
-      } else {
-        document.getElementById("eventModalTitle").textContent = "Nieuwe afspraak";
-        document.getElementById("eventTitleInput").value = "";
-        document.getElementById("eventDateInput").value = defaultDate || fmtDate(anchorDate);
-        document.getElementById("eventTimeInput").value = "";
-        document.getElementById("eventAllDayInput").checked = true;
-        document.getElementById("eventCategorySelect").value = categories.activity ? "activity" : Object.keys(categories)[0];
-        document.getElementById("eventDescInput").value = "";
-      }
-      document.getElementById("eventTimeInput").disabled = document.getElementById("eventAllDayInput").checked;
-      modal.classList.add("open");
-      setTimeout(() => document.getElementById("eventTitleInput").focus(), 40);
-    }
-
-    function closeEventModal() {
-      document.getElementById("eventModal").classList.remove("open");
-      editingId = null;
-    }
-
-    function openViewModal(evId) {
-      const ev = events.find(x => x.id === evId);
-      if (!ev) return;
-      activeEventId = evId;
-      const cat = categories[ev.category] || categories.activity;
-      document.getElementById("viewModalTitle").textContent = ev.title;
-      document.getElementById("viewModalMeta").textContent = `${ev.date} • ${ev.allDay ? "Hele dag" : (ev.time || "Tijd n.t.b.")} • ${cat.label}`;
-      document.getElementById("viewModalDesc").textContent = ev.description || "Geen omschrijving beschikbaar.";
-      document.getElementById("viewModal").classList.add("open");
-    }
-
-    function closeViewModal() {
-      document.getElementById("viewModal").classList.remove("open");
-      activeEventId = null;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      loadState();
-      renderCategories();
-      renderAll();
-
-      document.getElementById("createBtn").addEventListener("click", () => openEventModal());
-      document.getElementById("todayBtn").addEventListener("click", () => {
-        anchorDate = new Date();
-        miniAnchorDate = new Date();
-        renderAll();
-        showToast("Terug naar vandaag.");
-      });
-      document.getElementById("prevBtn").addEventListener("click", () => {
-        if (currentView === "day") anchorDate.setDate(anchorDate.getDate() - 1);
-        else if (currentView === "week") anchorDate.setDate(anchorDate.getDate() - 7);
-        else anchorDate.setMonth(anchorDate.getMonth() - 1);
-        renderAll();
-      });
-      document.getElementById("nextBtn").addEventListener("click", () => {
-        if (currentView === "day") anchorDate.setDate(anchorDate.getDate() + 1);
-        else if (currentView === "week") anchorDate.setDate(anchorDate.getDate() + 7);
-        else anchorDate.setMonth(anchorDate.getMonth() + 1);
-        renderAll();
-      });
-
-      document.querySelectorAll(".view-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          currentView = btn.dataset.view;
-          renderAll();
-        });
-      });
-
-      document.getElementById("toggleSidebarBtn").addEventListener("click", () => {
-        document.getElementById("sidebar").classList.toggle("collapsed");
-      });
-      document.getElementById("miniPrevBtn").addEventListener("click", () => {
-        miniAnchorDate.setMonth(miniAnchorDate.getMonth() - 1);
-        renderMiniCalendar();
-      });
-      document.getElementById("miniNextBtn").addEventListener("click", () => {
-        miniAnchorDate.setMonth(miniAnchorDate.getMonth() + 1);
-        renderMiniCalendar();
-      });
-
-      document.getElementById("searchInput").addEventListener("input", renderMainCalendar);
-      document.getElementById("showAllCatsBtn").addEventListener("click", () => {
-        activeCategory = "all";
-        renderCategories();
-        renderAll();
-        showToast("Alle categorieën zichtbaar.");
-      });
-      document.getElementById("printBtn").addEventListener("click", () => window.print());
-
-      document.getElementById("themeBtn").addEventListener("click", () => {
-        document.body.classList.toggle("dark");
-        const isDark = document.body.classList.contains("dark");
-        localStorage.setItem("snejin_v4_dark", isDark ? "1" : "0");
-        document.getElementById("themeBtn").textContent = isDark ? "☀️" : "🌙";
-      });
-
-      document.getElementById("logoutBtn").addEventListener("click", () => {
-        showToast("Uitgelogd.");
-        setTimeout(() => { window.location.href = "index.html"; }, 500);
-      });
-
-      document.getElementById("eventAllDayInput").addEventListener("change", (e) => {
-        document.getElementById("eventTimeInput").disabled = e.target.checked;
-      });
-
-      document.getElementById("saveEventBtn").addEventListener("click", () => {
-        const title = document.getElementById("eventTitleInput").value.trim();
-        const date = document.getElementById("eventDateInput").value;
-        const time = document.getElementById("eventTimeInput").value;
-        const allDay = document.getElementById("eventAllDayInput").checked;
-        const category = document.getElementById("eventCategorySelect").value;
-        const description = document.getElementById("eventDescInput").value.trim();
-
-        if (!title) return showToast("Vul een titel in.");
-        if (!date) return showToast("Kies een datum.");
-
-        if (editingId) {
-          events = events.map(ev => ev.id === editingId ? { ...ev, title, date, time, allDay, category, description } : ev);
-          showToast("Afspraak bijgewerkt.");
-        } else {
-          events.push({ id: "ev_" + Date.now(), title, date, time, allDay, category, description });
-          showToast("Afspraak opgeslagen.");
+          layer.appendChild(span);
         }
-        saveState();
-        closeEventModal();
+      }
+
+      function applySeasonTheme() {
+        const effective = getEffectiveSeason();
+        document.body.setAttribute("data-season", effective);
+        const selectEl = document.getElementById("seasonSelect");
+        if (selectEl && selectEl.value !== seasonPref) {
+          selectEl.value = seasonPref;
+        }
+        renderSeasonEffects(effective);
+      }
+
+      function loadCategories() {
+        categories = {};
+        Object.entries(DEFAULT_CATEGORIES).forEach(([k, v]) => {
+          categories[k] = { ...v };
+        });
+
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_CATS_KEY) || "null");
+          if (saved && typeof saved === "object") {
+            Object.entries(saved).forEach(([id, cat]) => {
+              if (cat && cat.label && cat.color) {
+                categories[id] = {
+                  id,
+                  label: String(cat.label),
+                  color: String(cat.color),
+                  emoji: String(cat.emoji || "⚡"),
+                  isDefault: false
+                };
+              }
+            });
+          }
+        } catch (err) {
+          console.warn("Kon categorieën niet laden:", err);
+        }
+      }
+
+      function saveCustomCategories() {
+        const customOnly = {};
+        Object.entries(categories).forEach(([id, cat]) => {
+          if (!cat.isDefault) {
+            customOnly[id] = {
+              id: cat.id,
+              label: cat.label,
+              color: cat.color,
+              emoji: cat.emoji || "⚡",
+              isDefault: false
+            };
+          }
+        });
+        localStorage.setItem(STORAGE_CATS_KEY, JSON.stringify(customOnly));
+      }
+
+      function loadEvents() {
+        try {
+          const raw = localStorage.getItem(STORAGE_EVENTS_KEY);
+          if (raw === null) {
+            events = SEED_EVENTS.map((ev) => ({ ...ev }));
+            saveEvents();
+          } else {
+            const parsed = JSON.parse(raw);
+            events = Array.isArray(parsed) ? parsed : [];
+          }
+        } catch (err) {
+          console.warn("Kon afspraken niet laden:", err);
+          events = SEED_EVENTS.map((ev) => ({ ...ev }));
+        }
+      }
+
+      function saveEvents() {
+        localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(events));
+      }
+
+      function formatDateISO(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+
+      function parseISODate(isoStr) {
+        const [y, m, d] = String(isoStr || "").split("-").map(Number);
+        if (!y || !m || !d) return new Date(2026, 10, 24);
+        return new Date(y, m - 1, d);
+      }
+
+      function isSameDay(d1, d2) {
+        return (
+          d1.getFullYear() === d2.getFullYear() &&
+          d1.getMonth() === d2.getMonth() &&
+          d1.getDate() === d2.getDate()
+        );
+      }
+
+      function getStartOfWeekMonday(date) {
+        const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const offset = (d.getDay() + 6) % 7;
+        d.setDate(d.getDate() - offset);
+        return d;
+      }
+
+      function capitalizeFirst(str) {
+        if (!str) return "";
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+
+      function getHeaderTitle() {
+        if (currentView === "month") {
+          const txt = new Intl.DateTimeFormat("nl-NL", { month: "long", year: "numeric" }).format(anchorDate);
+          return capitalizeFirst(txt);
+        }
+        if (currentView === "day") {
+          const txt = new Intl.DateTimeFormat("nl-NL", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+          }).format(anchorDate);
+          return capitalizeFirst(txt);
+        }
+        if (currentView === "week") {
+          const start = getStartOfWeekMonday(anchorDate);
+          const end = new Date(start);
+          end.setDate(start.getDate() + 6);
+          const startLabel = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "short" }).format(start);
+          const endLabel = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "short", year: "numeric" }).format(end);
+          return `${startLabel} – ${endLabel}`;
+        }
+        const txt = new Intl.DateTimeFormat("nl-NL", { month: "long", year: "numeric" }).format(anchorDate);
+        return `Agenda · ${capitalizeFirst(txt)}`;
+      }
+
+      function getFilteredEvents() {
+        const q = searchQuery.trim().toLowerCase();
+        return events.filter((ev) => {
+          const catMatch = activeCategoryFilter === "all" || ev.category === activeCategoryFilter;
+          const titleMatch = (ev.title || "").toLowerCase().includes(q);
+          const descMatch = (ev.description || "").toLowerCase().includes(q);
+          const searchMatch = !q || titleMatch || descMatch;
+          return catMatch && searchMatch;
+        });
+      }
+
+      function getCategoryMeta(catId) {
+        return (
+          categories[catId] ||
+          categories.activity || { id: "activity", label: "Activiteit", color: "#1A73E8", emoji: "⚡" }
+        );
+      }
+
+      function showMessage(text, type) {
+        const toast = document.getElementById("toast-message");
+        if (!toast) return;
+        toast.textContent = text;
+        toast.className = "";
+        if (type === "error") toast.classList.add("error");
+        if (type === "success") toast.classList.add("success");
+        void toast.offsetWidth;
+        toast.classList.add("show");
+        clearTimeout(showMessage._timer);
+        showMessage._timer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 2800);
+      }
+
+      function openModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.add("open");
+        el.setAttribute("aria-hidden", "false");
+      }
+
+      function closeModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove("open");
+        el.setAttribute("aria-hidden", "true");
+      }
+
+      function renderCategoryUI() {
+        const selectEl = document.getElementById("eventType");
+        const listEl = document.getElementById("categoryList");
+
+        if (selectEl) {
+          const prevVal = selectEl.value;
+          selectEl.innerHTML = "";
+          Object.values(categories).forEach((cat) => {
+            const opt = document.createElement("option");
+            opt.value = cat.id;
+            opt.textContent = `${cat.emoji ? cat.emoji + " " : ""}${cat.label}`;
+            selectEl.appendChild(opt);
+          });
+          if (prevVal && categories[prevVal]) {
+            selectEl.value = prevVal;
+          } else if (categories.activity) {
+            selectEl.value = "activity";
+          }
+        }
+
+        if (listEl) {
+          listEl.innerHTML = "";
+          Object.values(categories).forEach((cat) => {
+            const li = document.createElement("li");
+            li.className = "gcal-cat-item" + (activeCategoryFilter === cat.id ? " active" : "");
+
+            const filterBtn = document.createElement("button");
+            filterBtn.type = "button";
+            filterBtn.className = "gcal-cat-filter-btn";
+
+            const swatch = document.createElement("span");
+            swatch.className = "gcal-cat-square";
+            swatch.style.backgroundColor = cat.color;
+
+            const emojiSpan = document.createElement("span");
+            emojiSpan.className = "gcal-cat-emoji";
+            emojiSpan.textContent = cat.emoji || "⚡";
+
+            const labelSpan = document.createElement("span");
+            labelSpan.className = "gcal-cat-label-text";
+            labelSpan.textContent = cat.label;
+
+            filterBtn.appendChild(swatch);
+            filterBtn.appendChild(emojiSpan);
+            filterBtn.appendChild(labelSpan);
+            filterBtn.addEventListener("click", () => {
+              activeCategoryFilter = activeCategoryFilter === cat.id ? "all" : cat.id;
+              renderCategoryUI();
+              renderAll();
+            });
+
+            li.appendChild(filterBtn);
+
+            const actions = document.createElement("div");
+            actions.className = "gcal-cat-actions";
+
+            const editBtn = document.createElement("button");
+            editBtn.type = "button";
+            editBtn.className = "gcal-cat-action-btn";
+            editBtn.title = `Categorie '${cat.label}' bewerken`;
+            editBtn.setAttribute("aria-label", `Categorie ${cat.label} bewerken`);
+            editBtn.textContent = "✏️";
+            editBtn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              openEditCategoryModal(cat.id);
+            });
+            actions.appendChild(editBtn);
+
+            if (!cat.isDefault) {
+              const delBtn = document.createElement("button");
+              delBtn.type = "button";
+              delBtn.className = "gcal-cat-action-btn gcal-cat-del-btn";
+              delBtn.title = `Categorie '${cat.label}' verwijderen`;
+              delBtn.setAttribute("aria-label", `Categorie ${cat.label} verwijderen`);
+              delBtn.textContent = "×";
+              delBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                deleteCategory(cat.id);
+              });
+              actions.appendChild(delBtn);
+            }
+
+            li.appendChild(actions);
+            listEl.appendChild(li);
+          });
+        }
+      }
+
+      function openNewCategoryModal() {
+        editingCategoryId = null;
+        document.getElementById("categoryModalTitle").textContent = "Nieuwe categorie";
+        document.getElementById("newCategoryName").value = "";
+        document.getElementById("newCategoryEmoji").value = "⚡";
+        document.getElementById("newCategoryColor").value = "#0B57D0";
+        openModal("categoryModal");
+        setTimeout(() => document.getElementById("newCategoryName")?.focus(), 40);
+      }
+
+      function openEditCategoryModal(catId) {
+        const cat = categories[catId];
+        if (!cat) return;
+        editingCategoryId = cat.id;
+        document.getElementById("categoryModalTitle").textContent = "Categorie bewerken";
+        document.getElementById("newCategoryName").value = cat.label;
+        document.getElementById("newCategoryEmoji").value = cat.emoji || "⚡";
+        document.getElementById("newCategoryColor").value = cat.color || "#0B57D0";
+        openModal("categoryModal");
+        setTimeout(() => document.getElementById("newCategoryName")?.focus(), 40);
+      }
+
+      function saveCategoryFromModal() {
+        const nameInput = document.getElementById("newCategoryName");
+        const emojiInput = document.getElementById("newCategoryEmoji");
+        const colorInput = document.getElementById("newCategoryColor");
+
+        const label = (nameInput?.value || "").trim();
+        const emoji = (emojiInput?.value || "").trim() || "⚡";
+        const color = colorInput?.value || "#0B57D0";
+
+        if (!label) {
+          showMessage("Vul een naam in voor de categorie.", "error");
+          nameInput?.focus();
+          return;
+        }
+
+        if (editingCategoryId && categories[editingCategoryId]) {
+          categories[editingCategoryId] = {
+            ...categories[editingCategoryId],
+            label,
+            emoji,
+            color
+          };
+          saveCustomCategories();
+          renderCategoryUI();
+          renderAll();
+          closeModal("categoryModal");
+          editingCategoryId = null;
+          showMessage(`Categorie "${label}" bijgewerkt.`, "success");
+          return;
+        }
+
+        const slug =
+          "custom_" +
+          label
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/^_|_$/g, "") +
+          "_" +
+          Date.now().toString().slice(-4);
+
+        categories[slug] = {
+          id: slug,
+          label,
+          emoji,
+          color,
+          isDefault: false
+        };
+
+        saveCustomCategories();
+        renderCategoryUI();
+        closeModal("categoryModal");
+        if (nameInput) nameInput.value = "";
+        showMessage(`Categorie "${emoji} ${label}" toegevoegd.`, "success");
+      }
+
+      function deleteCategory(catId) {
+        const cat = categories[catId];
+        if (!cat) return;
+        if (cat.isDefault) {
+          showMessage("Standaard categorieën kunnen niet worden verwijderd.", "error");
+          return;
+        }
+        delete categories[catId];
+        saveCustomCategories();
+        events.forEach((ev) => {
+          if (ev.category === catId) {
+            ev.category = "activity";
+          }
+        });
+        saveEvents();
+        if (activeCategoryFilter === catId) {
+          activeCategoryFilter = "all";
+        }
+        renderCategoryUI();
+        renderAll();
+        showMessage(`Categorie "${cat.label}" verwijderd.`, "success");
+      }
+
+      function renderMiniCalendar() {
+        const labelEl = document.getElementById("miniCalMonthLabel");
+        const gridEl = document.getElementById("miniCalGrid");
+        if (!labelEl || !gridEl) return;
+
+        const year = miniCalMonth.getFullYear();
+        const month = miniCalMonth.getMonth();
+        const formatted = new Intl.DateTimeFormat("nl-NL", { month: "long", year: "numeric" }).format(
+          new Date(year, month, 1)
+        );
+        labelEl.textContent = capitalizeFirst(formatted);
+
+        const firstDay = new Date(year, month, 1);
+        const startOffset = (firstDay.getDay() + 6) % 7;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const prevMonthDays = new Date(year, month, 0).getDate();
+        const realToday = new Date();
+
+        gridEl.innerHTML = "";
+
+        for (let i = startOffset - 1; i >= 0; i--) {
+          const dayNum = prevMonthDays - i;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "gcal-mini-day muted";
+          btn.textContent = String(dayNum);
+          btn.addEventListener("click", () => {
+            anchorDate = new Date(year, month - 1, dayNum);
+            miniCalMonth = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1);
+            renderAll();
+          });
+          gridEl.appendChild(btn);
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const current = new Date(year, month, d);
+          const btn = document.createElement("button");
+          btn.type = "button";
+          let cls = "gcal-mini-day";
+          if (isSameDay(current, realToday)) cls += " today";
+          else if (isSameDay(current, anchorDate)) cls += " selected-day";
+          btn.className = cls;
+          btn.textContent = String(d);
+          btn.addEventListener("click", () => {
+            anchorDate = new Date(year, month, d);
+            renderAll();
+          });
+          gridEl.appendChild(btn);
+        }
+
+        const total = gridEl.children.length;
+        const tail = total % 7 === 0 ? 0 : 7 - (total % 7);
+        for (let n = 1; n <= tail; n++) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "gcal-mini-day muted";
+          btn.textContent = String(n);
+          btn.addEventListener("click", () => {
+            anchorDate = new Date(year, month + 1, n);
+            miniCalMonth = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1);
+            renderAll();
+          });
+          gridEl.appendChild(btn);
+        }
+      }
+
+      function createEventChip(ev) {
+        const meta = getCategoryMeta(ev.category);
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "cal-event-chip";
+        chip.style.backgroundColor = meta.color;
+        const emojiPrefix = meta.emoji ? `${meta.emoji} ` : "";
+        const timePrefix = !ev.allDay && ev.time ? `${ev.time} ` : "";
+        chip.textContent = `${emojiPrefix}${timePrefix}${ev.title}`;
+        chip.title = `${emojiPrefix}${timePrefix}${ev.title} (${meta.label})`;
+        chip.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openViewModal(ev.id);
+        });
+        return chip;
+      }
+
+      function renderMonthView(container, filteredEvents) {
+        const weekdaysRow = document.createElement("div");
+        weekdaysRow.className = "month-weekdays";
+        ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].forEach((w) => {
+          const lbl = document.createElement("div");
+          lbl.className = "month-weekday-label";
+          lbl.textContent = w;
+          weekdaysRow.appendChild(lbl);
+        });
+        container.appendChild(weekdaysRow);
+
+        const grid = document.createElement("div");
+        grid.className = "month-grid";
+
+        const year = anchorDate.getFullYear();
+        const month = anchorDate.getMonth();
+        const firstOfMonth = new Date(year, month, 1);
+        const startOffset = (firstOfMonth.getDay() + 6) % 7;
+        const gridStart = new Date(year, month, 1 - startOffset);
+        const realToday = new Date();
+
+        for (let i = 0; i < 42; i++) {
+          const cellDate = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
+          const iso = formatDateISO(cellDate);
+          const isOtherMonth = cellDate.getMonth() !== month;
+          const isToday = isSameDay(cellDate, realToday);
+
+          const cell = document.createElement("div");
+          cell.className =
+            "month-cell" +
+            (isOtherMonth ? " other-month" : "") +
+            (isToday ? " is-today" : "");
+
+          const top = document.createElement("div");
+          top.className = "month-cell-top";
+          const numSpan = document.createElement("span");
+          numSpan.className = "month-day-num";
+          numSpan.textContent = String(cellDate.getDate());
+          top.appendChild(numSpan);
+          cell.appendChild(top);
+
+          const stack = document.createElement("div");
+          stack.className = "month-events-stack";
+
+          const dayEvents = filteredEvents.filter((ev) => ev.date === iso);
+          dayEvents.forEach((ev) => {
+            stack.appendChild(createEventChip(ev));
+          });
+
+          cell.appendChild(stack);
+          cell.addEventListener("click", () => {
+            openFormModal(iso);
+          });
+
+          grid.appendChild(cell);
+        }
+
+        container.appendChild(grid);
+      }
+
+      function renderTimeGridView(container, daysList, filteredEvents) {
+        const colCount = daysList.length;
+        const realToday = new Date();
+
+        const wrap = document.createElement("div");
+        wrap.className = "timegrid-wrap";
+
+        const header = document.createElement("div");
+        header.className = "timegrid-header";
+        const gutterHead = document.createElement("div");
+        gutterHead.className = "timegrid-gutter-head";
+        header.appendChild(gutterHead);
+
+        const daysHead = document.createElement("div");
+        daysHead.className = "timegrid-days-head";
+        daysHead.style.gridTemplateColumns = `repeat(${colCount}, minmax(0, 1fr))`;
+
+        daysList.forEach((d) => {
+          const dh = document.createElement("div");
+          dh.className = "timegrid-day-head" + (isSameDay(d, realToday) ? " is-today" : "");
+          const wk = new Intl.DateTimeFormat("nl-NL", { weekday: "short" }).format(d);
+          dh.innerHTML = `<div>${capitalizeFirst(wk)}</div><div class="tg-head-num">${d.getDate()}</div>`;
+          daysHead.appendChild(dh);
+        });
+        header.appendChild(daysHead);
+        wrap.appendChild(header);
+
+        const alldayRow = document.createElement("div");
+        alldayRow.className = "timegrid-allday-row";
+        const alldayLabel = document.createElement("div");
+        alldayLabel.className = "timegrid-allday-label";
+        alldayLabel.textContent = "Hele dag";
+        alldayRow.appendChild(alldayLabel);
+
+        const alldayCols = document.createElement("div");
+        alldayCols.className = "timegrid-allday-cols";
+        alldayCols.style.gridTemplateColumns = `repeat(${colCount}, minmax(0, 1fr))`;
+
+        daysList.forEach((d) => {
+          const iso = formatDateISO(d);
+          const col = document.createElement("div");
+          col.className = "timegrid-allday-col";
+          const dayAllDay = filteredEvents.filter((ev) => ev.date === iso && ev.allDay);
+          dayAllDay.forEach((ev) => col.appendChild(createEventChip(ev)));
+          col.addEventListener("click", () => openFormModal(iso, "", true));
+          alldayCols.appendChild(col);
+        });
+        alldayRow.appendChild(alldayCols);
+        wrap.appendChild(alldayRow);
+
+        const body = document.createElement("div");
+        body.className = "timegrid-body";
+
+        for (let hour = 7; hour <= 21; hour++) {
+          const hh = String(hour).padStart(2, "0");
+          const slotLabelStr = `${hh}:00`;
+          const row = document.createElement("div");
+          row.className = "timegrid-slot-row";
+
+          const tLbl = document.createElement("div");
+          tLbl.className = "timegrid-time-label";
+          tLbl.textContent = slotLabelStr;
+          row.appendChild(tLbl);
+
+          const slotCols = document.createElement("div");
+          slotCols.className = "timegrid-slot-cols";
+          slotCols.style.gridTemplateColumns = `repeat(${colCount}, minmax(0, 1fr))`;
+
+          daysList.forEach((d) => {
+            const iso = formatDateISO(d);
+            const cell = document.createElement("div");
+            cell.className = "timegrid-slot-cell";
+
+            const matching = filteredEvents.filter((ev) => {
+              if (ev.date !== iso || ev.allDay) return false;
+              const evHour = parseInt((ev.time || "00:00").split(":")[0], 10);
+              return evHour === hour;
+            });
+            matching.forEach((ev) => cell.appendChild(createEventChip(ev)));
+
+            cell.addEventListener("click", () => {
+              openFormModal(iso, slotLabelStr, false);
+            });
+            slotCols.appendChild(cell);
+          });
+
+          row.appendChild(slotCols);
+          body.appendChild(row);
+        }
+
+        wrap.appendChild(body);
+        container.appendChild(wrap);
+      }
+
+      function renderAgendaListView(container, filteredEvents) {
+        const listWrap = document.createElement("div");
+        listWrap.className = "agenda-list-wrap";
+
+        const sorted = [...filteredEvents].sort((a, b) => {
+          const keyA = `${a.date} ${a.allDay ? "00:00" : a.time || "23:59"}`;
+          const keyB = `${b.date} ${b.allDay ? "00:00" : b.time || "23:59"}`;
+          return keyA.localeCompare(keyB);
+        });
+
+        if (sorted.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "agenda-list-empty";
+          empty.textContent = "Geen afspraken gevonden voor dit filter.";
+          listWrap.appendChild(empty);
+          container.appendChild(listWrap);
+          return;
+        }
+
+        sorted.forEach((ev) => {
+          const meta = getCategoryMeta(ev.category);
+          const item = document.createElement("div");
+          item.className = "agenda-list-item";
+
+          const left = document.createElement("div");
+          left.className = "agenda-list-left";
+
+          const dot = document.createElement("span");
+          dot.className = "agenda-dot";
+          dot.style.backgroundColor = meta.color;
+
+          const textBlock = document.createElement("div");
+          const titleEl = document.createElement("div");
+          titleEl.className = "agenda-item-title";
+          titleEl.textContent = `${meta.emoji ? meta.emoji + " " : ""}${ev.title}`;
+
+          const dateObj = parseISODate(ev.date);
+          const datePretty = capitalizeFirst(
+            new Intl.DateTimeFormat("nl-NL", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric"
+            }).format(dateObj)
+          );
+          const timePretty = ev.allDay ? "Hele dag" : ev.time || "Tijd niet opgegeven";
+
+          const metaEl = document.createElement("div");
+          metaEl.className = "agenda-item-meta";
+          metaEl.textContent = `${datePretty} · ${timePretty} · ${meta.label}`;
+
+          textBlock.appendChild(titleEl);
+          textBlock.appendChild(metaEl);
+
+          if (ev.description) {
+            const descEl = document.createElement("div");
+            descEl.className = "agenda-item-desc";
+            descEl.textContent = ev.description;
+            textBlock.appendChild(descEl);
+          }
+
+          left.appendChild(dot);
+          left.appendChild(textBlock);
+
+          const openBtn = document.createElement("button");
+          openBtn.type = "button";
+          openBtn.className = "agenda-open-btn";
+          openBtn.textContent = "Bekijken";
+          openBtn.addEventListener("click", () => openViewModal(ev.id));
+
+          item.appendChild(left);
+          item.appendChild(openBtn);
+          listWrap.appendChild(item);
+        });
+
+        container.appendChild(listWrap);
+      }
+
+      function updateStats() {
+        const totalEl = document.getElementById("statTotalEvents");
+        const weekEl = document.getElementById("statUpcomingWeek");
+        if (totalEl) {
+          totalEl.textContent = String(events.length);
+        }
+        if (weekEl) {
+          const weekStart = getStartOfWeekMonday(anchorDate);
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 7);
+          const startIso = formatDateISO(weekStart);
+          const endIso = formatDateISO(weekEnd);
+          const countWeek = events.filter((ev) => ev.date >= startIso && ev.date < endIso).length;
+          weekEl.textContent = String(countWeek);
+        }
+      }
+
+      function renderCalendarView() {
+        const container = document.getElementById("calendarViewContainer");
+        const titleEl = document.getElementById("gcalCurrentTitle");
+        if (!container) return;
+
+        if (titleEl) {
+          titleEl.textContent = getHeaderTitle();
+        }
+
+        document.querySelectorAll(".gcal-view-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.view === currentView);
+        });
+
+        container.innerHTML = "";
+        const filtered = getFilteredEvents();
+
+        if (currentView === "month") {
+          renderMonthView(container, filtered);
+        } else if (currentView === "week") {
+          const monday = getStartOfWeekMonday(anchorDate);
+          const weekDays = [];
+          for (let i = 0; i < 7; i++) {
+            const d = new Date(monday);
+            d.setDate(monday.getDate() + i);
+            weekDays.push(d);
+          }
+          renderTimeGridView(container, weekDays, filtered);
+        } else if (currentView === "day") {
+          renderTimeGridView(container, [new Date(anchorDate)], filtered);
+        } else {
+          renderAgendaListView(container, filtered);
+        }
+      }
+
+      function renderAll() {
+        miniCalMonth = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1);
+        renderMiniCalendar();
+        renderCalendarView();
+        updateStats();
+      }
+
+      function updateTimeFieldState() {
+        const allDayCheckbox = document.getElementById("allDay");
+        const timeInput = document.getElementById("eventTime");
+        if (!allDayCheckbox || !timeInput) return;
+        timeInput.disabled = allDayCheckbox.checked;
+        if (allDayCheckbox.checked) {
+          timeInput.value = "";
+        } else if (!timeInput.value) {
+          timeInput.value = "09:00";
+        }
+      }
+
+      function openFormModal(dateIso, timeStr, forceAllDay) {
+        editingEventId = null;
+        document.getElementById("formTitle").textContent = "Nieuwe afspraak";
+        document.getElementById("eventTitle").value = "";
+        document.getElementById("eventDate").value = dateIso || formatDateISO(anchorDate);
+        document.getElementById("eventDescription").value = "";
+        document.getElementById("eventRepeat").value = "none";
+
+        const typeSelect = document.getElementById("eventType");
+        if (typeSelect) {
+          if (activeCategoryFilter !== "all" && categories[activeCategoryFilter]) {
+            typeSelect.value = activeCategoryFilter;
+          } else if (categories.activity) {
+            typeSelect.value = "activity";
+          }
+        }
+
+        const allDayCheckbox = document.getElementById("allDay");
+        const timeInput = document.getElementById("eventTime");
+
+        if (forceAllDay === true || !timeStr) {
+          allDayCheckbox.checked = true;
+          timeInput.value = "";
+          timeInput.disabled = true;
+        } else {
+          allDayCheckbox.checked = false;
+          timeInput.disabled = false;
+          timeInput.value = timeStr;
+        }
+
+        openModal("eventModal");
+        setTimeout(() => document.getElementById("eventTitle")?.focus(), 40);
+      }
+
+      function saveEventFromModal() {
+        const title = (document.getElementById("eventTitle")?.value || "").trim();
+        const date = document.getElementById("eventDate")?.value || "";
+        const time = document.getElementById("eventTime")?.value || "";
+        const allDay = Boolean(document.getElementById("allDay")?.checked);
+        const category = document.getElementById("eventType")?.value || "activity";
+        const repeat = document.getElementById("eventRepeat")?.value || "none";
+        const description = (document.getElementById("eventDescription")?.value || "").trim();
+
+        if (!title) {
+          showMessage("Vul een titel in voor de afspraak.", "error");
+          document.getElementById("eventTitle")?.focus();
+          return;
+        }
+        if (!date) {
+          showMessage("Kies een geldige datum.", "error");
+          return;
+        }
+        if (!allDay && !time) {
+          showMessage("Kies een tijd of vink 'Hele dag' aan.", "error");
+          return;
+        }
+
+        if (editingEventId) {
+          const idx = events.findIndex((e) => e.id === editingEventId);
+          if (idx !== -1) {
+            events[idx] = {
+              ...events[idx],
+              title,
+              date,
+              time: allDay ? "" : time,
+              allDay,
+              category,
+              description
+            };
+          }
+          saveEvents();
+          closeModal("eventModal");
+          anchorDate = parseISODate(date);
+          renderAll();
+          showMessage("Afspraak bijgewerkt.", "success");
+          return;
+        }
+
+        const baseDate = parseISODate(date);
+        const occurrences = repeat === "weekly" ? 4 : repeat === "monthly" ? 3 : 1;
+
+        for (let i = 0; i < occurrences; i++) {
+          const occDate = new Date(baseDate);
+          if (repeat === "weekly") {
+            occDate.setDate(baseDate.getDate() + i * 7);
+          } else if (repeat === "monthly") {
+            occDate.setMonth(baseDate.getMonth() + i);
+          }
+
+          events.push({
+            id: `ev-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`,
+            title,
+            date: formatDateISO(occDate),
+            time: allDay ? "" : time,
+            allDay,
+            category,
+            description
+          });
+        }
+
+        saveEvents();
+        closeModal("eventModal");
+        anchorDate = baseDate;
+        renderAll();
+        showMessage(
+          occurrences > 1 ? `${occurrences} herhalende afspraken opgeslagen.` : "Afspraak opgeslagen.",
+          "success"
+        );
+      }
+
+      function openViewModal(eventId) {
+        const ev = events.find((e) => e.id === eventId);
+        if (!ev) return;
+        viewingEventId = ev.id;
+
+        const meta = getCategoryMeta(ev.category);
+        const dateObj = parseISODate(ev.date);
+        const datePretty = capitalizeFirst(
+          new Intl.DateTimeFormat("nl-NL", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+          }).format(dateObj)
+        );
+
+        document.getElementById("viewBadge").style.backgroundColor = meta.color;
+        document.getElementById("viewTitle").textContent = ev.title;
+        document.getElementById("viewDate").textContent = datePretty;
+        document.getElementById("viewTime").textContent = ev.allDay ? "Hele dag" : ev.time || "-";
+        document.getElementById("viewCategoryEmoji").textContent = meta.emoji || "🏷️";
+        document.getElementById("viewCategoryName").textContent = meta.label;
+        document.getElementById("viewDescription").textContent =
+          ev.description || "Geen omschrijving beschikbaar.";
+
+        openModal("eventViewModal");
+      }
+
+      function editViewingEvent() {
+        if (!viewingEventId) return;
+        const ev = events.find((e) => e.id === viewingEventId);
+        if (!ev) return;
+
+        closeModal("eventViewModal");
+        editingEventId = ev.id;
+        document.getElementById("formTitle").textContent = "Afspraak wijzigen";
+        document.getElementById("eventTitle").value = ev.title;
+        document.getElementById("eventDate").value = ev.date;
+        document.getElementById("eventDescription").value = ev.description || "";
+        document.getElementById("eventRepeat").value = "none";
+        document.getElementById("eventType").value = categories[ev.category] ? ev.category : "activity";
+
+        const allDayCheckbox = document.getElementById("allDay");
+        const timeInput = document.getElementById("eventTime");
+        allDayCheckbox.checked = Boolean(ev.allDay);
+        timeInput.disabled = Boolean(ev.allDay);
+        timeInput.value = ev.allDay ? "" : ev.time || "09:00";
+
+        openModal("eventModal");
+        setTimeout(() => document.getElementById("eventTitle")?.focus(), 40);
+      }
+
+      function completeViewingEvent() {
+        if (!viewingEventId) return;
+        const ev = events.find((e) => e.id === viewingEventId);
+        const title = ev ? ev.title : "Afspraak";
+        events = events.filter((e) => e.id !== viewingEventId);
+        saveEvents();
+        viewingEventId = null;
+        closeModal("eventViewModal");
+        renderAll();
+        showMessage(`"${title}" gemarkeerd als gereed.`, "success");
+      }
+
+      function deleteViewingEvent() {
+        if (!viewingEventId) return;
+        const ev = events.find((e) => e.id === viewingEventId);
+        const title = ev ? ev.title : "Afspraak";
+        events = events.filter((e) => e.id !== viewingEventId);
+        saveEvents();
+        viewingEventId = null;
+        closeModal("eventViewModal");
+        renderAll();
+        showMessage(`"${title}" verwijderd.`, "success");
+      }
+
+      function stepPeriod(delta) {
+        if (currentView === "month" || currentView === "agenda") {
+          anchorDate = new Date(anchorDate.getFullYear(), anchorDate.getMonth() + delta, 1);
+        } else if (currentView === "week") {
+          anchorDate = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), anchorDate.getDate() + delta * 7);
+        } else if (currentView === "day") {
+          anchorDate = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), anchorDate.getDate() + delta);
+        }
+        renderAll();
+      }
+
+      function setupThemeAndSeason() {
+        const btn = document.getElementById("themeButton");
+        const savedTheme = localStorage.getItem(STORAGE_THEME_KEY);
+        if (savedTheme === "dark") {
+          document.body.classList.add("dark", "dark-mode");
+          if (btn) btn.textContent = "☀️";
+        }
+
+        btn?.addEventListener("click", () => {
+          document.body.classList.toggle("dark");
+          document.body.classList.toggle("dark-mode");
+          const isDark = document.body.classList.contains("dark");
+          localStorage.setItem(STORAGE_THEME_KEY, isDark ? "dark" : "light");
+          if (btn) btn.textContent = isDark ? "☀️" : "🌙";
+          showMessage(isDark ? "Donkere modus ingeschakeld." : "Lichte modus ingeschakeld.", "info");
+        });
+
+        const savedSeason = localStorage.getItem(STORAGE_SEASON_KEY);
+        if (savedSeason && ["auto", "spring", "summer", "autumn", "winter"].includes(savedSeason)) {
+          seasonPref = savedSeason;
+        }
+        applySeasonTheme();
+
+        document.getElementById("seasonSelect")?.addEventListener("change", (e) => {
+          seasonPref = e.target.value || "auto";
+          localStorage.setItem(STORAGE_SEASON_KEY, seasonPref);
+          applySeasonTheme();
+          showMessage(
+            seasonPref === "auto"
+              ? "Seizoen ingesteld op automatisch."
+              : `Seizoen gewijzigd naar ${e.target.selectedOptions[0]?.textContent || seasonPref}.`,
+            "info"
+          );
+        });
+      }
+
+      function bindAllEvents() {
+        document.getElementById("toggleSidebarBtn")?.addEventListener("click", () => {
+          document.getElementById("gcalSidebar")?.classList.toggle("collapsed");
+        });
+
+        document.getElementById("brandHomeLink")?.addEventListener("click", (e) => {
+          e.preventDefault();
+          activeCategoryFilter = "all";
+          searchQuery = "";
+          const searchEl = document.getElementById("search");
+          if (searchEl) searchEl.value = "";
+          renderCategoryUI();
+          renderAll();
+          showMessage("Agenda gereset naar startweergave.", "info");
+        });
+
+        document.getElementById("gcalTodayBtn")?.addEventListener("click", () => {
+          anchorDate = new Date();
+          renderAll();
+          showMessage("Naar vandaag gesprongen.", "info");
+        });
+
+        document.getElementById("gcalPrevBtn")?.addEventListener("click", () => stepPeriod(-1));
+        document.getElementById("gcalNextBtn")?.addEventListener("click", () => stepPeriod(1));
+
+        document.querySelectorAll(".gcal-view-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const nextView = btn.dataset.view;
+            if (nextView) {
+              currentView = nextView;
+              renderCalendarView();
+            }
+          });
+        });
+
+        document.getElementById("search")?.addEventListener("input", (e) => {
+          searchQuery = e.target.value || "";
+          renderCalendarView();
+        });
+
+        document.getElementById("logoutButton")?.addEventListener("click", () => {
+          activeCategoryFilter = "all";
+          searchQuery = "";
+          const searchEl = document.getElementById("search");
+          if (searchEl) searchEl.value = "";
+          renderCategoryUI();
+          renderCalendarView();
+          showMessage("Je bent uitgelogd uit deze sessie.", "info");
+        });
+
+        document.getElementById("addEventButton")?.addEventListener("click", () => {
+          openFormModal(formatDateISO(anchorDate));
+        });
+
+        document.getElementById("miniPrevMonth")?.addEventListener("click", () => {
+          miniCalMonth = new Date(miniCalMonth.getFullYear(), miniCalMonth.getMonth() - 1, 1);
+          renderMiniCalendar();
+        });
+
+        document.getElementById("miniNextMonth")?.addEventListener("click", () => {
+          miniCalMonth = new Date(miniCalMonth.getFullYear(), miniCalMonth.getMonth() + 1, 1);
+          renderMiniCalendar();
+        });
+
+        document.getElementById("openCategoryModalBtn")?.addEventListener("click", openNewCategoryModal);
+
+        document.querySelectorAll(".emoji-preset-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const emojiInput = document.getElementById("newCategoryEmoji");
+            if (emojiInput) {
+              emojiInput.value = btn.dataset.emoji || "⚡";
+              emojiInput.focus();
+            }
+          });
+        });
+
+        document.getElementById("showAllCategoriesBtn")?.addEventListener("click", () => {
+          activeCategoryFilter = "all";
+          renderCategoryUI();
+          renderCalendarView();
+          showMessage("Alle categorieën worden weergegeven.", "info");
+        });
+
+        // Afspraak modal knoppen
+        document.getElementById("allDay")?.addEventListener("change", updateTimeFieldState);
+        document.getElementById("saveEventButton")?.addEventListener("click", saveEventFromModal);
+        document.getElementById("cancelEventButton")?.addEventListener("click", () => closeModal("eventModal"));
+        document.getElementById("closeFormX")?.addEventListener("click", () => closeModal("eventModal"));
+
+        // Categorie modal knoppen
+        document.getElementById("saveCategoryButton")?.addEventListener("click", saveCategoryFromModal);
+        document.getElementById("cancelCategoryButton")?.addEventListener("click", () => {
+          editingCategoryId = null;
+          closeModal("categoryModal");
+        });
+        document.getElementById("closeCategoryX")?.addEventListener("click", () => {
+          editingCategoryId = null;
+          closeModal("categoryModal");
+        });
+
+        // Bekijk modal knoppen
+        document.getElementById("editFromViewButton")?.addEventListener("click", editViewingEvent);
+        document.getElementById("doneFromViewButton")?.addEventListener("click", completeViewingEvent);
+        document.getElementById("deleteFromViewButton")?.addEventListener("click", deleteViewingEvent);
+        document.getElementById("closeViewX")?.addEventListener("click", () => closeModal("eventViewModal"));
+        document.getElementById("closeViewButton")?.addEventListener("click", () => closeModal("eventViewModal"));
+
+        document.querySelectorAll(".modal").forEach((modal) => {
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+              if (modal.id === "categoryModal") editingCategoryId = null;
+              closeModal(modal.id);
+            }
+          });
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            editingCategoryId = null;
+            closeModal("eventModal");
+            closeModal("categoryModal");
+            closeModal("eventViewModal");
+          }
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadCategories();
+        loadEvents();
+        setupThemeAndSeason();
+        renderCategoryUI();
+        bindAllEvents();
         renderAll();
       });
-
-      document.getElementById("cancelEventBtn").addEventListener("click", closeEventModal);
-      document.getElementById("closeEventModalX").addEventListener("click", closeEventModal);
-
-      document.getElementById("closeViewBtn").addEventListener("click", closeViewModal);
-      document.getElementById("closeViewModalX").addEventListener("click", closeViewModal);
-      document.getElementById("editEventBtn").addEventListener("click", () => {
-        const id = activeEventId;
-        closeViewModal();
-        openEventModal(id);
-      });
-      document.getElementById("deleteEventBtn").addEventListener("click", () => {
-        if (!activeEventId) return;
-        events = events.filter(ev => ev.id !== activeEventId);
-        saveState();
-        closeViewModal();
-        renderAll();
-        showToast("Afspraak verwijderd.");
-      });
-
-      document.getElementById("newCategoryBtn").addEventListener("click", () => {
-        document.getElementById("newCatName").value = "";
-        document.getElementById("categoryModal").classList.add("open");
-        setTimeout(() => document.getElementById("newCatName").focus(), 40);
-      });
-      document.getElementById("cancelCatBtn").addEventListener("click", () => document.getElementById("categoryModal").classList.remove("open"));
-      document.getElementById("closeCategoryModalX").addEventListener("click", () => document.getElementById("categoryModal").classList.remove("open"));
-      document.getElementById("saveCatBtn").addEventListener("click", () => {
-        const label = document.getElementById("newCatName").value.trim();
-        const color = document.getElementById("newCatColor").value || "#0b57d0";
-        if (!label) return showToast("Vul een categorienaam in.");
-        const id = "cat_" + label.toLowerCase().replace(/[^a-z0-9]+/g, "_") + "_" + Date.now().toString().slice(-3);
-        categories[id] = { id, label, color, isDefault: false };
-        saveState();
-        renderCategories();
-        document.getElementById("categoryModal").classList.remove("open");
-        showToast("Categorie toegevoegd.");
-      });
-    });
+    })();
   </script>
 </body>
 </html>
