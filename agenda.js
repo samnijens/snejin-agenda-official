@@ -1,1627 +1,1096 @@
-/* =========================================================
-   SNEJIN AGENDA
-   COMPLETE STYLE.CSS
-   Login + Agenda + FullCalendar + Modals + Dark Mode
-========================================================= */
+import { db, auth } from "./firebase.js";
+import {
+    collection,
+    addDoc,
+    getDocs,
+    updateDoc,
+    deleteDoc,
+    doc,
+    setDoc
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import {
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
+let calendar = null;
+let selectedEventId = null;
+let currentViewEvent = null;
+let editingEventId = null;
+let activeCategoryFilter = "all";
+let firestoreAvailable = true;
+let miniCalDate = new Date();
 
-/* =========================================================
-   RESET
-========================================================= */
+const appointmentsRef = collection(db, "appointments");
+const completedAppointmentsRef = collection(db, "completedAppointments");
+const categoriesRef = collection(db, "categories");
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+const DEFAULT_CATEGORIES = {
+    work: { id: "work", label: "Werken", color: "#0B57D0", emoji: "🔵", isDefault: true },
+    holiday: { id: "holiday", label: "Vakantie", color: "#0F9D58", emoji: "🟢", isDefault: true },
+    activity: { id: "activity", label: "Activiteit", color: "#1A73E8", emoji: "🟦", isDefault: true },
+    birthday: { id: "birthday", label: "Verjaardag", color: "#E37400", emoji: "🎂", isDefault: true },
+    holidayofficial: { id: "holidayofficial", label: "Feestdag", color: "#9334E6", emoji: "🟣", isDefault: true }
+};
+
+let categoryConfig = { ...DEFAULT_CATEGORIES };
+
+document.addEventListener("DOMContentLoaded", () => {
+    setupTheme();
+    setupButtons();
+    setupModals();
+    setupSearch();
+    setupBackupAndTools();
+    renderMiniCalendar();
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.replace("index.html");
+            return;
+        }
+
+        try {
+            await loadCategories();
+            createCalendar();
+            await loadAppointments();
+            updateStats();
+            syncHeaderTitle();
+        } catch (error) {
+            console.error("Agenda initialiseren mislukt:", error);
+            showMessage("De agenda kon niet worden geladen.", "error");
+        }
+    });
+});
+
+function syncHeaderTitle() {
+    if (!calendar) return;
+    const titleEl = document.getElementById("gcalCurrentTitle");
+    if (titleEl && calendar.view) {
+        titleEl.textContent = calendar.view.title;
+    }
+    const activeView = calendar.view?.type;
+    document.querySelectorAll(".gcal-view-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.view === activeView);
+    });
 }
 
-html,
-body {
-    width: 100%;
-    min-height: 100%;
-    font-family: "Segoe UI", Arial, sans-serif;
-}
-
-button,
-input,
-textarea,
-select {
-    font: inherit;
-}
-
-
-/* =========================================================
-   LOGIN PAGINA
-========================================================= */
-
-body.login-page {
-    min-height: 100vh;
-    overflow: hidden;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(0, 120, 160, .48),
-            rgba(255, 180, 80, .30)
-        ),
-        url("default_background.jpg");
-
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-}
-
-
-/* Login overlay */
-
-.login-overlay {
-    width: 100%;
-    min-height: 100vh;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    padding: 20px;
-}
-
-
-/* Login kaart */
-
-.login-card {
-    width: 100%;
-    max-width: 450px;
-
-    padding: 45px;
-
-    border-radius: 40px;
-
-    background: rgba(255, 255, 255, .84);
-
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-
-    border: 1px solid rgba(255, 255, 255, .65);
-
-    box-shadow:
-        0 35px 90px rgba(0, 0, 0, .42);
-
-    text-align: center;
-
-    animation:
-        loginShow .8s ease both;
-}
-
-
-/* Login logo */
-
-.login-card .logo {
-    width: 170px;
-    height: auto;
-
-    margin-bottom: 20px;
-
-    filter:
-        drop-shadow(
-            0 15px 20px rgba(0, 0, 0, .25)
-        );
-}
-
-
-/* Login titel */
-
-.login-card h1 {
-    font-size: 40px;
-    font-weight: 800;
-
-    letter-spacing: -1px;
-
-    color: #007f7f;
-
-    margin-bottom: 8px;
-}
-
-
-/* Login subtitel */
-
-.subtitle {
-    font-size: 16px;
-    color: #555;
-
-    margin-bottom: 35px;
-}
-
-
-/* Login formulier */
-
-.form-group {
-    margin-bottom: 22px;
-    text-align: left;
-}
-
-.form-group label {
-    display: block;
-
-    font-size: 14px;
-    font-weight: 700;
-
-    color: #333;
-
-    margin-bottom: 8px;
-}
-
-.form-group input {
-    width: 100%;
-    height: 58px;
-
-    padding: 0 20px;
-
-    border: none;
-    border-radius: 20px;
-
-    background: rgba(255, 255, 255, .96);
-
-    color: #222;
-
-    font-size: 16px;
-
-    box-shadow:
-        0 8px 20px rgba(0, 0, 0, .08);
-
-    transition:
-        transform .2s ease,
-        box-shadow .2s ease;
-}
-
-.form-group input:focus {
-    outline: none;
-
-    transform: translateY(-1px);
-
-    box-shadow:
-        0 0 0 4px rgba(0, 168, 150, .25),
-        0 10px 25px rgba(0, 0, 0, .10);
-}
-
-
-/* Login knop */
-
-#loginButton {
-    width: 100%;
-    height: 58px;
-
-    margin-top: 15px;
-
-    border: none;
-    border-radius: 20px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #00c9a7,
-            #008f87
-        );
-
-    color: white;
-
-    font-size: 18px;
-    font-weight: 800;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 15px 30px rgba(0, 140, 130, .35);
-
-    transition:
-        transform .25s ease,
-        box-shadow .25s ease;
-}
-
-#loginButton:hover {
-    transform: translateY(-4px);
-
-    box-shadow:
-        0 20px 38px rgba(0, 140, 130, .42);
-}
-
-#loginButton:active {
-    transform: translateY(-1px);
-}
-
-
-/* Login melding */
-
-.message {
-    min-height: 25px;
-
-    margin-top: 20px;
-
-    color: #d62828;
-
-    font-weight: 700;
-}
-
-
-/* Login animatie */
-
-@keyframes loginShow {
-    from {
-        opacity: 0;
-        transform:
-            translateY(40px)
-            scale(.92);
+function renderMiniCalendar() {
+    const labelEl = document.getElementById("miniCalMonthLabel");
+    const gridEl = document.getElementById("miniCalGrid");
+    if (!labelEl || !gridEl) return;
+
+    const year = miniCalDate.getFullYear();
+    const month = miniCalDate.getMonth();
+
+    const monthFormatter = new Intl.DateTimeFormat("nl-NL", { month: "long", year: "numeric" });
+    const formatted = monthFormatter.format(new Date(year, month, 1));
+    labelEl.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+
+    const firstDayOfMonth = new Date(year, month, 1);
+    const startOffset = (firstDayOfMonth.getDay() + 6) % 7; // maandag = 0
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const prevMonthDays = new Date(year, month, 0).getDate();
+
+    const today = new Date();
+    const isSameDay = (d1, d2) =>
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
+
+    gridEl.innerHTML = "";
+
+    for (let i = startOffset - 1; i >= 0; i--) {
+        const dayNum = prevMonthDays - i;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "gcal-mini-day muted";
+        btn.textContent = String(dayNum);
+        const target = new Date(year, month - 1, dayNum);
+        btn.addEventListener("click", () => {
+            calendar?.gotoDate(target);
+            syncHeaderTitle();
+        });
+        gridEl.appendChild(btn);
     }
 
-    to {
-        opacity: 1;
-        transform:
-            translateY(0)
-            scale(1);
+    for (let d = 1; d <= daysInMonth; d++) {
+        const current = new Date(year, month, d);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "gcal-mini-day" + (isSameDay(current, today) ? " today" : "");
+        btn.textContent = String(d);
+        btn.addEventListener("click", () => {
+            calendar?.gotoDate(current);
+            syncHeaderTitle();
+        });
+        gridEl.appendChild(btn);
+    }
+
+    const totalCells = gridEl.children.length;
+    const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let n = 1; n <= remaining; n++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "gcal-mini-day muted";
+        btn.textContent = String(n);
+        const target = new Date(year, month + 1, n);
+        btn.addEventListener("click", () => {
+            calendar?.gotoDate(target);
+            syncHeaderTitle();
+        });
+        gridEl.appendChild(btn);
     }
 }
 
-
-/* =========================================================
-   AGENDA PAGINA
-========================================================= */
-
-body.agenda-page {
-    min-height: 100vh;
-
-    color: #1f2937;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(0, 150, 170, .18),
-            rgba(255, 220, 120, .16)
-        ),
-        url("main_background.jpg");
-
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-
-    animation:
-        pageAppear .7s ease both;
-}
-
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-.topbar {
-    position: relative;
-    z-index: 20;
-
-    margin: 20px;
-    padding: 16px 22px;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    gap: 20px;
-
-    background:
-        rgba(255, 255, 255, .86);
-
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-
-    border:
-        1px solid rgba(255, 255, 255, .65);
-
-    border-radius: 26px;
-
-    box-shadow:
-        0 20px 55px rgba(0, 0, 0, .18);
-
-    animation:
-        slideDown .7s ease both;
-}
-
-
-/* Logo */
-
-.logo-area {
-    display: flex;
-    align-items: center;
-
-    gap: 14px;
-
-    min-width: 0;
-}
-
-.logo-small {
-    width: 65px;
-    height: auto;
-
-    flex-shrink: 0;
-
-    filter:
-        drop-shadow(
-            0 8px 12px rgba(0, 0, 0, .16)
-        );
-
-    animation:
-        floatingLogo 4s ease-in-out infinite;
-}
-
-.logo-area h1 {
-    color: #008b8b;
-
-    font-size: 25px;
-    line-height: 1.1;
-
-    font-weight: 800;
-}
-
-.logo-area span {
-    display: block;
-
-    margin-top: 4px;
-
-    color: #666;
-
-    font-size: 14px;
-}
-
-
-/* =========================================================
-   HEADER KNOPPEN
-========================================================= */
-
-.top-buttons {
-    display: flex;
-    align-items: center;
-
-    gap: 9px;
-}
-
-.top-buttons input {
-    width: 240px;
-    height: 45px;
-
-    padding: 0 16px;
-
-    border: 1px solid rgba(0, 0, 0, .07);
-    border-radius: 15px;
-
-    outline: none;
-
-    background:
-        rgba(255, 255, 255, .9);
-
-    color: #222;
-
-    box-shadow:
-        0 5px 15px rgba(0, 0, 0, .06);
-
-    transition:
-        width .25s ease,
-        box-shadow .2s ease,
-        border-color .2s ease;
-}
-
-.top-buttons input:focus {
-    border-color: #00a896;
-
-    box-shadow:
-        0 0 0 4px rgba(0, 168, 150, .12);
-}
-
-.top-buttons button {
-    height: 45px;
-
-    padding: 0 16px;
-
-    border: none;
-    border-radius: 15px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #00bfa5,
-            #008f87
-        );
-
-    color: white;
-
-    cursor: pointer;
-
-    font-weight: 700;
-
-    box-shadow:
-        0 8px 18px rgba(0, 140, 130, .18);
-
-    transition:
-        transform .22s ease,
-        box-shadow .22s ease,
-        filter .22s ease;
-}
-
-.top-buttons button:hover {
-    transform:
-        translateY(-3px);
-
-    box-shadow:
-        0 13px 25px rgba(0, 0, 0, .18);
-
-    filter: brightness(1.05);
-}
-
-.top-buttons button:active {
-    transform:
-        translateY(0)
-        scale(.97);
-}
-
-
-/* =========================================================
-   HOOFDGEDEELTE
-========================================================= */
-
-main {
-    width: 100%;
-
-    padding:
-        0 20px 30px;
-
-    position: relative;
-    z-index: 1;
-}
-
-
-/* =========================================================
-   KALENDER KAART
-========================================================= */
-
-.calendar-card {
-    width: 100%;
-    max-width: 1500px;
-
-    min-height: 650px;
-
-    margin: 0 auto;
-
-    padding: 22px;
-
-    background:
-        rgba(255, 255, 255, .91);
-
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-
-    border:
-        1px solid rgba(255, 255, 255, .7);
-
-    border-radius: 30px;
-
-    box-shadow:
-        0 25px 70px rgba(0, 0, 0, .22);
-
-    animation:
-        calendarAppear .9s ease both;
-}
-
-
-/* =========================================================
-   FULLCALENDAR
-========================================================= */
-
-#calendar {
-    width: 100%;
-    min-height: 600px;
-}
-
-
-/* FullCalendar hoofdcontainer */
-
-.fc {
-    width: 100%;
-
-    min-height: 600px;
-
-    padding: 12px;
-
-    background:
-        rgba(255, 255, 255, .96);
-
-    border-radius: 22px;
-
-    color: #202124;
-}
-
-
-/* Toolbar */
-
-.fc .fc-toolbar {
-    gap: 12px;
-
-    margin-bottom: 20px;
-}
-
-.fc .fc-toolbar-title {
-    color: #008b8b !important;
-
-    font-size: 26px;
-
-    font-weight: 800;
-}
-
-
-/* FullCalendar buttons */
-
-.fc .fc-button {
-    border: none !important;
-
-    border-radius: 11px !important;
-
-    padding: 8px 13px !important;
-
-    background:
-        linear-gradient(
-            135deg,
-            #00bfa5,
-            #008f87
-        ) !important;
-
-    color: white !important;
-
-    font-weight: 700 !important;
-
-    box-shadow:
-        0 5px 12px rgba(0, 140, 130, .16);
-
-    transition:
-        transform .2s ease,
-        box-shadow .2s ease,
-        filter .2s ease !important;
-}
-
-.fc .fc-button:hover {
-    transform:
-        translateY(-2px);
-
-    filter: brightness(1.05);
-
-    box-shadow:
-        0 9px 18px rgba(0, 0, 0, .16);
-}
-
-.fc .fc-button:active,
-.fc .fc-button:focus {
-    box-shadow:
-        none !important;
-}
-
-
-/* Vandaag knop */
-
-.fc .fc-button-primary:not(:disabled).fc-button-active,
-.fc .fc-button-primary:not(:disabled):active {
-    background:
-        #007f78 !important;
-}
-
-
-/* Weekdagen */
-
-.fc .fc-col-header-cell {
-    background:
-        rgba(0, 168, 150, .06);
-
-    border-color:
-        rgba(0, 0, 0, .07);
-}
-
-.fc .fc-col-header-cell-cushion {
-    padding: 10px 4px;
-
-    color: #007f7f;
-
-    font-size: 13px;
-
-    font-weight: 800;
-
-    text-decoration: none;
-}
-
-
-/* Kalender cellen */
-
-.fc .fc-daygrid-day {
-    background:
-        rgba(255, 255, 255, .75);
-
-    border-color:
-        rgba(0, 0, 0, .07);
-
-    transition:
-        background .2s ease;
-}
-
-.fc .fc-daygrid-day:hover {
-    background:
-        rgba(0, 168, 150, .07);
-}
-
-
-/* Datumnummers */
-
-.fc .fc-daygrid-day-number {
-    padding: 8px;
-
-    color: #444;
-
-    font-weight: 700;
-
-    text-decoration: none;
-}
-
-
-/* Vandaag */
-
-.fc .fc-day-today {
-    background:
-        rgba(0, 168, 150, .10) !important;
-}
-
-
-/* Events */
-
-.fc .fc-event {
-    border: none !important;
-
-    border-radius: 8px !important;
-
-    padding: 3px 6px !important;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 3px 8px rgba(0, 0, 0, .13);
-
-    transition:
-        transform .18s ease,
-        filter .18s ease,
-        box-shadow .18s ease;
-}
-
-.fc .fc-event:hover {
-    transform:
-        translateY(-1px)
-        scale(1.01);
-
-    filter: brightness(1.04);
-
-    box-shadow:
-        0 5px 13px rgba(0, 0, 0, .18);
-}
-
-.fc .fc-event-title,
-.fc .fc-event-time {
-    font-weight: 700;
-}
-
-
-/* Meer events */
-
-.fc .fc-more-link {
-    color: #008f87;
-
-    font-weight: 700;
-
-    text-decoration: none;
-}
-
-
-/* Scrollbars */
-
-.fc-scroller::-webkit-scrollbar,
-.modal-content::-webkit-scrollbar {
-    width: 7px;
-}
-
-.fc-scroller::-webkit-scrollbar-thumb,
-.modal-content::-webkit-scrollbar-thumb {
-    background:
-        rgba(0, 168, 150, .35);
-
-    border-radius: 20px;
-}
-
-
-/* =========================================================
-   NIEUWE AFSPRAAK FLOATING BUTTON
-========================================================= */
-
-.floatingButton {
-    position: fixed;
-
-    right: 30px;
-    bottom: 30px;
-
-    z-index: 100;
-
-    width: 66px;
-    height: 66px;
-
-    border: none;
-    border-radius: 50%;
-
-    background:
-        linear-gradient(
-            135deg,
-            #00c9a7,
-            #008f87
-        );
-
-    color: white;
-
-    font-size: 35px;
-    line-height: 1;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 15px 35px rgba(0, 120, 110, .35);
-
-    transition:
-        transform .25s ease,
-        box-shadow .25s ease;
-}
-
-.floatingButton:hover {
-    transform:
-        translateY(-5px)
-        scale(1.07);
-
-    box-shadow:
-        0 20px 42px rgba(0, 0, 0, .25);
-}
-
-.floatingButton:active {
-    transform:
-        scale(.94);
-}
-
-
-/* =========================================================
-   MODALS
-========================================================= */
-
-.modal {
-    display: none;
-
-    position: fixed;
-    inset: 0;
-
-    z-index: 9999;
-
-    justify-content: center;
-    align-items: center;
-
-    padding: 20px;
-
-    background:
-        rgba(0, 0, 0, .58);
-
-    backdrop-filter: blur(9px);
-    -webkit-backdrop-filter: blur(9px);
-
-    opacity: 0;
-
-    transition:
-        opacity .25s ease;
-}
-
-.modal.open {
-    display: flex;
-
-    opacity: 1;
-}
-
-
-/* Modal inhoud */
-
-.modal-content {
-    position: relative;
-
-    width: 100%;
-    max-width: 500px;
-
-    max-height: 90vh;
-
-    overflow-y: auto;
-
-    padding:
-        32px 30px 26px;
-
-    border-radius: 28px;
-
-    background:
-        rgba(255, 255, 255, .98);
-
-    border:
-        1px solid rgba(255, 255, 255, .7);
-
-    box-shadow:
-        0 35px 90px rgba(0, 0, 0, .45);
-
-    transform:
-        translateY(25px)
-        scale(.94);
-
-    transition:
-        transform .3s cubic-bezier(.2, .9, .3, 1.15);
-}
-
-.modal.open .modal-content {
-    transform:
-        translateY(0)
-        scale(1);
-}
-
-
-/* Sluitknop */
-
-.modal-close {
-    position: absolute;
-
-    top: 14px;
-    right: 16px;
-
-    width: 38px;
-    height: 38px;
-
-    border: none;
-    border-radius: 50%;
-
-    background:
-        rgba(0, 0, 0, .06);
-
-    color: #555;
-
-    font-size: 24px;
-
-    cursor: pointer;
-
-    transition:
-        transform .2s ease,
-        background .2s ease,
-        color .2s ease;
-}
-
-.modal-close:hover {
-    background:
-        rgba(231, 76, 60, .15);
-
-    color: #e74c3c;
-
-    transform:
-        rotate(90deg);
-}
-
-
-/* =========================================================
-   FORM MODAL
-========================================================= */
-
-.form-content h2 {
-    color: #008b8b;
-
-    font-size: 27px;
-
-    margin-bottom: 22px;
-
-    padding-right: 35px;
-}
-
-.form-body .form-group {
-    margin-bottom: 16px;
-
-    text-align: left;
-}
-
-.form-body label {
-    display: block;
-
-    margin-bottom: 7px;
-
-    color: #444;
-
-    font-size: 13px;
-
-    font-weight: 700;
-}
-
-
-/* Form inputs */
-
-.form-body input[type="text"],
-.form-body input[type="date"],
-.form-body input[type="time"],
-.form-body textarea,
-.form-body select {
-    width: 100%;
-
-    border:
-        2px solid rgba(0, 0, 0, .08);
-
-    border-radius: 14px;
-
-    padding:
-        12px 14px;
-
-    background:
-        #fff;
-
-    color: #222;
-
-    font-size: 15px;
-
-    font-family: inherit;
-
-    transition:
-        border-color .2s ease,
-        box-shadow .2s ease,
-        transform .2s ease;
-}
-
-.form-body textarea {
-    min-height: 90px;
-
-    resize: vertical;
-}
-
-.form-body input:focus,
-.form-body textarea:focus,
-.form-body select:focus {
-    outline: none;
-
-    border-color:
-        #00a896;
-
-    box-shadow:
-        0 0 0 4px
-        rgba(0, 168, 150, .13);
-}
-
-
-/* Datum/tijd */
-
-.form-row {
-    display: flex;
-
-    gap: 12px;
-}
-
-.form-row .form-group {
-    flex: 1;
-}
-
-
-/* Checkbox */
-
-.checkbox-line {
-    display: flex !important;
-
-    align-items: center;
-
-    gap: 9px;
-
-    margin:
-        5px 0 10px;
-
-    color: #333 !important;
-
-    font-weight: 600 !important;
-
-    cursor: pointer;
-}
-
-.checkbox-line input {
-    width: 17px !important;
-    height: 17px;
-
-    accent-color:
-        #00a896;
-}
-
-
-/* =========================================================
-   VIEW MODAL
-========================================================= */
-
-.view-badge {
-    display: inline-block;
-
-    padding:
-        7px 14px;
-
-    margin-bottom: 12px;
-
-    border-radius: 999px;
-
-    color: white;
-
-    font-size: 13px;
-
-    font-weight: 700;
-}
-
-.view-content h2 {
-    color: #1d3557;
-
-    font-size: 28px;
-
-    line-height: 1.2;
-
-    margin-bottom: 18px;
-
-    padding-right: 35px;
-
-    word-break: break-word;
-}
-
-.view-meta {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 10px;
-
-    margin-bottom: 18px;
-}
-
-.view-row {
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    padding:
-        11px 14px;
-
-    border-radius: 13px;
-
-    background:
-        rgba(0, 168, 150, .08);
-
-    color: #333;
-
-    font-size: 15px;
-}
-
-.view-icon {
-    font-size: 18px;
-}
-
-.view-desc {
-    margin-bottom: 22px;
-
-    padding:
-        15px 16px;
-
-    border-radius: 14px;
-
-    background:
-        rgba(0, 0, 0, .04);
-}
-
-.view-desc h3 {
-    margin-bottom: 7px;
-
-    color: #777;
-
-    font-size: 12px;
-
-    letter-spacing: .6px;
-
-    text-transform: uppercase;
-}
-
-.view-desc p {
-    color: #333;
-
-    line-height: 1.55;
-
-    white-space: pre-wrap;
-}
-
-
-/* =========================================================
-   MODAL BUTTONS
-========================================================= */
-
-.modal-buttons {
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 10px;
-
-    margin-top: 8px;
-}
-
-.btn {
-    flex:
-        1 1 auto;
-
-    min-width: 120px;
-
-    padding:
-        13px 16px;
-
-    border: none;
-
-    border-radius: 14px;
-
-    color: white;
-
-    font-size: 15px;
-
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition:
-        transform .2s ease,
-        box-shadow .2s ease,
-        filter .2s ease;
-}
-
-.btn:hover {
-    transform:
-        translateY(-2px);
-
-    box-shadow:
-        0 10px 22px rgba(0, 0, 0, .20);
-
-    filter: brightness(1.05);
-}
-
-.btn:active {
-    transform:
-        translateY(0)
-        scale(.98);
-}
-
-.btn-save {
-    background:
-        linear-gradient(
-            135deg,
-            #00c9a7,
-            #008f87
-        );
-}
-
-.btn-edit {
-    background:
-        linear-gradient(
-            135deg,
-            #4aa3ff,
-            #2563eb
-        );
-}
-
-.btn-delete {
-    background:
-        linear-gradient(
-            135deg,
-            #ff6b6b,
-            #d62828
-        );
-}
-
-.btn-done {
-    background:
-        linear-gradient(
-            135deg,
-            #2ecc71,
-            #27ae60
-        );
-}
-
-.btn-cancel {
-    background:
-        #e2e6ea;
-
-    color:
-        #444;
-}
-
-.btn-cancel:hover {
-    background:
-        #d3d8dd;
-
-    filter: none;
-}
-
-
-/* =========================================================
-   DARK MODE
-========================================================= */
-
-body.dark {
-    color: #f1f5f9;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(0, 35, 45, .82),
-            rgba(25, 25, 25, .88)
-        ),
-        url("main_background.jpg");
-
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-}
-
-
-/* Header */
-
-body.dark .topbar {
-    background:
-        rgba(24, 28, 31, .90);
-
-    border-color:
-        rgba(255, 255, 255, .08);
-
-    box-shadow:
-        0 20px 55px rgba(0, 0, 0, .35);
-}
-
-body.dark .logo-area h1 {
-    color: #00d4c0;
-}
-
-body.dark .logo-area span {
-    color: #cbd5e1;
-}
-
-
-/* Search */
-
-body.dark .top-buttons input {
-    background:
-        rgba(45, 50, 54, .95);
-
-    border-color:
-        rgba(255, 255, 255, .08);
-
-    color: white;
-}
-
-body.dark .top-buttons input::placeholder {
-    color: #aab4bd;
-}
-
-
-/* Calendar card */
-
-body.dark .calendar-card {
-    background:
-        rgba(22, 25, 28, .93);
-
-    border-color:
-        rgba(255, 255, 255, .07);
-
-    box-shadow:
-        0 25px 70px rgba(0, 0, 0, .45);
-}
-
-
-/* FullCalendar */
-
-body.dark .fc {
-    background:
-        #1d2125;
-
-    color: #f1f5f9;
-}
-
-body.dark .fc-theme-standard td,
-body.dark .fc-theme-standard th {
-    border-color:
-        rgba(255, 255, 255, .09);
-}
-
-body.dark .fc .fc-daygrid-day {
-    background:
-        #1d2125;
-}
-
-body.dark .fc .fc-daygrid-day:hover {
-    background:
-        rgba(0, 168, 150, .09);
-}
-
-body.dark .fc .fc-col-header-cell {
-    background:
-        rgba(0, 168, 150, .08);
-}
-
-body.dark .fc .fc-col-header-cell-cushion,
-body.dark .fc .fc-daygrid-day-number {
-    color: #f1f5f9;
-}
-
-body.dark .fc .fc-toolbar-title {
-    color:
-        #00d4c0 !important;
-}
-
-body.dark .fc .fc-day-today {
-    background:
-        rgba(0, 168, 150, .13) !important;
-}
-
-
-/* Modals */
-
-body.dark .modal-content {
-    background:
-        rgba(28, 32, 35, .98);
-
-    color: #f1f1f1;
-
-    border-colo
-
-/* =========================================================
-   AGENDA LAYOUT, ZIJLBALK, CATEGORIEËN & TOOLS
-========================================================= */
-
-.agenda-layout {
-    display: grid;
-    grid-template-columns: 290px 1fr;
-    gap: 20px;
-    max-width: 1560px;
-    margin: 0 auto;
-    align-items: start;
-}
-
-.agenda-layout .calendar-card {
-    max-width: none;
-    margin: 0;
-}
-
-.sidebar-card {
-    background: rgba(255, 255, 255, .91);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-    border: 1px solid rgba(255, 255, 255, .7);
-    border-radius: 26px;
-    padding: 20px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, .16);
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-}
-
-.sidebar-section h2 {
-    font-size: 16px;
-    font-weight: 800;
-    color: #007f7f;
-    margin-bottom: 6px;
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
-}
-
-.section-header h2 {
-    margin-bottom: 0;
-}
-
-.section-hint {
-    font-size: 12px;
-    color: #64748b;
-    margin-bottom: 10px;
-}
-
-.small-action-btn {
-    border: none;
-    border-radius: 10px;
-    padding: 5px 10px;
-    background: linear-gradient(135deg, #00c9a7, #008f87);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.full-width {
-    width: 100%;
-}
-
-.category-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.category-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-    border-radius: 12px;
-    padding: 4px 6px;
-    background: rgba(0, 168, 150, .05);
-    transition: background .2s ease;
-}
-
-.category-item.active {
-    background: rgba(0, 168, 150, .18);
-    outline: 2px solid #00a896;
-}
-
-.category-filter-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: none;
-    background: transparent;
-    color: #1f2937;
-    font-size: 13px;
-    font-weight: 700;
-    text-align: left;
-    padding: 6px 4px;
-    cursor: pointer;
-}
-
-.cat-dot {
-    width: 11px;
-    height: 11px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.category-delete-btn {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-size: 14px;
-    padding: 4px 6px;
-    border-radius: 8px;
-    transition: background .2s ease, transform .15s ease;
-}
-
-.category-delete-btn:hover {
-    background: rgba(239, 68, 68, .16);
-    transform: scale(1.1);
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 8px;
-}
-
-.stat-box {
-    background: rgba(0, 168, 150, .09);
-    border-radius: 14px;
-    padding: 12px;
-    text-align: center;
-}
-
-.stat-number {
-    display: block;
-    font-size: 22px;
-    font-weight: 800;
-    color: #008b8b;
-}
-
-.stat-label {
-    font-size: 12px;
-    color: #475569;
-    font-weight: 600;
-}
-
-.tool-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 8px;
-}
-
-.tool-btn {
-    width: 100%;
-    border: 1px solid rgba(0, 0, 0, .08);
-    border-radius: 12px;
-    padding: 9px 12px;
-    background: rgba(255, 255, 255, .92);
-    color: #1f2937;
-    font-size: 13px;
-    font-weight: 700;
-    text-align: left;
-    cursor: pointer;
-    transition: transform .15s ease, background .2s ease;
-}
-
-.tool-btn:hover {
-    background: rgba(0, 168, 150, .12);
-    transform: translateX(2px);
-}
-
-input[type="color"] {
-    width: 100%;
-    height: 44px;
-    border: 2px solid rgba(0, 0, 0, .08);
-    border-radius: 12px;
-    padding: 2px;
-    background: #fff;
-    cursor: pointer;
-}
-
-body.dark .sidebar-card,
-body.dark-mode .sidebar-card {
-    background: rgba(24, 28, 31, .92);
-    border-color: rgba(255, 255, 255, .08);
-    color: #f1f5f9;
-}
-
-body.dark .sidebar-section h2,
-body.dark-mode .sidebar-section h2,
-body.dark .stat-number,
-body.dark-mode .stat-number {
-    color: #00d4c0;
-}
-
-body.dark .category-item,
-body.dark-mode .category-item {
-    background: rgba(255, 255, 255, .05);
-}
-
-body.dark .category-filter-btn,
-body.dark-mode .category-filter-btn,
-body.dark .tool-btn,
-body.dark-mode .tool-btn {
-    color: #f1f5f9;
-}
-
-body.dark .tool-btn,
-body.dark-mode .tool-btn {
-    background: rgba(45, 50, 54, .9);
-    border-color: rgba(255, 255, 255, .08);
-}
-
-body.dark .stat-label,
-body.dark-mode .stat-label,
-body.dark .section-hint,
-body.dark-mode .section-hint {
-    color: #94a3b8;
-}
-
-@media (max-width: 960px) {
-    .agenda-layout {
-        grid-template-columns: 1fr;
+async function loadCategories() {
+    categoryConfig = { ...DEFAULT_CATEGORIES };
+
+    const localCats = JSON.parse(localStorage.getItem("snejin_categories") || "{}");
+    Object.assign(categoryConfig, localCats);
+
+    try {
+        const snapshot = await getDocs(categoriesRef);
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            categoryConfig[docSnap.id] = {
+                id: docSnap.id,
+                label: data.label || "Categorie",
+                color: data.color || "#0B57D0",
+                emoji: data.emoji || "🟦",
+                isDefault: Boolean(data.isDefault)
+            };
+        });
+        firestoreAvailable = true;
+    } catch (error) {
+        console.warn("Kon categorieën niet uit Firestore laden, lokale opslag gebruikt:", error);
+        firestoreAvailable = false;
     }
-    .top-buttons {
-        flex-wrap: wrap;
+
+    renderCategoryUI();
+}
+
+function saveCategoriesLocal() {
+    const customOnly = {};
+    Object.entries(categoryConfig).forEach(([key, val]) => {
+        if (!DEFAULT_CATEGORIES[key]) {
+            customOnly[key] = val;
+        }
+    });
+    localStorage.setItem("snejin_categories", JSON.stringify(customOnly));
+}
+
+function renderCategoryUI() {
+    const selectEl = document.getElementById("eventType");
+    const listEl = document.getElementById("categoryList");
+
+    if (selectEl) {
+        const previousVal = selectEl.value;
+        selectEl.innerHTML = "";
+        Object.values(categoryConfig).forEach((cat) => {
+            const opt = document.createElement("option");
+            opt.value = cat.id;
+            opt.textContent = `${cat.emoji} ${cat.label}`;
+            selectEl.appendChild(opt);
+        });
+        if (previousVal && categoryConfig[previousVal]) {
+            selectEl.value = previousVal;
+        } else if (categoryConfig.activity) {
+            selectEl.value = "activity";
+        }
+    }
+
+    if (listEl) {
+        listEl.innerHTML = "";
+        Object.values(categoryConfig).forEach((cat) => {
+            const li = document.createElement("li");
+            li.className = "gcal-cat-item" + (activeCategoryFilter === cat.id ? " active" : "");
+
+            const filterBtn = document.createElement("button");
+            filterBtn.type = "button";
+            filterBtn.className = "gcal-cat-filter-btn";
+            filterBtn.innerHTML = `
+                <span class="gcal-cat-square" style="background:${cat.color}"></span>
+                <span>${escapeHtml(cat.label)}</span>
+            `;
+            filterBtn.addEventListener("click", () => {
+                activeCategoryFilter = activeCategoryFilter === cat.id ? "all" : cat.id;
+                applyFilters();
+                renderCategoryUI();
+            });
+
+            li.appendChild(filterBtn);
+
+            if (!cat.isDefault) {
+                const delBtn = document.createElement("button");
+                delBtn.type = "button";
+                delBtn.className = "gcal-cat-del-btn";
+                delBtn.title = `Verwijder categorie '${cat.label}'`;
+                delBtn.setAttribute("aria-label", `Verwijder categorie ${cat.label}`);
+                delBtn.textContent = "×";
+                delBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    deleteCategory(cat.id);
+                });
+                li.appendChild(delBtn);
+            }
+
+            listEl.appendChild(li);
+        });
     }
 }
 
-@media print {
-    .topbar,
-    .sidebar-card,
-    .floatingButton,
-    .modal {
-        display: none !important;
+async function createCategory() {
+    const nameInput = document.getElementById("newCategoryName");
+    const emojiInput = document.getElementById("newCategoryEmoji");
+    const colorInput = document.getElementById("newCategoryColor");
+
+    const label = nameInput.value.trim();
+    const emoji = emojiInput.value || "🟦";
+    const color = colorInput.value || "#0B57D0";
+
+    if (!label) {
+        showMessage("Vul een naam in voor de categorie.", "error");
+        return;
     }
-    .agenda-layout {
-        grid-template-columns: 1fr;
+
+    const slugId = "cat_" + label.toLowerCase().replace(/[^a-z0-9]+/g, "_") + "_" + Date.now().toString().slice(-4);
+    const newCat = { id: slugId, label, emoji, color, isDefault: false };
+
+    categoryConfig[slugId] = newCat;
+    saveCategoriesLocal();
+
+    if (firestoreAvailable) {
+        try {
+            await setDoc(doc(db, "categories", slugId), newCat);
+        } catch (error) {
+            console.warn("Categorie opslaan in Firestore mislukt, lokaal opgeslagen:", error);
+        }
     }
+
+    renderCategoryUI();
+    closeModal("categoryModal");
+    nameInput.value = "";
+    showMessage(`Categorie '${label}' toegevoegd.`, "success");
+}
+
+async function deleteCategory(catId) {
+    const cat = categoryConfig[catId];
+    if (!cat) return;
+
+    if (cat.isDefault) {
+        showMessage("Standaard categorieën kunnen niet worden verwijderd.", "error");
+        return;
+    }
+
+    const confirmed = confirm(`Weet je zeker dat je de categorie '${cat.label}' wilt verwijderen?`);
+    if (!confirmed) return;
+
+    delete categoryConfig[catId];
+    saveCategoriesLocal();
+
+    if (firestoreAvailable) {
+        try {
+            await deleteDoc(doc(db, "categories", catId));
+        } catch (error) {
+            console.warn("Categorie verwijderen uit Firestore mislukt:", error);
+        }
+    }
+
+    if (calendar) {
+        calendar.getEvents().forEach((ev) => {
+            if (ev.extendedProps.category === catId) {
+                const fallback = categoryConfig.activity || { label: "Activiteit", color: "#1A73E8", emoji: "🟦" };
+                const cleanTitle = ev.extendedProps.originalTitle || removeEmojiFromTitle(ev.title);
+                ev.setExtendedProp("category", "activity");
+                ev.setProp("title", cleanTitle);
+                ev.setProp("backgroundColor", fallback.color);
+                ev.setProp("borderColor", fallback.color);
+            }
+        });
+    }
+
+    if (activeCategoryFilter === catId) {
+        activeCategoryFilter = "all";
+    }
+
+    renderCategoryUI();
+    applyFilters();
+    updateStats();
+    showMessage(`Categorie '${cat.label}' verwijderd.`, "success");
+}
+
+function createCalendar() {
+    const calendarEl = document.getElementById("calendar");
+    if (!calendarEl) throw new Error("Element #calendar ontbreekt.");
+    if (typeof FullCalendar === "undefined" || !FullCalendar.Calendar) {
+        throw new Error("FullCalendar is niet geladen.");
+    }
+
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        locale: "nl",
+        firstDay: 1,
+        height: "auto",
+        contentHeight: "auto",
+        selectable: true,
+        editable: true,
+        dayMaxEvents: 4,
+        navLinks: true,
+        nowIndicator: true,
+        headerToolbar: false,
+        datesSet() {
+            syncHeaderTitle();
+            if (calendar?.getDate) {
+                const currentCalDate = calendar.getDate();
+                miniCalDate = new Date(currentCalDate.getFullYear(), currentCalDate.getMonth(), 1);
+                renderMiniCalendar();
+            }
+        },
+        dateClick(info) {
+            calendar.unselect();
+            openFormModal(info.dateStr);
+        },
+        select(info) {
+            calendar.unselect();
+            openFormModal(info.startStr);
+        },
+        eventClick(info) {
+            info.jsEvent.preventDefault();
+            currentViewEvent = info.event;
+            selectedEventId = info.event.id;
+            openViewModal(info.event);
+        },
+        async eventDrop(info) {
+            const ev = info.event;
+            const newStart = ev.allDay
+                ? formatDateForInput(ev.start)
+                : `${formatDateForInput(ev.start)}T${formatTimeForInput(ev.start)}:00`;
+
+            saveLocalAppointment(ev.id, {
+                title: ev.extendedProps.originalTitle || removeEmojiFromTitle(ev.title),
+                description: ev.extendedProps.description || "",
+                start: newStart,
+                allDay: ev.allDay,
+                category: ev.extendedProps.category || "activity"
+            });
+
+            if (firestoreAvailable && !ev.id.startsWith("local_")) {
+                try {
+                    await updateDoc(doc(db, "appointments", ev.id), {
+                        start: newStart,
+                        allDay: ev.allDay
+                    });
+                } catch (err) {
+                    console.warn("Kon versleepte datum niet in Firestore bijwerken:", err);
+                }
+            }
+            updateStats();
+            showMessage("Afspraak verplaatst.", "success");
+        },
+        eventDidMount(info) {
+            const catId = info.event.extendedProps.category;
+            const config = categoryConfig[catId] || categoryConfig.activity;
+            info.el.title = info.event.title;
+            info.el.style.cursor = "pointer";
+            info.el.style.borderRadius = "6px";
+            info.el.style.border = "none";
+            if (config) {
+                info.el.style.backgroundColor = config.color;
+                info.el.style.color = "#ffffff";
+            }
+        }
+    });
+
+    calendar.render();
+    syncHeaderTitle();
+}
+
+function getLocalAppointments() {
+    try {
+        return JSON.parse(localStorage.getItem("snejin_appointments") || "{}");
+    } catch {
+        return {};
+    }
+}
+
+function saveLocalAppointment(id, data) {
+    const all = getLocalAppointments();
+    all[id] = data;
+    localStorage.setItem("snejin_appointments", JSON.stringify(all));
+}
+
+function removeLocalAppointment(id) {
+    const all = getLocalAppointments();
+    delete all[id];
+    localStorage.setItem("snejin_appointments", JSON.stringify(all));
+}
+
+function addEventToCalendarObject(id, data) {
+    const category = categoryConfig[data.category] ? data.category : "activity";
+    const config = categoryConfig[category] || { label: "Activiteit", color: "#1A73E8", emoji: "🟦" };
+    const title = data.title || "Afspraak";
+
+    calendar.addEvent({
+        id,
+        title,
+        start: data.start,
+        allDay: data.allDay !== false,
+        color: config.color,
+        backgroundColor: config.color,
+        borderColor: config.color,
+        extendedProps: {
+            originalTitle: title,
+            description: data.description || "",
+            category,
+            allDay: data.allDay !== false
+        }
+    });
+}
+
+async function loadAppointments() {
+    if (!calendar) return;
+
+    calendar.removeAllEvents();
+    const combined = { ...getLocalAppointments() };
+
+    try {
+        const snapshot = await getDocs(appointmentsRef);
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            if (data && data.start) {
+                combined[docSnap.id] = data;
+            }
+        });
+        firestoreAvailable = true;
+    } catch (error) {
+        console.warn("Firestore afspraken laden mislukt, lokale afspraken geladen:", error);
+        firestoreAvailable = false;
+    }
+
+    Object.entries(combined).forEach(([id, data]) => {
+        if (!data || !data.start) return;
+        addEventToCalendarObject(id, data);
+    });
+
+    applyFilters();
+    updateStats();
+}
+
+function buildOccurrenceDates(baseDateStr, timeStr, allDay, repeatMode) {
+    const dates = [];
+    const baseDate = new Date(`${baseDateStr}T12:00:00`);
+    const count = repeatMode === "weekly" ? 4 : repeatMode === "monthly" ? 3 : 1;
+
+    for (let i = 0; i < count; i++) {
+        const d = new Date(baseDate);
+        if (repeatMode === "weekly") {
+            d.setDate(baseDate.getDate() + i * 7);
+        } else if (repeatMode === "monthly") {
+            d.setMonth(baseDate.getMonth() + i);
+        }
+        const datePart = formatDateForInput(d);
+        dates.push(allDay ? datePart : `${datePart}T${timeStr}:00`);
+    }
+    return dates;
+}
+
+async function saveEvent() {
+    const title = document.getElementById("eventTitle").value.trim();
+    const description = document.getElementById("eventDescription").value.trim();
+    const date = document.getElementById("eventDate").value;
+    const time = document.getElementById("eventTime").value;
+    const category = document.getElementById("eventType").value || "activity";
+    const repeatMode = document.getElementById("eventRepeat")?.value || "none";
+    const allDay = document.getElementById("allDay").checked;
+
+    if (!title) {
+        showMessage("Voeg een titel toe voor de afspraak.", "error");
+        return;
+    }
+    if (!date) {
+        showMessage("Kies een datum.", "error");
+        return;
+    }
+    if (!allDay && !time) {
+        showMessage("Kies een tijd of vink 'Hele dag' aan.", "error");
+        return;
+    }
+
+    const start = allDay ? date : `${date}T${time}:00`;
+
+    try {
+        disableSaveButton(true);
+
+        if (editingEventId) {
+            const payload = { title, description, start, allDay, category };
+            saveLocalAppointment(editingEventId, payload);
+
+            if (firestoreAvailable && !editingEventId.startsWith("local_")) {
+                await updateDoc(doc(db, "appointments", editingEventId), payload);
+            }
+
+            const event = calendar.getEventById(editingEventId);
+            if (event) {
+                const config = categoryConfig[category] || categoryConfig.activity;
+                event.setProp("title", title);
+                event.setProp("backgroundColor", config.color);
+                event.setProp("borderColor", config.color);
+                event.setStart(start);
+                event.setAllDay(allDay);
+                event.setExtendedProp("originalTitle", title);
+                event.setExtendedProp("description", description);
+                event.setExtendedProp("category", category);
+            }
+            showMessage("Afspraak bijgewerkt.", "success");
+        } else {
+            const occurrences = buildOccurrenceDates(date, time, allDay, repeatMode);
+
+            for (const occStart of occurrences) {
+                const payload = {
+                    title,
+                    description,
+                    start: occStart,
+                    allDay,
+                    category,
+                    createdAt: new Date().toISOString()
+                };
+
+                let createdId = "local_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+                if (firestoreAvailable) {
+                    try {
+                        const newDoc = await addDoc(appointmentsRef, payload);
+                        createdId = newDoc.id;
+                    } catch (err) {
+                        console.warn("Firestore addDoc mislukt, lokaal opgeslagen:", err);
+                    }
+                }
+
+                saveLocalAppointment(createdId, payload);
+                addEventToCalendarObject(createdId, payload);
+            }
+
+            showMessage(
+                occurrences.length > 1
+                    ? `${occurrences.length} herhalende afspraken opgeslagen.`
+                    : "Afspraak opgeslagen.",
+                "success"
+            );
+        }
+
+        closeFormModal();
+        resetForm();
+        applyFilters();
+        updateStats();
+    } catch (error) {
+        console.error("Opslaan mislukt:", error);
+        showMessage("Opslaan mislukt.", "error");
+    } finally {
+        disableSaveButton(false);
+    }
+}
+
+function editCurrentEvent() {
+    if (!currentViewEvent) return;
+    const event = currentViewEvent;
+    editingEventId = event.id;
+
+    document.getElementById("formTitle").textContent = "Afspraak wijzigen";
+    document.getElementById("eventTitle").value = event.extendedProps.originalTitle || removeEmojiFromTitle(event.title);
+    document.getElementById("eventDescription").value = event.extendedProps.description || "";
+    document.getElementById("eventType").value = categoryConfig[event.extendedProps.category]
+        ? event.extendedProps.category
+        : "activity";
+    if (document.getElementById("eventRepeat")) {
+        document.getElementById("eventRepeat").value = "none";
+    }
+    document.getElementById("allDay").checked = event.allDay;
+
+    if (event.start) {
+        document.getElementById("eventDate").value = formatDateForInput(event.start);
+        document.getElementById("eventTime").value = event.allDay ? "" : formatTimeForInput(event.start);
+    }
+
+    updateTimeInputState();
+    closeViewModal();
+    openModal("eventModal");
+
+    setTimeout(() => {
+        document.getElementById("eventTitle")?.focus();
+    }, 50);
+}
+
+async function markEventAsDone() {
+    if (!currentViewEvent) return;
+    const event = currentViewEvent;
+
+    try {
+        const donePayload = {
+            title: event.extendedProps.originalTitle || removeEmojiFromTitle(event.title),
+            description: event.extendedProps.description || "",
+            start: event.startStr,
+            allDay: event.allDay,
+            category: event.extendedProps.category || "activity",
+            completedAt: new Date().toISOString(),
+            originalId: event.id
+        };
+
+        if (firestoreAvailable) {
+            try {
+                await addDoc(completedAppointmentsRef, donePayload);
+                if (!event.id.startsWith("local_")) {
+                    await deleteDoc(doc(db, "appointments", event.id));
+                }
+            } catch (err) {
+                console.warn("Kon voltooide afspraak niet naar Firestore verplaatsen:", err);
+            }
+        }
+
+        removeLocalAppointment(event.id);
+        event.remove();
+
+        currentViewEvent = null;
+        selectedEventId = null;
+        closeViewModal();
+        updateStats();
+        showMessage("Afspraak gemarkeerd als gereed.", "success");
+    } catch (error) {
+        console.error("Afronden mislukt:", error);
+        showMessage("De afspraak kon niet als gereed worden gemarkeerd.", "error");
+    }
+}
+
+async function deleteCurrentEvent() {
+    const id = currentViewEvent?.id || selectedEventId;
+    if (!id) return;
+
+    if (!confirm("Weet je zeker dat je deze afspraak wilt verwijderen?")) return;
+
+    try {
+        if (firestoreAvailable && !id.startsWith("local_")) {
+            try {
+                await deleteDoc(doc(db, "appointments", id));
+            } catch (err) {
+                console.warn("Kon afspraak niet uit Firestore verwijderen:", err);
+            }
+        }
+
+        removeLocalAppointment(id);
+        const event = calendar.getEventById(id);
+        if (event) event.remove();
+
+        currentViewEvent = null;
+        selectedEventId = null;
+        closeViewModal();
+        closeFormModal();
+        updateStats();
+        showMessage("Afspraak verwijderd.", "success");
+    } catch (error) {
+        console.error("Verwijderen mislukt:", error);
+        showMessage("Verwijderen mislukt.", "error");
+    }
+}
+
+function setupButtons() {
+    document.getElementById("addEventButton")?.addEventListener("click", () => openFormModal());
+    document.getElementById("gcalTodayBtn")?.addEventListener("click", () => {
+        calendar?.today();
+        syncHeaderTitle();
+    });
+    document.getElementById("gcalPrevBtn")?.addEventListener("click", () => {
+        calendar?.prev();
+        syncHeaderTitle();
+    });
+    document.getElementById("gcalNextBtn")?.addEventListener("click", () => {
+        calendar?.next();
+        syncHeaderTitle();
+    });
+
+    document.querySelectorAll(".gcal-view-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const viewName = btn.dataset.view;
+            if (viewName && calendar) {
+                calendar.changeView(viewName);
+                syncHeaderTitle();
+            }
+        });
+    });
+
+    document.getElementById("toggleSidebarBtn")?.addEventListener("click", () => {
+        document.getElementById("gcalSidebar")?.classList.toggle("collapsed");
+    });
+
+    document.getElementById("miniPrevMonth")?.addEventListener("click", () => {
+        miniCalDate = new Date(miniCalDate.getFullYear(), miniCalDate.getMonth() - 1, 1);
+        renderMiniCalendar();
+    });
+
+    document.getElementById("miniNextMonth")?.addEventListener("click", () => {
+        miniCalDate = new Date(miniCalDate.getFullYear(), miniCalDate.getMonth() + 1, 1);
+        renderMiniCalendar();
+    });
+
+    document.getElementById("openCategoryModalBtn")?.addEventListener("click", () => {
+        document.getElementById("newCategoryName").value = "";
+        openModal("categoryModal");
+        setTimeout(() => document.getElementById("newCategoryName")?.focus(), 50);
+    });
+
+    document.getElementById("logoutButton")?.addEventListener("click", async () => {
+        try {
+            await signOut(auth);
+            window.location.replace("index.html");
+        } catch (error) {
+            console.error("Uitloggen mislukt:", error);
+            showMessage("Uitloggen mislukt.", "error");
+        }
+    });
+}
+
+function setupModals() {
+    document.getElementById("saveEventButton")?.addEventListener("click", saveEvent);
+    document.getElementById("cancelEventButton")?.addEventListener("click", closeFormModal);
+    document.getElementById("closeFormX")?.addEventListener("click", closeFormModal);
+
+    document.getElementById("saveCategoryButton")?.addEventListener("click", createCategory);
+    document.getElementById("cancelCategoryButton")?.addEventListener("click", () => closeModal("categoryModal"));
+    document.getElementById("closeCategoryX")?.addEventListener("click", () => closeModal("categoryModal"));
+
+    document.getElementById("closeViewX")?.addEventListener("click", closeViewModal);
+    document.getElementById("closeViewButton")?.addEventListener("click", closeViewModal);
+    document.getElementById("editFromViewButton")?.addEventListener("click", editCurrentEvent);
+    document.getElementById("deleteFromViewButton")?.addEventListener("click", deleteCurrentEvent);
+    document.getElementById("doneFromViewButton")?.addEventListener("click", markEventAsDone);
+    document.getElementById("allDay")?.addEventListener("change", updateTimeInputState);
+
+    document.querySelectorAll(".modal").forEach((modal) => {
+        modal.addEventListener("click", (event) => {
+            if (event.target !== modal) return;
+            if (modal.id === "eventModal") closeFormModal();
+            else closeModal(modal.id);
+        });
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeFormModal();
+            closeViewModal();
+            closeModal("categoryModal");
+        }
+    });
+}
+
+function applyFilters() {
+    if (!calendar) return;
+    const query = (document.getElementById("search")?.value || "").trim().toLowerCase();
+
+    calendar.getEvents().forEach((event) => {
+        const title = (event.extendedProps.originalTitle || event.title || "").toLowerCase();
+        const description = (event.extendedProps.description || "").toLowerCase();
+        const cat = event.extendedProps.category || "activity";
+
+        const matchesSearch = !query || title.includes(query) || description.includes(query);
+        const matchesCategory = activeCategoryFilter === "all" || cat === activeCategoryFilter;
+
+        event.setProp("display", matchesSearch && matchesCategory ? "auto" : "none");
+    });
+}
+
+function setupSearch() {
+    const input = document.getElementById("search");
+    if (!input) return;
+    input.addEventListener("input", applyFilters);
+}
+
+function setupBackupAndTools() {
+    document.getElementById("showAllCategoriesBtn")?.addEventListener("click", () => {
+        activeCategoryFilter = "all";
+        renderCategoryUI();
+        applyFilters();
+    });
+
+    document.getElementById("printAgendaBtn")?.addEventListener("click", () => {
+        window.print();
+    });
+
+    document.getElementById("exportJsonButton")?.addEventListener("click", () => {
+        const payload = {
+            exportedAt: new Date().toISOString(),
+            categories: categoryConfig,
+            appointments: getLocalAppointments()
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `snejin-agenda-backup-${formatDateForInput(new Date())}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showMessage("Back-up gedownload.", "success");
+    });
+
+    document.getElementById("importJsonButton")?.addEventListener("click", () => {
+        document.getElementById("importJsonInput")?.click();
+    });
+
+    document.getElementById("importJsonInput")?.addEventListener("change", async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+            const text = await file.text();
+            const parsed = JSON.parse(text);
+            if (parsed.categories) {
+                Object.entries(parsed.categories).forEach(([k, v]) => {
+                    if (!DEFAULT_CATEGORIES[k]) categoryConfig[k] = v;
+                });
+                saveCategoriesLocal();
+                renderCategoryUI();
+            }
+            if (parsed.appointments) {
+                const existing = getLocalAppointments();
+                Object.assign(existing, parsed.appointments);
+                localStorage.setItem("snejin_appointments", JSON.stringify(existing));
+            }
+            await loadAppointments();
+            showMessage("Back-up succesvol geïmporteerd.", "success");
+        } catch (err) {
+            console.error("Import mislukt:", err);
+            showMessage("Kon het JSON-bestand niet importeren.", "error");
+        } finally {
+            e.target.value = "";
+        }
+    });
+
+    document.getElementById("exportIcsButton")?.addEventListener("click", () => {
+        if (!calendar) return;
+        const lines = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//Snejin Agenda//NL"
+        ];
+        calendar.getEvents().forEach((ev, idx) => {
+            const title = (ev.extendedProps.originalTitle || removeEmojiFromTitle(ev.title)).replace(/[,;]/g, " ");
+            const desc = (ev.extendedProps.description || "").replace(/
+/g, "\n").replace(/[,;]/g, " ");
+            const startFormatted = ev.allDay
+                ? formatDateForInput(ev.start).replace(/-/g, "")
+                : ev.start.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+            lines.push("BEGIN:VEVENT");
+            lines.push(`UID:${ev.id || idx}@snejin-agenda`);
+            lines.push(`DTSTART:${startFormatted}`);
+            lines.push(`SUMMARY:${title}`);
+            if (desc) lines.push(`DESCRIPTION:${desc}`);
+            lines.push("END:VEVENT");
+        });
+        lines.push("END:VCALENDAR");
+
+        const blob = new Blob([lines.join("
+")], { type: "text/calendar;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "snejin-agenda.ics";
+        a.click();
+        URL.revokeObjectURL(url);
+        showMessage("Agenda geëxporteerd als .ICS.", "success");
+    });
+}
+
+function updateStats() {
+    if (!calendar) return;
+    const events = calendar.getEvents();
+    const totalEl = document.getElementById("statTotalEvents");
+    const weekEl = document.getElementById("statUpcomingWeek");
+
+    if (totalEl) totalEl.textContent = String(events.length);
+
+    if (weekEl) {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        const day = startOfWeek.getDay() || 7;
+        startOfWeek.setDate(startOfWeek.getDate() - day + 1);
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+        const countThisWeek = events.filter((ev) => ev.start && ev.start >= startOfWeek && ev.start < endOfWeek).length;
+        weekEl.textContent = String(countThisWeek);
+    }
+}
+
+function setupTheme() {
+    const themeBtn = document.getElementById("themeButton");
+    const isDark = localStorage.getItem("theme") === "dark";
+    if (isDark) {
+        document.body.classList.add("dark");
+        document.body.classList.add("dark-mode");
+    }
+
+    themeBtn?.addEventListener("click", () => {
+        document.body.classList.toggle("dark");
+        document.body.classList.toggle("dark-mode");
+        const darkModeActive = document.body.classList.contains("dark");
+        localStorage.setItem("theme", darkModeActive ? "dark" : "light");
+    });
+}
+
+function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden", "false");
+    }
+}
+
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+    }
+}
+
+function openFormModal(dateStr = "") {
+    editingEventId = null;
+    resetForm();
+    document.getElementById("formTitle").textContent = "Nieuwe afspraak";
+
+    if (dateStr) {
+        document.getElementById("eventDate").value = dateStr.split("T")[0];
+        if (dateStr.includes("T")) {
+            document.getElementById("eventTime").value = dateStr.split("T")[1].substring(0, 5);
+            document.getElementById("allDay").checked = false;
+        }
+    } else {
+        document.getElementById("eventDate").value = formatDateForInput(new Date());
+    }
+
+    updateTimeInputState();
+    openModal("eventModal");
+    setTimeout(() => document.getElementById("eventTitle")?.focus(), 50);
+}
+
+function closeFormModal() {
+    closeModal("eventModal");
+    resetForm();
+}
+
+function openViewModal(event) {
+    const catId = event.extendedProps.category;
+    const config = categoryConfig[catId] || { label: "Activiteit", color: "#1A73E8", emoji: "🟦" };
+
+    document.getElementById("viewTitle").textContent = event.extendedProps.originalTitle || removeEmojiFromTitle(event.title);
+    const badgeEl = document.getElementById("viewBadge");
+    if (badgeEl) {
+        badgeEl.style.backgroundColor = config.color;
+    }
+    document.getElementById("viewCategoryName").textContent = config.label;
+    document.getElementById("viewDescription").textContent = event.extendedProps.description || "Geen omschrijving beschikbaar.";
+
+    if (event.start) {
+        const dateStr = event.start.toLocaleDateString("nl-NL", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+        document.getElementById("viewDate").textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        document.getElementById("viewTime").textContent = event.allDay
+            ? "Hele dag"
+            : event.start.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    openModal("eventViewModal");
+}
+
+function closeViewModal() {
+    closeModal("eventViewModal");
+}
+
+function resetForm() {
+    editingEventId = null;
+    document.getElementById("eventTitle").value = "";
+    document.getElementById("eventDescription").value = "";
+    document.getElementById("eventDate").value = "";
+    document.getElementById("eventTime").value = "";
+    const typeSelect = document.getElementById("eventType");
+    if (typeSelect) {
+        typeSelect.value = categoryConfig.activity ? "activity" : (Object.keys(categoryConfig)[0] || "");
+    }
+    const repeatSelect = document.getElementById("eventRepeat");
+    if (repeatSelect) repeatSelect.value = "none";
+    document.getElementById("allDay").checked = true;
+    updateTimeInputState();
+}
+
+function updateTimeInputState() {
+    const allDayChecked = document.getElementById("allDay").checked;
+    const timeInput = document.getElementById("eventTime");
+    if (timeInput) {
+        timeInput.disabled = allDayChecked;
+        if (allDayChecked) timeInput.value = "";
+    }
+}
+
+function disableSaveButton(disable) {
+    const btn = document.getElementById("saveEventButton");
+    if (btn) btn.disabled = disable;
+}
+
+function showMessage(text, type = "info") {
+    let msgContainer = document.getElementById("toast-message");
+    if (!msgContainer) {
+        msgContainer = document.createElement("div");
+        msgContainer.id = "toast-message";
+        msgContainer.style.cssText = `
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            background: #1f1f1f;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+            z-index: 10000;
+            transition: all 0.25s ease;
+        `;
+        document.body.appendChild(msgContainer);
+    }
+    msgContainer.style.background = type === "error" ? "#b3261e" : "#1f1f1f";
+    msgContainer.textContent = text;
+    msgContainer.style.display = "block";
+    msgContainer.style.opacity = "1";
+    clearTimeout(msgContainer._timer);
+    msgContainer._timer = setTimeout(() => {
+        msgContainer.style.opacity = "0";
+        setTimeout(() => { msgContainer.style.display = "none"; }, 250);
+    }, 3000);
+}
+
+function formatDateForInput(date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+function formatTimeForInput(date) {
+    const hh = String(date.getHours()).padStart(2, "0");
+    const mm = String(date.getMinutes()).padStart(2, "0");
+    return `${hh}:${mm}`;
+}
+
+function removeEmojiFromTitle(title) {
+    return title.replace(/^[^\w\s]+\s*/u, "");
+}
+
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
 }
