@@ -1,299 +1,897 @@
 <!DOCTYPE html>
 <html lang="nl">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snejin Agenda</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snejin Agenda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-grad: radial-gradient(circle at 12% 10%, rgba(168, 199, 250, 0.38), transparent 44%),
+                radial-gradient(circle at 90% 85%, rgba(194, 231, 255, 0.50), transparent 48%),
+                linear-gradient(160deg, #f2f7fe 0%, #f8fafd 55%, #eaf2fd 100%);
+      --surface: rgba(255, 255, 255, 0.92);
+      --glass: rgba(255, 255, 255, 0.78);
+      --header-bg: rgba(248, 250, 253, 0.88);
+      --border: rgba(218, 220, 224, 0.85);
+      --text: #1f1f1f;
+      --muted: #5f6368;
+      --primary: #0b57d0;
+      --primary-hover: #0842a0;
+      --pill-active: #c2e7ff;
+      --pill-active-text: #001d35;
+      --search-bg: rgba(234, 241, 251, 0.92);
+      --hover-bg: rgba(68, 71, 70, 0.08);
+      --shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+    }
+    body.dark {
+      --bg-grad: radial-gradient(circle at 15% 15%, rgba(11, 87, 208, 0.24), transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(76, 29, 149, 0.18), transparent 50%),
+                linear-gradient(160deg, #0f1117 0%, #131314 60%, #161822 100%);
+      --surface: rgba(30, 31, 32, 0.94);
+      --glass: rgba(30, 31, 32, 0.84);
+      --header-bg: rgba(19, 19, 20, 0.88);
+      --border: #2c2d30;
+      --text: #e3e3e3;
+      --muted: #9aa0a6;
+      --primary: #a8c7fa;
+      --primary-hover: #8ab4f8;
+      --pill-active: #004a77;
+      --pill-active-text: #c2e7ff;
+      --search-bg: #282a2c;
+      --hover-bg: rgba(255, 255, 255, 0.08);
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    }
+    html, body {
+      min-height: 100%;
+      font-family: "Google Sans", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-grad);
+      background-attachment: fixed;
+      color: var(--text);
+    }
+    button, input, select, textarea { font: inherit; color: inherit; }
 
-    <meta name="theme-color" content="#0B57D0">
-    <link rel="icon" type="image/png" href="logo.png">
-    <link rel="stylesheet" href="style.css">
+    .header {
+      height: 64px;
+      padding: 0 16px;
+      background: var(--header-bg);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+    .header-left, .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-center { flex: 1; max-width: 480px; }
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    .icon-btn {
+      width: 38px; height: 38px; border: none; border-radius: 50%;
+      background: transparent; cursor: pointer; font-size: 18px;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background .15s ease;
+    }
+    .icon-btn:hover { background: var(--hover-bg); }
 
-    <!-- FullCalendar -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js"></script>
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 600; margin-right: 6px; white-space: nowrap; }
+    .brand-dot {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, #0b57d0, #4285f4);
+      color: #fff; font-size: 14px; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
 
-    <!-- Agenda script (module met automatische fallback als firebase.js niet gevonden of nog niet ingesteld is) -->
-    <script type="module" src="agenda.js"></script>
+    .outlined-btn {
+      height: 36px; padding: 0 16px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--surface);
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .outlined-btn:hover { background: var(--hover-bg); }
+
+    .title-label { font-size: 20px; font-weight: 500; margin-left: 6px; white-space: nowrap; }
+
+    .search-box {
+      height: 42px; padding: 0 16px; border-radius: 999px;
+      background: var(--search-bg); display: flex; align-items: center; gap: 8px;
+    }
+    .search-box input { width: 100%; border: none; background: transparent; outline: none; font-size: 14px; }
+
+    .view-switcher {
+      display: inline-flex; border: 1px solid var(--border);
+      border-radius: 999px; overflow: hidden; background: var(--surface);
+    }
+    .view-btn {
+      border: none; background: transparent; padding: 0 13px; height: 34px;
+      font-size: 13px; font-weight: 500; cursor: pointer; border-right: 1px solid var(--border);
+    }
+    .view-btn:last-child { border-right: none; }
+    .view-btn.active { background: var(--pill-active); color: var(--pill-active-text); font-weight: 600; }
+
+    .logout-btn {
+      height: 34px; padding: 0 14px; border-radius: 999px; border: none;
+      background: var(--hover-bg); font-size: 13px; font-weight: 500; cursor: pointer;
+    }
+
+    .workspace { display: flex; min-height: calc(100vh - 64px); }
+    .sidebar {
+      width: 268px; flex-shrink: 0; padding: 14px 14px 24px 16px;
+      display: flex; flex-direction: column; gap: 16px; transition: all .2s ease;
+    }
+    .sidebar.collapsed { width: 0; padding: 0; overflow: hidden; opacity: 0; }
+
+    .create-btn {
+      height: 52px; padding: 0 22px 0 16px; border: none; border-radius: 16px;
+      background: var(--surface); font-size: 15px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+      box-shadow: var(--shadow); width: fit-content; transition: transform .15s ease;
+    }
+    .create-btn:hover { transform: translateY(-1px); }
+    .create-plus { font-size: 24px; color: #0b57d0; line-height: 1; }
+
+    .card-box {
+      background: var(--glass); backdrop-filter: blur(12px);
+      border: 1px solid var(--border); border-radius: 18px; padding: 12px;
+    }
+    .card-box h2 { font-size: 14px; font-weight: 600; }
+    .box-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .small-link-btn {
+      border: none; background: transparent; color: #0b57d0;
+      font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 999px;
+    }
+    .small-link-btn:hover { background: rgba(11, 87, 208, 0.1); }
+
+    .mini-weekdays, .mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 2px; }
+    .mini-weekdays { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+    .mini-day {
+      height: 28px; border: none; border-radius: 50%; background: transparent;
+      font-size: 12px; cursor: pointer;
+    }
+    .mini-day:hover { background: var(--hover-bg); }
+    .mini-day.muted { color: var(--muted); opacity: 0.55; }
+    .mini-day.today { background: #0b57d0; color: #fff; font-weight: 700; }
+
+    .cat-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+    .cat-item { display: flex; align-items: center; justify-content: space-between; border-radius: 999px; padding: 2px 6px; }
+    .cat-item:hover { background: var(--hover-bg); }
+    .cat-item.active { background: var(--pill-active); color: var(--pill-active-text); }
+    .cat-filter {
+      flex: 1; border: none; background: transparent; text-align: left;
+      padding: 6px 4px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; cursor: pointer;
+    }
+    .cat-dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
+    .cat-del { border: none; background: transparent; font-size: 16px; cursor: pointer; padding: 0 6px; color: var(--muted); }
+    .cat-del:hover { color: #c5221f; }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 8px; text-align: center; }
+    .stat-card strong { display: block; font-size: 18px; color: #0b57d0; }
+    .stat-card span { font-size: 11px; color: var(--muted); }
+
+    .text-action {
+      width: 100%; border: none; background: transparent; text-align: left;
+      padding: 6px 8px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer;
+    }
+    .text-action:hover { background: var(--hover-bg); }
+
+    .main { flex: 1; padding: 14px 16px 16px 0; min-width: 0; }
+    .calendar-surface {
+      background: var(--surface); backdrop-filter: blur(12px);
+      border: 1px solid var(--border); border-radius: 24px;
+      padding: 14px; min-height: calc(100vh - 94px); box-shadow: var(--shadow);
+    }
+
+    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 6px; }
+    .cal-weekday { text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: .5px; }
+    .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--border); border-left: 1px solid var(--border); }
+    .day-cell {
+      min-height: 112px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 6px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: background .12s ease;
+    }
+    .day-cell:hover { background: var(--hover-bg); }
+    .day-cell.muted { opacity: 0.48; }
+    .day-num {
+      width: 24px; height: 24px; font-size: 12px; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
+    }
+    .day-cell.today .day-num { background: #0b57d0; color: #fff; }
+
+    .event-pill {
+      border: none; border-radius: 6px; padding: 3px 7px; font-size: 12px; font-weight: 500;
+      color: #fff; text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .event-pill:hover { filter: brightness(0.95); }
+
+    .list-view { display: flex; flex-direction: column; gap: 8px; }
+    .list-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--glass); cursor: pointer;
+    }
+    .list-row:hover { background: var(--hover-bg); }
+
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: rgba(15, 23, 42, 0.42); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-card {
+      width: 100%; max-width: 450px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 24px; padding: 22px; box-shadow: var(--shadow); position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 14px; right: 14px; width: 32px; height: 32px;
+      border: none; border-radius: 50%; background: transparent; font-size: 20px; cursor: pointer;
+    }
+    .modal-close:hover { background: var(--hover-bg); }
+    .modal-title { font-size: 19px; font-weight: 600; margin-bottom: 14px; padding-right: 28px; }
+    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .field input, .field select, .field textarea {
+      border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px;
+      background: var(--glass); font-size: 14px; outline: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #0b57d0; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 12px; cursor: pointer; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    .btn-primary {
+      border: none; border-radius: 999px; height: 38px; padding: 0 20px;
+      background: #0b57d0; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    .btn-primary:hover { background: #0842a0; }
+    .btn-secondary {
+      border: none; border-radius: 999px; height: 38px; padding: 0 16px;
+      background: var(--hover-bg); font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .btn-danger {
+      border: none; border-radius: 999px; height: 38px; padding: 0 16px;
+      background: #fce8e6; color: #c5221f; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+
+    .toast {
+      position: fixed; bottom: 20px; left: 20px; z-index: 200;
+      background: #1f1f1f; color: #fff; padding: 11px 18px; border-radius: 12px;
+      font-size: 13px; font-weight: 500; display: none; box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 900px) {
+      .workspace { flex-direction: column; }
+      .sidebar { width: 100%; }
+      .main { padding: 0 12px 16px; }
+      .header-center { display: none; }
+    }
+  </style>
 </head>
-
-<body class="gcal-body">
-
-    <!-- Bovenste balk (stijl Google Calendar) -->
-    <header class="gcal-header">
-        <div class="gcal-header-left">
-            <button id="toggleSidebarBtn" type="button" class="gcal-icon-btn" title="Zijbalk in- of uitklappen" aria-label="Menu">
-                ☰
-            </button>
-
-            <a href="agenda.html" class="gcal-brand">
-                <img src="logo.png" alt="Snejin Agenda" class="gcal-logo" onerror="this.style.display='none'">
-                <span class="gcal-brand-text">Snejin Agenda</span>
-            </a>
-
-            <button id="gcalTodayBtn" type="button" class="gcal-outlined-btn">
-                Vandaag
-            </button>
-
-            <div class="gcal-nav-arrows">
-                <button id="gcalPrevBtn" type="button" class="gcal-icon-btn" title="Vorige periode" aria-label="Vorige">
-                    ‹
-                </button>
-                <button id="gcalNextBtn" type="button" class="gcal-icon-btn" title="Volgende periode" aria-label="Volgende">
-                    ›
-                </button>
-            </div>
-
-            <h1 id="gcalCurrentTitle" class="gcal-current-title">November 2026</h1>
-        </div>
-
-        <div class="gcal-header-center">
-            <div class="gcal-search-box">
-                <span class="gcal-search-icon">🔍</span>
-                <input
-                    id="search"
-                    type="search"
-                    placeholder="Zoeken in Snejin Agenda..."
-                    aria-label="Zoeken in Snejin Agenda"
-                >
-            </div>
-        </div>
-
-        <div class="gcal-header-right">
-            <div class="gcal-view-switcher" role="group" aria-label="Weergave kiezen">
-                <button type="button" class="gcal-view-btn" data-view="timeGridDay">Dag</button>
-                <button type="button" class="gcal-view-btn" data-view="timeGridWeek">Week</button>
-                <button type="button" class="gcal-view-btn active" data-view="dayGridMonth">Maand</button>
-                <button type="button" class="gcal-view-btn" data-view="listWeek">Agenda</button>
-            </div>
-
-            <button id="exportIcsButton" type="button" class="gcal-subtle-btn" title="Exporteer naar .ICS">
-                .ICS
-            </button>
-            <button id="exportJsonButton" type="button" class="gcal-subtle-btn" title="Back-up opslaan (.JSON)">
-                Back-up
-            </button>
-            <button id="importJsonButton" type="button" class="gcal-subtle-btn" title="Back-up herstellen (.JSON)">
-                Import
-            </button>
-            <input id="importJsonInput" type="file" accept=".json" style="display:none;">
-
-            <button id="themeButton" type="button" class="gcal-icon-btn" title="Donkere modus" aria-label="Donkere modus">
-                🌙
-            </button>
-
-            <button id="logoutButton" type="button" class="gcal-logout-btn">
-                Uitloggen
-            </button>
-        </div>
-    </header>
-
-    <!-- Hoofdwerkruimte: Zijbalk links + Kalender rechts -->
-    <div class="gcal-workspace">
-        <aside id="gcalSidebar" class="gcal-sidebar">
-            <!-- Maken knop zoals Google Calendar -->
-            <button id="addEventButton" type="button" class="gcal-create-btn">
-                <span class="gcal-plus">+</span>
-                <span>Maken</span>
-            </button>
-
-            <!-- Mini-kalender / Maandoverzicht -->
-            <div class="gcal-mini-cal">
-                <div class="gcal-mini-header">
-                    <span id="miniCalMonthLabel">November 2026</span>
-                    <div class="gcal-mini-arrows">
-                        <button id="miniPrevMonth" type="button" aria-label="Vorige maand">‹</button>
-                        <button id="miniNextMonth" type="button" aria-label="Volgende maand">›</button>
-                    </div>
-                </div>
-                <div class="gcal-mini-weekdays">
-                    <span>M</span><span>D</span><span>W</span><span>D</span><span>V</span><span>Z</span><span>Z</span>
-                </div>
-                <div id="miniCalGrid" class="gcal-mini-grid"></div>
-            </div>
-
-            <!-- Mijn categorieën (aanmaken, filteren, verwijderen) -->
-            <div class="gcal-sidebar-block">
-                <div class="gcal-block-header">
-                    <h2>Mijn categorieën</h2>
-                    <button id="openCategoryModalBtn" type="button" class="gcal-mini-add-btn" title="Nieuwe categorie aanmaken">
-                        + Nieuw
-                    </button>
-                </div>
-                <ul id="categoryList" class="gcal-cat-list"></ul>
-            </div>
-
-            <!-- Overzicht & Snelacties -->
-            <div class="gcal-sidebar-block">
-                <h2>Overzicht &amp; Tools</h2>
-                <div class="gcal-stats-row">
-                    <div class="gcal-stat-card">
-                        <strong id="statTotalEvents">0</strong>
-                        <span>Afspraken</span>
-                    </div>
-                    <div class="gcal-stat-card">
-                        <strong id="statUpcomingWeek">0</strong>
-                        <span>Deze week</span>
-                    </div>
-                </div>
-                <div class="gcal-quick-actions">
-                    <button id="showAllCategoriesBtn" type="button" class="gcal-text-action">
-                        Alle categorieën weergeven
-                    </button>
-                    <button id="printAgendaBtn" type="button" class="gcal-text-action">
-                        🖨️ Kalender afdrukken
-                    </button>
-                </div>
-            </div>
-        </aside>
-
-        <main class="gcal-main">
-            <div class="gcal-calendar-surface">
-                <div id="calendar"></div>
-            </div>
-        </main>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <button id="toggleSidebarBtn" type="button" class="icon-btn" title="Zijbalk">☰</button>
+      <div class="brand">
+        <span class="brand-dot">S</span>
+        <span>Snejin Agenda</span>
+      </div>
+      <button id="todayBtn" type="button" class="outlined-btn">Vandaag</button>
+      <button id="prevBtn" type="button" class="icon-btn" title="Vorige">‹</button>
+      <button id="nextBtn" type="button" class="icon-btn" title="Volgende">›</button>
+      <h1 id="currentTitle" class="title-label">November 2026</h1>
     </div>
 
-    <!-- Modal: Afspraak aanmaken of wijzigen -->
-    <div id="eventModal" class="modal" aria-hidden="true">
-        <div class="modal-content gcal-dialog" role="dialog" aria-modal="true" aria-labelledby="formTitle">
-            <button id="closeFormX" class="modal-close" type="button" aria-label="Sluiten">&times;</button>
-            <h2 id="formTitle" class="gcal-dialog-title">Nieuwe afspraak</h2>
-
-            <div class="gcal-form">
-                <div class="gcal-field">
-                    <input id="eventTitle" type="text" class="gcal-title-input" placeholder="Titel toevoegen" required>
-                </div>
-
-                <div class="gcal-row-2">
-                    <div class="gcal-field">
-                        <label for="eventDate">Datum</label>
-                        <input id="eventDate" type="date" required>
-                    </div>
-                    <div class="gcal-field">
-                        <label for="eventTime">Tijd</label>
-                        <input id="eventTime" type="time">
-                    </div>
-                </div>
-
-                <label class="gcal-check">
-                    <input id="allDay" type="checkbox" checked>
-                    <span>Hele dag</span>
-                </label>
-
-                <div class="gcal-row-2">
-                    <div class="gcal-field">
-                        <label for="eventType">Categorie</label>
-                        <select id="eventType"></select>
-                    </div>
-                    <div class="gcal-field">
-                        <label for="eventRepeat">Herhalen</label>
-                        <select id="eventRepeat">
-                            <option value="none">Niet herhalen</option>
-                            <option value="weekly">Wekelijks (4 weken)</option>
-                            <option value="monthly">Maandelijks (3 maanden)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="gcal-field">
-                    <label for="eventDescription">Omschrijving / Locatie / Notities</label>
-                    <textarea id="eventDescription" rows="3" placeholder="Beschrijving of locatie toevoegen..."></textarea>
-                </div>
-            </div>
-
-            <div class="gcal-dialog-footer">
-                <button id="cancelEventButton" type="button" class="gcal-btn-secondary">Annuleren</button>
-                <button id="saveEventButton" type="button" class="gcal-btn-primary">Opslaan</button>
-            </div>
-        </div>
+    <div class="header-center">
+      <div class="search-box">
+        <span>🔍</span>
+        <input id="searchInput" type="search" placeholder="Zoeken in Snejin Agenda..." />
+      </div>
     </div>
 
-    <!-- Modal: Categorie aanmaken -->
-    <div id="categoryModal" class="modal" aria-hidden="true">
-        <div class="modal-content gcal-dialog" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
-            <button id="closeCategoryX" class="modal-close" type="button" aria-label="Sluiten">&times;</button>
-            <h2 id="categoryModalTitle" class="gcal-dialog-title">Nieuwe categorie</h2>
-
-            <div class="gcal-form">
-                <div class="gcal-field">
-                    <label for="newCategoryName">Naam</label>
-                    <input id="newCategoryName" type="text" placeholder="Bijv. Sport, Werk, Familie..." required>
-                </div>
-
-                <div class="gcal-row-2">
-                    <div class="gcal-field">
-                        <label for="newCategoryEmoji">Pictogram</label>
-                        <select id="newCategoryEmoji">
-                            <option value="🟦">🟦 Blauw</option>
-                            <option value="🟪">🟪 Paars</option>
-                            <option value="🟧">🟧 Oranje</option>
-                            <option value="⚽">⚽ Sport</option>
-                            <option value="💼">💼 Werk</option>
-                            <option value="🎓">🎓 School</option>
-                            <option value="🏠">🏠 Thuis</option>
-                            <option value="⭐">⭐ Belangrijk</option>
-                        </select>
-                    </div>
-
-                    <div class="gcal-field">
-                        <label for="newCategoryColor">Kleur</label>
-                        <input id="newCategoryColor" type="color" value="#0B57D0">
-                    </div>
-                </div>
-            </div>
-
-            <div class="gcal-dialog-footer">
-                <button id="cancelCategoryButton" type="button" class="gcal-btn-secondary">Annuleren</button>
-                <button id="saveCategoryButton" type="button" class="gcal-btn-primary">Toevoegen</button>
-            </div>
-        </div>
+    <div class="header-right">
+      <div class="view-switcher" role="group" aria-label="Weergave">
+        <button type="button" class="view-btn" data-view="day">Dag</button>
+        <button type="button" class="view-btn" data-view="week">Week</button>
+        <button type="button" class="view-btn active" data-view="month">Maand</button>
+        <button type="button" class="view-btn" data-view="agenda">Agenda</button>
+      </div>
+      <button id="themeBtn" type="button" class="icon-btn" title="Donkere modus">🌙</button>
+      <button id="logoutBtn" type="button" class="logout-btn">Uitloggen</button>
     </div>
+  </header>
 
-    <!-- Modal: Afspraak bekijken / bewerken / gereed / verwijderen -->
-    <div id="eventViewModal" class="modal" aria-hidden="true">
-        <div class="modal-content gcal-dialog gcal-view-card" role="dialog" aria-modal="true" aria-labelledby="viewTitle">
-            <div class="gcal-view-top-actions">
-                <button id="editFromViewButton" type="button" class="gcal-icon-btn" title="Afspraak wijzigen" aria-label="Wijzigen">✏️</button>
-                <button id="doneFromViewButton" type="button" class="gcal-icon-btn" title="Markeren als gereed" aria-label="Gereed">✓</button>
-                <button id="deleteFromViewButton" type="button" class="gcal-icon-btn gcal-danger-icon" title="Afspraak verwijderen" aria-label="Verwijderen">🗑️</button>
-                <button id="closeViewX" type="button" class="modal-close gcal-inline-close" title="Sluiten" aria-label="Sluiten">&times;</button>
-            </div>
+  <div class="workspace">
+    <aside id="sidebar" class="sidebar">
+      <button id="createBtn" type="button" class="create-btn">
+        <span class="create-plus">+</span>
+        <span>Maken</span>
+      </button>
 
-            <div class="gcal-view-header">
-                <span id="viewBadge" class="gcal-color-swatch"></span>
-                <div>
-                    <h2 id="viewTitle" class="gcal-view-title">Afspraak</h2>
-                    <p id="viewDate" class="gcal-view-sub">-</p>
-                </div>
-            </div>
-
-            <div class="gcal-view-body">
-                <div class="gcal-view-line">
-                    <span>🕐</span>
-                    <span id="viewTime">-</span>
-                </div>
-                <div class="gcal-view-line">
-                    <span>🏷️</span>
-                    <span id="viewCategoryName">-</span>
-                </div>
-                <div class="gcal-view-desc-box">
-                    <p id="viewDescription">Geen omschrijving beschikbaar.</p>
-                </div>
-            </div>
-
-            <div class="gcal-dialog-footer">
-                <button id="closeViewButton" type="button" class="gcal-btn-primary">Sluiten</button>
-            </div>
+      <div class="card-box">
+        <div class="box-top">
+          <h2 id="miniMonthLabel">November 2026</h2>
+          <div>
+            <button id="miniPrevBtn" type="button" class="small-link-btn">‹</button>
+            <button id="miniNextBtn" type="button" class="small-link-btn">›</button>
+          </div>
         </div>
-    </div>
+        <div class="mini-weekdays">
+          <span>M</span><span>D</span><span>W</span><span>D</span><span>V</span><span>Z</span><span>Z</span>
+        </div>
+        <div id="miniGrid" class="mini-grid"></div>
+      </div>
 
+      <div class="card-box">
+        <div class="box-top">
+          <h2>Mijn categorieën</h2>
+          <button id="newCategoryBtn" type="button" class="small-link-btn">+ Nieuw</button>
+        </div>
+        <ul id="categoryList" class="cat-list"></ul>
+      </div>
+
+      <div class="card-box">
+        <div class="box-top"><h2>Overzicht</h2></div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <strong id="statTotal">0</strong>
+            <span>Afspraken</span>
+          </div>
+          <div class="stat-card">
+            <strong id="statWeek">0</strong>
+            <span>Deze week</span>
+          </div>
+        </div>
+        <button id="showAllCatsBtn" type="button" class="text-action">Alle categorieën weergeven</button>
+        <button id="printBtn" type="button" class="text-action">🖨️ Kalender afdrukken</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="calendar-surface">
+        <div id="calendarView"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Afspraak Modal -->
+  <div id="eventModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card">
+      <button id="closeEventModalX" type="button" class="modal-close">&times;</button>
+      <h2 id="eventModalTitle" class="modal-title">Nieuwe afspraak</h2>
+      <div class="field">
+        <label for="eventTitleInput">Titel</label>
+        <input id="eventTitleInput" type="text" placeholder="Titel toevoegen..." />
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="eventDateInput">Datum</label>
+          <input id="eventDateInput" type="date" />
+        </div>
+        <div class="field">
+          <label for="eventTimeInput">Tijd</label>
+          <input id="eventTimeInput" type="time" />
+        </div>
+      </div>
+      <label class="check-row">
+        <input id="eventAllDayInput" type="checkbox" checked />
+        <span>Hele dag</span>
+      </label>
+      <div class="field">
+        <label for="eventCategorySelect">Categorie</label>
+        <select id="eventCategorySelect"></select>
+      </div>
+      <div class="field">
+        <label for="eventDescInput">Omschrijving</label>
+        <textarea id="eventDescInput" rows="3" placeholder="Notities of locatie..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelEventBtn" type="button" class="btn-secondary">Annuleren</button>
+        <button id="saveEventBtn" type="button" class="btn-primary">Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bekijken Modal -->
+  <div id="viewModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card">
+      <button id="closeViewModalX" type="button" class="modal-close">&times;</button>
+      <h2 id="viewModalTitle" class="modal-title">Afspraak</h2>
+      <p id="viewModalMeta" style="font-size:13px;color:var(--muted);margin-bottom:10px;"></p>
+      <p id="viewModalDesc" style="font-size:14px;line-height:1.5;white-space:pre-wrap;"></p>
+      <div class="modal-actions">
+        <button id="deleteEventBtn" type="button" class="btn-danger">Verwijderen</button>
+        <button id="editEventBtn" type="button" class="btn-secondary">Wijzigen</button>
+        <button id="closeViewBtn" type="button" class="btn-primary">Sluiten</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categorie Modal -->
+  <div id="categoryModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card">
+      <button id="closeCategoryModalX" type="button" class="modal-close">&times;</button>
+      <h2 class="modal-title">Nieuwe categorie</h2>
+      <div class="field">
+        <label for="newCatName">Naam</label>
+        <input id="newCatName" type="text" placeholder="Bijv. Sport, Familie..." />
+      </div>
+      <div class="field">
+        <label for="newCatColor">Kleur</label>
+        <input id="newCatColor" type="color" value="#0b57d0" style="height:40px;padding:4px;" />
+      </div>
+      <div class="modal-actions">
+        <button id="cancelCatBtn" type="button" class="btn-secondary">Annuleren</button>
+        <button id="saveCatBtn" type="button" class="btn-primary">Toevoegen</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const DEFAULT_CATEGORIES = {
+      work: { id: "work", label: "Werken", color: "#0b57d0", isDefault: true },
+      holiday: { id: "holiday", label: "Vakantie", color: "#0f9d58", isDefault: true },
+      activity: { id: "activity", label: "Activiteit", color: "#1a73e8", isDefault: true },
+      birthday: { id: "birthday", label: "Verjaardag", color: "#e37400", isDefault: true },
+      holidayofficial: { id: "holidayofficial", label: "Feestdag", color: "#9334e6", isDefault: true }
+    };
+
+    let categories = { ...DEFAULT_CATEGORIES };
+    let events = [];
+    let currentView = "month";
+    let anchorDate = new Date();
+    let miniAnchorDate = new Date();
+    let activeCategory = "all";
+    let editingId = null;
+    let activeEventId = null;
+
+    function loadState() {
+      try {
+        const savedCats = JSON.parse(localStorage.getItem("snejin_v4_cats") || "{}");
+        categories = { ...DEFAULT_CATEGORIES, ...savedCats };
+        const savedEvents = JSON.parse(localStorage.getItem("snejin_v4_events") || "[]");
+        events = Array.isArray(savedEvents) ? savedEvents : [];
+        if (localStorage.getItem("snejin_v4_dark") === "1") {
+          document.body.classList.add("dark");
+          document.getElementById("themeBtn").textContent = "☀️";
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function saveState() {
+      const customCats = {};
+      Object.entries(categories).forEach(([k, v]) => {
+        if (!DEFAULT_CATEGORIES[k]) customCats[k] = v;
+      });
+      localStorage.setItem("snejin_v4_cats", JSON.stringify(customCats));
+      localStorage.setItem("snejin_v4_events", JSON.stringify(events));
+    }
+
+    function fmtDate(d) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.style.display = "block";
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.style.display = "none"; }, 2600);
+    }
+
+    function getFilteredEvents() {
+      const q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+      return events.filter(ev => {
+        const catOk = activeCategory === "all" || ev.category === activeCategory;
+        const qOk = !q || (ev.title || "").toLowerCase().includes(q) || (ev.description || "").toLowerCase().includes(q);
+        return catOk && qOk;
+      });
+    }
+
+    function renderCategories() {
+      const list = document.getElementById("categoryList");
+      const select = document.getElementById("eventCategorySelect");
+      list.innerHTML = "";
+      select.innerHTML = "";
+
+      Object.values(categories).forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat.id;
+        opt.textContent = cat.label;
+        select.appendChild(opt);
+
+        const li = document.createElement("li");
+        li.className = "cat-item" + (activeCategory === cat.id ? " active" : "");
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "cat-filter";
+        btn.innerHTML = `<span class="cat-dot" style="background:${cat.color}"></span><span>${cat.label}</span>`;
+        btn.addEventListener("click", () => {
+          activeCategory = activeCategory === cat.id ? "all" : cat.id;
+          renderCategories();
+          renderAll();
+        });
+        li.appendChild(btn);
+
+        if (!cat.isDefault) {
+          const del = document.createElement("button");
+          del.type = "button";
+          del.className = "cat-del";
+          del.textContent = "×";
+          del.addEventListener("click", () => {
+            delete categories[cat.id];
+            events = events.map(ev => ev.category === cat.id ? { ...ev, category: "activity" } : ev);
+            if (activeCategory === cat.id) activeCategory = "all";
+            saveState();
+            renderCategories();
+            renderAll();
+            showToast("Categorie verwijderd.");
+          });
+          li.appendChild(del);
+        }
+        list.appendChild(li);
+      });
+      select.value = categories.activity ? "activity" : Object.keys(categories)[0];
+    }
+
+    function renderMiniCalendar() {
+      const label = document.getElementById("miniMonthLabel");
+      const grid = document.getElementById("miniGrid");
+      const y = miniAnchorDate.getFullYear();
+      const m = miniAnchorDate.getMonth();
+      const formatted = new Intl.DateTimeFormat("nl-NL", { month: "long", year: "numeric" }).format(new Date(y, m, 1));
+      label.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+
+      const firstOffset = (new Date(y, m, 1).getDay() + 6) % 7;
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      const prevDays = new Date(y, m, 0).getDate();
+      const todayStr = fmtDate(new Date());
+
+      grid.innerHTML = "";
+      for (let i = firstOffset - 1; i >= 0; i--) {
+        const d = new Date(y, m - 1, prevDays - i);
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "mini-day muted"; b.textContent = d.getDate();
+        b.addEventListener("click", () => { anchorDate = d; renderAll(); });
+        grid.appendChild(b);
+      }
+      for (let day = 1; day <= daysInMonth; day++) {
+        const d = new Date(y, m, day);
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "mini-day" + (fmtDate(d) === todayStr ? " today" : "");
+        b.textContent = day;
+        b.addEventListener("click", () => { anchorDate = d; renderAll(); });
+        grid.appendChild(b);
+      }
+      const rem = grid.children.length % 7 === 0 ? 0 : 7 - (grid.children.length % 7);
+      for (let n = 1; n <= rem; n++) {
+        const d = new Date(y, m + 1, n);
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "mini-day muted"; b.textContent = n;
+        b.addEventListener("click", () => { anchorDate = d; renderAll(); });
+        grid.appendChild(b);
+      }
+    }
+
+    function renderMainCalendar() {
+      const container = document.getElementById("calendarView");
+      const titleEl = document.getElementById("currentTitle");
+      const filtered = getFilteredEvents();
+
+      const monthTitle = new Intl.DateTimeFormat("nl-NL", { month: "long", year: "numeric" }).format(anchorDate);
+      titleEl.textContent = monthTitle.charAt(0).toUpperCase() + monthTitle.slice(1);
+
+      document.querySelectorAll(".view-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.view === currentView);
+      });
+
+      if (currentView === "agenda" || currentView === "day" || currentView === "week") {
+        let listItems = [...filtered];
+        if (currentView === "day") {
+          const dStr = fmtDate(anchorDate);
+          listItems = listItems.filter(ev => ev.date === dStr);
+          titleEl.textContent = anchorDate.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+        } else if (currentView === "week") {
+          const start = new Date(anchorDate);
+          const diff = (start.getDay() + 6) % 7;
+          start.setDate(start.getDate() - diff);
+          const end = new Date(start);
+          end.setDate(start.getDate() + 7);
+          listItems = listItems.filter(ev => {
+            const ed = new Date(ev.date + "T12:00:00");
+            return ed >= start && ed < end;
+          });
+          titleEl.textContent = `Week van ${start.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`;
+        }
+
+        container.innerHTML = `<div class="list-view" id="listContainer"></div>`;
+        const listEl = document.getElementById("listContainer");
+        if (!listItems.length) {
+          listEl.innerHTML = `<p style="padding:18px;color:var(--muted);">Geen afspraken gevonden voor deze weergave.</p>`;
+          return;
+        }
+        listItems.sort((a, b) => (a.date + (a.time || "")).localeCompare(b.date + (b.time || "")));
+        listItems.forEach(ev => {
+          const cat = categories[ev.category] || categories.activity;
+          const row = document.createElement("div");
+          row.className = "list-row";
+          row.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span class="cat-dot" style="background:${cat.color};width:14px;height:14px;"></span>
+              <div>
+                <div style="font-weight:600;">${ev.title}</div>
+                <div style="font-size:12px;color:var(--muted);">${ev.date} ${ev.allDay ? "• Hele dag" : (ev.time ? "• " + ev.time : "")} • ${cat.label}</div>
+              </div>
+            </div>
+            <span style="font-size:12px;color:var(--muted);">Bekijken ›</span>
+          `;
+          row.addEventListener("click", () => openViewModal(ev.id));
+          listEl.appendChild(row);
+        });
+        return;
+      }
+
+      // Maandweergave
+      const y = anchorDate.getFullYear();
+      const m = anchorDate.getMonth();
+      const firstOffset = (new Date(y, m, 1).getDay() + 6) % 7;
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      const prevDays = new Date(y, m, 0).getDate();
+      const todayStr = fmtDate(new Date());
+
+      let html = `<div class="cal-weekdays">
+        <div class="cal-weekday">Ma</div><div class="cal-weekday">Di</div><div class="cal-weekday">Wo</div>
+        <div class="cal-weekday">Do</div><div class="cal-weekday">Vr</div><div class="cal-weekday">Za</div><div class="cal-weekday">Zo</div>
+      </div><div class="month-grid">`;
+
+      const cells = [];
+      for (let i = firstOffset - 1; i >= 0; i--) {
+        cells.push({ date: new Date(y, m - 1, prevDays - i), muted: true });
+      }
+      for (let day = 1; day <= daysInMonth; day++) {
+        cells.push({ date: new Date(y, m, day), muted: false });
+      }
+      const rem = cells.length % 7 === 0 ? 0 : 7 - (cells.length % 7);
+      for (let n = 1; n <= rem; n++) {
+        cells.push({ date: new Date(y, m + 1, n), muted: true });
+      }
+
+      cells.forEach(c => {
+        const dStr = fmtDate(c.date);
+        const dayEvents = filtered.filter(ev => ev.date === dStr);
+        const isToday = dStr === todayStr;
+        html += `<div class="day-cell ${c.muted ? "muted" : ""} ${isToday ? "today" : ""}" data-date="${dStr}">
+          <span class="day-num">${c.date.getDate()}</span>
+          ${dayEvents.map(ev => {
+            const cat = categories[ev.category] || categories.activity;
+            return `<button type="button" class="event-pill" data-ev-id="${ev.id}" style="background:${cat.color}">${ev.time && !ev.allDay ? ev.time + " " : ""}${ev.title}</button>`;
+          }).join("")}
+        </div>`;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+
+      container.querySelectorAll(".day-cell").forEach(cell => {
+        cell.addEventListener("click", (e) => {
+          if (e.target.closest(".event-pill")) return;
+          openEventModal(null, cell.dataset.date);
+        });
+      });
+
+      container.querySelectorAll(".event-pill").forEach(pill => {
+        pill.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openViewModal(pill.dataset.evId);
+        });
+      });
+    }
+
+    function updateStats() {
+      document.getElementById("statTotal").textContent = String(events.length);
+      const now = new Date();
+      const start = new Date(now);
+      start.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 7);
+      const weekCount = events.filter(ev => {
+        const d = new Date(ev.date + "T12:00:00");
+        return d >= start && d < end;
+      }).length;
+      document.getElementById("statWeek").textContent = String(weekCount);
+    }
+
+    function renderAll() {
+      renderMiniCalendar();
+      renderMainCalendar();
+      updateStats();
+    }
+
+    function openEventModal(evId = null, defaultDate = "") {
+      editingId = evId;
+      const modal = document.getElementById("eventModal");
+      if (evId) {
+        const ev = events.find(x => x.id === evId);
+        if (!ev) return;
+        document.getElementById("eventModalTitle").textContent = "Afspraak wijzigen";
+        document.getElementById("eventTitleInput").value = ev.title;
+        document.getElementById("eventDateInput").value = ev.date;
+        document.getElementById("eventTimeInput").value = ev.time || "";
+        document.getElementById("eventAllDayInput").checked = Boolean(ev.allDay);
+        document.getElementById("eventCategorySelect").value = categories[ev.category] ? ev.category : "activity";
+        document.getElementById("eventDescInput").value = ev.description || "";
+      } else {
+        document.getElementById("eventModalTitle").textContent = "Nieuwe afspraak";
+        document.getElementById("eventTitleInput").value = "";
+        document.getElementById("eventDateInput").value = defaultDate || fmtDate(anchorDate);
+        document.getElementById("eventTimeInput").value = "";
+        document.getElementById("eventAllDayInput").checked = true;
+        document.getElementById("eventCategorySelect").value = categories.activity ? "activity" : Object.keys(categories)[0];
+        document.getElementById("eventDescInput").value = "";
+      }
+      document.getElementById("eventTimeInput").disabled = document.getElementById("eventAllDayInput").checked;
+      modal.classList.add("open");
+      setTimeout(() => document.getElementById("eventTitleInput").focus(), 40);
+    }
+
+    function closeEventModal() {
+      document.getElementById("eventModal").classList.remove("open");
+      editingId = null;
+    }
+
+    function openViewModal(evId) {
+      const ev = events.find(x => x.id === evId);
+      if (!ev) return;
+      activeEventId = evId;
+      const cat = categories[ev.category] || categories.activity;
+      document.getElementById("viewModalTitle").textContent = ev.title;
+      document.getElementById("viewModalMeta").textContent = `${ev.date} • ${ev.allDay ? "Hele dag" : (ev.time || "Tijd n.t.b.")} • ${cat.label}`;
+      document.getElementById("viewModalDesc").textContent = ev.description || "Geen omschrijving beschikbaar.";
+      document.getElementById("viewModal").classList.add("open");
+    }
+
+    function closeViewModal() {
+      document.getElementById("viewModal").classList.remove("open");
+      activeEventId = null;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      renderCategories();
+      renderAll();
+
+      document.getElementById("createBtn").addEventListener("click", () => openEventModal());
+      document.getElementById("todayBtn").addEventListener("click", () => {
+        anchorDate = new Date();
+        miniAnchorDate = new Date();
+        renderAll();
+        showToast("Terug naar vandaag.");
+      });
+      document.getElementById("prevBtn").addEventListener("click", () => {
+        if (currentView === "day") anchorDate.setDate(anchorDate.getDate() - 1);
+        else if (currentView === "week") anchorDate.setDate(anchorDate.getDate() - 7);
+        else anchorDate.setMonth(anchorDate.getMonth() - 1);
+        renderAll();
+      });
+      document.getElementById("nextBtn").addEventListener("click", () => {
+        if (currentView === "day") anchorDate.setDate(anchorDate.getDate() + 1);
+        else if (currentView === "week") anchorDate.setDate(anchorDate.getDate() + 7);
+        else anchorDate.setMonth(anchorDate.getMonth() + 1);
+        renderAll();
+      });
+
+      document.querySelectorAll(".view-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentView = btn.dataset.view;
+          renderAll();
+        });
+      });
+
+      document.getElementById("toggleSidebarBtn").addEventListener("click", () => {
+        document.getElementById("sidebar").classList.toggle("collapsed");
+      });
+      document.getElementById("miniPrevBtn").addEventListener("click", () => {
+        miniAnchorDate.setMonth(miniAnchorDate.getMonth() - 1);
+        renderMiniCalendar();
+      });
+      document.getElementById("miniNextBtn").addEventListener("click", () => {
+        miniAnchorDate.setMonth(miniAnchorDate.getMonth() + 1);
+        renderMiniCalendar();
+      });
+
+      document.getElementById("searchInput").addEventListener("input", renderMainCalendar);
+      document.getElementById("showAllCatsBtn").addEventListener("click", () => {
+        activeCategory = "all";
+        renderCategories();
+        renderAll();
+        showToast("Alle categorieën zichtbaar.");
+      });
+      document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+      document.getElementById("themeBtn").addEventListener("click", () => {
+        document.body.classList.toggle("dark");
+        const isDark = document.body.classList.contains("dark");
+        localStorage.setItem("snejin_v4_dark", isDark ? "1" : "0");
+        document.getElementById("themeBtn").textContent = isDark ? "☀️" : "🌙";
+      });
+
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        showToast("Uitgelogd.");
+        setTimeout(() => { window.location.href = "index.html"; }, 500);
+      });
+
+      document.getElementById("eventAllDayInput").addEventListener("change", (e) => {
+        document.getElementById("eventTimeInput").disabled = e.target.checked;
+      });
+
+      document.getElementById("saveEventBtn").addEventListener("click", () => {
+        const title = document.getElementById("eventTitleInput").value.trim();
+        const date = document.getElementById("eventDateInput").value;
+        const time = document.getElementById("eventTimeInput").value;
+        const allDay = document.getElementById("eventAllDayInput").checked;
+        const category = document.getElementById("eventCategorySelect").value;
+        const description = document.getElementById("eventDescInput").value.trim();
+
+        if (!title) return showToast("Vul een titel in.");
+        if (!date) return showToast("Kies een datum.");
+
+        if (editingId) {
+          events = events.map(ev => ev.id === editingId ? { ...ev, title, date, time, allDay, category, description } : ev);
+          showToast("Afspraak bijgewerkt.");
+        } else {
+          events.push({ id: "ev_" + Date.now(), title, date, time, allDay, category, description });
+          showToast("Afspraak opgeslagen.");
+        }
+        saveState();
+        closeEventModal();
+        renderAll();
+      });
+
+      document.getElementById("cancelEventBtn").addEventListener("click", closeEventModal);
+      document.getElementById("closeEventModalX").addEventListener("click", closeEventModal);
+
+      document.getElementById("closeViewBtn").addEventListener("click", closeViewModal);
+      document.getElementById("closeViewModalX").addEventListener("click", closeViewModal);
+      document.getElementById("editEventBtn").addEventListener("click", () => {
+        const id = activeEventId;
+        closeViewModal();
+        openEventModal(id);
+      });
+      document.getElementById("deleteEventBtn").addEventListener("click", () => {
+        if (!activeEventId) return;
+        events = events.filter(ev => ev.id !== activeEventId);
+        saveState();
+        closeViewModal();
+        renderAll();
+        showToast("Afspraak verwijderd.");
+      });
+
+      document.getElementById("newCategoryBtn").addEventListener("click", () => {
+        document.getElementById("newCatName").value = "";
+        document.getElementById("categoryModal").classList.add("open");
+        setTimeout(() => document.getElementById("newCatName").focus(), 40);
+      });
+      document.getElementById("cancelCatBtn").addEventListener("click", () => document.getElementById("categoryModal").classList.remove("open"));
+      document.getElementById("closeCategoryModalX").addEventListener("click", () => document.getElementById("categoryModal").classList.remove("open"));
+      document.getElementById("saveCatBtn").addEventListener("click", () => {
+        const label = document.getElementById("newCatName").value.trim();
+        const color = document.getElementById("newCatColor").value || "#0b57d0";
+        if (!label) return showToast("Vul een categorienaam in.");
+        const id = "cat_" + label.toLowerCase().replace(/[^a-z0-9]+/g, "_") + "_" + Date.now().toString().slice(-3);
+        categories[id] = { id, label, color, isDefault: false };
+        saveState();
+        renderCategories();
+        document.getElementById("categoryModal").classList.remove("open");
+        showToast("Categorie toegevoegd.");
+      });
+    });
+  </script>
 </body>
-
 </html>
