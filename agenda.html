@@ -470,6 +470,7 @@
           <button type="button" class="view-btn active" data-view="month">Maand</button>
           <button type="button" class="view-btn" data-view="agenda">Agenda</button>
         </div>
+        <button id="notifBtn" type="button" class="icon-btn" title="Meldingen inschakelen">🔔</button>
         <button id="themeBtn" type="button" class="icon-btn" title="Donkere modus">🌙</button>
         <button id="logoutBtn" type="button" class="logout-btn" onclick="handleLogoutClick(event)">Uitloggen</button>
       </div>
@@ -1135,6 +1136,80 @@
       });
 
       document.getElementById("searchInput").addEventListener("input", renderMainCalendar);
+
+      
+      const notifBtn = document.getElementById("notifBtn");
+
+      function updateNotifBtnState() {
+        if (!("Notification" in window)) {
+          notifBtn.style.display = "none";
+          return;
+        }
+        if (Notification.permission === "granted") {
+          notifBtn.textContent = "🔔";
+          notifBtn.title = "Meldingen zijn ingeschakeld";
+          notifBtn.style.opacity = "1";
+        } else if (Notification.permission === "denied") {
+          notifBtn.textContent = "🔕";
+          notifBtn.title = "Meldingen zijn geblokkeerd in je browser";
+          notifBtn.style.opacity = "0.5";
+        } else {
+          notifBtn.textContent = "🔔";
+          notifBtn.title = "Klik om meldingen op je apparaat in te schakelen";
+          notifBtn.style.opacity = "0.75";
+        }
+      }
+
+      updateNotifBtnState();
+
+      notifBtn.addEventListener("click", () => {
+        if (!("Notification" in window)) {
+          return showToast("Deze browser ondersteunt geen apparaatmeldingen.");
+        }
+        if (Notification.permission === "granted") {
+          showToast("Apparaatmeldingen zijn al actief!");
+          new Notification("Snejin Agenda", {
+            body: "Meldingen op je apparaat staan ingeschakeld!",
+            icon: "logo.png"
+          });
+        } else if (Notification.permission === "denied") {
+          showToast("Meldingen zijn geblokkeerd via de browserinstellingen.");
+        } else {
+          Notification.requestPermission().then(permission => {
+            updateNotifBtnState();
+            if (permission === "granted") {
+              showToast("Apparaatmeldingen ingeschakeld!");
+              new Notification("Snejin Agenda", {
+                body: "Je ontvangt vanaf nu herinneringen op dit apparaat.",
+                icon: "logo.png"
+              });
+            } else {
+              showToast("Meldingen zijn niet toegestaan.");
+            }
+          });
+        }
+      });
+
+      // Periodieke controle op afspraken voor vandaag/nu
+      function checkUpcomingEventsNotification() {
+        if (!("Notification" in window) || Notification.permission !== "granted") return;
+        const now = new Date();
+        const todayStr = fmtDate(now);
+        const timeStr = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+        
+        events.forEach(ev => {
+          if (ev.date === todayStr && ev.time === timeStr && !ev._notified) {
+            ev._notified = true;
+            const cat = categories[ev.category] || categories.activity;
+            new Notification(`${cat.emoji ? cat.emoji + " " : ""}${ev.title}`, {
+              body: `Afspraak start om ${ev.time} (${cat.label})`,
+              icon: "logo.png"
+            });
+          }
+        });
+      }
+
+      setInterval(checkUpcomingEventsNotification, 30000);
 
       document.getElementById("themeBtn").addEventListener("click", () => {
         document.body.classList.toggle("dark");
