@@ -19,6 +19,7 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js"></script>
 
+    <!-- Agenda script (module met automatische fallback als firebase.js niet gevonden of nog niet ingesteld is) -->
     <script type="module" src="agenda.js"></script>
 </head>
 
@@ -32,7 +33,7 @@
             </button>
 
             <a href="agenda.html" class="gcal-brand">
-                <img src="logo.png" alt="Snejin Agenda" class="gcal-logo">
+                <img src="logo.png" alt="Snejin Agenda" class="gcal-logo" onerror="this.style.display='none'">
                 <span class="gcal-brand-text">Snejin Agenda</span>
             </a>
 
