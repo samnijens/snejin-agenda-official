@@ -765,54 +765,6 @@
       color: var(--danger);
     }
 
-    .gcal-stats-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .gcal-stat-card {
-      background: var(--surface-card);
-      border: 1px solid var(--border-soft);
-      border-radius: 12px;
-      padding: 10px 8px;
-      text-align: center;
-    }
-
-    .gcal-stat-card strong {
-      display: block;
-      font-size: 18px;
-      color: var(--accent);
-    }
-
-    .gcal-stat-card span {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .gcal-quick-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .gcal-text-action {
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 12px;
-      font-weight: 500;
-      text-align: left;
-      padding: 7px 9px;
-      border-radius: 9px;
-    }
-
-    .gcal-text-action:hover {
-      background: var(--surface-hover);
-      color: var(--text-primary);
-    }
-
     /* =========================================================
        KALENDER VLAK & WEERGAVEN (MAAND / WEEK / DAG / AGENDA)
        ========================================================= */
@@ -1601,30 +1553,7 @@
             + Nieuw
           </button>
         </div>
-        <ul id="categoryList" class="gcal-cat-list"></ul>
-      </section>
-
-      <!-- Overzicht & Snelacties -->
-      <section class="gcal-panel" aria-label="Overzicht en snelacties">
-        <div class="gcal-panel-header">
-          <h2 class="gcal-panel-title">Overzicht</h2>
-          <span id="activeSeasonBadge" style="font-size:12px;color:var(--text-muted);font-weight:600;"></span>
-        </div>
-        <div class="gcal-stats-row">
-          <div class="gcal-stat-card">
-            <strong id="statTotalEvents">0</strong>
-            <span>Afspraken</span>
-          </div>
-          <div class="gcal-stat-card">
-            <strong id="statUpcomingWeek">0</strong>
-            <span>Deze week</span>
-          </div>
-        </div>
-        <div class="gcal-quick-actions">
-          <button id="showAllCategoriesBtn" type="button" class="gcal-text-action">
-            Alle categorieën weergeven
-          </button>
-        </div>
+        <ul id="categoryList" class="cat-list"></ul>
       </section>
     </aside>
 
@@ -1859,18 +1788,7 @@
 
       function renderSeasonEffects(season) {
         const layer = document.getElementById("seasonParticles");
-        const badge = document.getElementById("activeSeasonBadge");
         if (!layer) return;
-
-        const labels = {
-          spring: "🌸 Lente",
-          summer: "☀️ Zomer",
-          autumn: "🍂 Herfst",
-          winter: "❄️ Winter"
-        };
-        if (badge) {
-          badge.textContent = labels[season] || "";
-        }
 
         layer.innerHTML = "";
 
@@ -2646,7 +2564,6 @@
         miniCalMonth = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1);
         renderMiniCalendar();
         renderCalendarView();
-        updateStats();
       }
 
       function updateTimeFieldState() {
